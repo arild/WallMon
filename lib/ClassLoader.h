@@ -1,0 +1,28 @@
+/*
+ * ClassLoader.h
+ *
+ *  Created on: Feb 1, 2011
+ *      Author: arild
+ */
+
+#ifndef CLASSLOADER_H_
+#define CLASSLOADER_H_
+
+#include <string>
+#include "IDataHandler.h"
+#include "IDataCollector.h"
+
+using std::string;
+
+class ClassLoader {
+public:
+	ClassLoader(string filePath);
+	virtual ~ClassLoader();
+	IDataHandler *LoadAndInstantiateHandler();
+	IDataCollector *LoadAndInstantiateCollector();
+
+private:
+	void *_dl_handle;
+};
+
+#endif /* CLASSLOADER_H_ */

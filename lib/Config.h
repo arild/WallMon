@@ -1,0 +1,6 @@
+
+#define STREAMER_ENTRY_PORT		5577
+#define MULITCAST_ADDRESS		"224.0.0.127"
+#define MULTICAST_LISTEN_PORT	9955
+#define PROTOCOL_PREFIX			"WALLMON "
+#define SHARED_LIBRARY_PATH		"/home/arild/WallMon/monitors/bin/"

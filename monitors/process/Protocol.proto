@@ -1,0 +1,9 @@
+
+message DataPacket  
+{
+	required uint32 numThreads = 1;
+	required double userTime = 2;
+	required double systemTime = 3;
+	required double userCpuLoad = 4;
+	required double systemCpuLoad = 5;
+}
