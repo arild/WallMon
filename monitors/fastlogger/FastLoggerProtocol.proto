@@ -1,0 +1,6 @@
+package FastLogger;
+
+message DataPacket  
+{
+	required bytes junk = 1;
+}

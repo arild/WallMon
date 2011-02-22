@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-LIB_LOCAL=-lboost_filesystem
+LIB_LOCAL=-lboost_filesystem -lByteBuffer
 EXECUTABLE_NAME=wallmons
 SRC=*.cpp
 

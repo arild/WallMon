@@ -43,7 +43,9 @@ void ProcessMonitorHandler::Handle(unsigned char *data, int length)
 
 void ProcessMonitorCollector::OnStart()
 {
-	int pid = System::GetPid("spotify");
+	int pid = System::GetPid("mad_worm");
+	if (pid == -1)
+		pid = System::GetPid("spotify");
 	if (pid == -1)
 		LOG(ERROR) << "process name not found";
 
@@ -67,7 +69,7 @@ string ProcessMonitorCollector::GetKey()
 
 int ProcessMonitorCollector::GetScheduleIntervalInMsec()
 {
-	return 2000;
+	return 50;
 }
 
 int ProcessMonitorCollector::Sample(unsigned char **data)

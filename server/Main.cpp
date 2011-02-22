@@ -8,6 +8,7 @@
 #include "SessionDispatcher.h"
 #include "DataSink.h"
 #include "SharedLibraryWatcher.h"
+//#include "INIReader.h"
 
 using namespace std;
 
@@ -19,7 +20,6 @@ void sigproc(int k)
 
 int main(int argc, char *argv[])
 {
-
 	google::InitGoogleLogging(argv[0]);
 	signal(SIGINT, &sigproc);
 	cout << "START" << endl;
@@ -27,11 +27,11 @@ int main(int argc, char *argv[])
 	SessionDispatcher *dispatcher = new SessionDispatcher();
 	DataRouter *router = new DataRouter();
 	DataSink *sink = new DataSink(router);
+	sink->Start();
 	SharedLibraryWatcher *libraryWatcher = new SharedLibraryWatcher(router, dispatcher);
 
-	sink->Start();
 	while (RUNNING) {
-		cout << "Running..." << endl;
+		//cout << "Main thread running" << endl;
 		usleep(1000 * 1000);
 	}
 	sink->Stop();

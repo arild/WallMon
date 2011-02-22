@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	}
 
 	dispatcher->Stop();
-	scheduler->Stop();
+	// Note: dispatcher will stop scheduler
 
 	delete dispatcher;
 	delete scheduler;

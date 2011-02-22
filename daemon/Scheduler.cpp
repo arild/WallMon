@@ -16,6 +16,14 @@ using namespace std;
 
 Streamer *Scheduler::_streamer;
 
+ev_tstamp last_ts;
+
+typedef struct TimerEventContext {
+	IDataCollector *collector;
+	Streamer *streamer;
+} TimerEventContext_t;
+
+
 Scheduler::Scheduler()
 {
 	_loop = ev_default_loop(0);
@@ -31,18 +39,24 @@ void Scheduler::SetStreamer(Streamer *streamer)
 	Scheduler::_streamer = streamer;
 }
 
+/**
+ * Registers a given collector with an event timer that is
+ * inserted into the global event loop.
+ */
 void Scheduler::RegisterColllector(IDataCollector *collector)
 {
 	ev_timer *timer = new ev_timer();
-	ev_timer_init (timer, &Scheduler::_InterceptCallback, 3., 0.);
 	try {
+		// Adhere to interface contract
 		collector->OnStart();
 	} catch (exception &e) {
 		LOG(ERROR) << "user-defined OnStart() failed: " << e.what();
 	}
 	try {
 		LOG(INFO) << "Before GetScheduleInterval()";
-		timer->repeat = collector->GetScheduleIntervalInMsec() / (double) 1000;
+		double scheduleIntervalInSec = collector->GetScheduleIntervalInMsec() / (double) 1000;
+		ev_timer_init (timer, &Scheduler::_InterceptCallback, scheduleIntervalInSec, 0.);
+		timer->repeat = scheduleIntervalInSec;
 	} catch (exception &e) {
 		LOG(ERROR) << "user-defined GetScheduleIntervalInMsec() failed: " << e.what();
 	}
@@ -67,22 +81,42 @@ void Scheduler::Stop()
 
 void Scheduler::_ScheduleForever()
 {
-	usleep(1000 * 10000);
 	while (_running) {
 		LOG(INFO) << "Scheduling loop";
+		// Blocks as long as there are one or more timers registered.
+		// In order to terminate the loop, all registered timers must be removed.
 		ev_run(_loop, 0);
-		usleep(1000 * 3000);
+		usleep(1000 * 500); // 500 Msec
 	}
 }
 
 void Scheduler::_InterceptCallback(struct ev_loop *loop, ev_timer *w, int revents)
 {
-	//TODO: Compensate for invocation (and perhaps execution delay too)
-	LOG(INFO) << "**** TIMER event";
 	ev_timer_again(loop, w);
+	double start = ev_time();
+	double now_ts = ev_now(loop);
+	//LOG(INFO) << "Last: " << last_ts << " Now: " << now_ts << " Diff: " << now_ts - last_ts;
+	//LOG(INFO) << "timer->at: " << w->at << " timer->repeat: " << w->repeat;
 	IDataCollector *collector = (IDataCollector *) w->data;
-	unsigned char *data;
-	int dataLength = collector->Sample(&data);
-	Scheduler::_streamer->Stream(collector->GetKey(), data, dataLength);
+
+	unsigned char *buf = new unsigned char[1024*10];
+	unsigned char *tmp;
+
+	StreamItem_t item = *new StreamItem();
+	int dataLen = collector->Sample((unsigned char **)&tmp);
+
+	string key = collector->GetKey();
+	int keyLen = key.length() + 1;
+	memcpy(buf, key.c_str(), keyLen);
+	memcpy(buf + keyLen, tmp, dataLen);
+
+	item.length = keyLen + dataLen;
+	item.data = buf;
+
+	LOG(INFO) << "Item ready, streaming it";
+	Scheduler::_streamer->Stream(item);
+	LOG(INFO) << "collector execution time: " << ev_time() - start << " msec";
+	LOG(INFO) << "timer schedule offset: " << now_ts - last_ts << " msec";
+	last_ts = now_ts;
 }
 

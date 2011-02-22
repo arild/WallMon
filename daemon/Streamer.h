@@ -8,17 +8,32 @@
 #ifndef NETWORK_H_
 #define NETWORK_H_
 
-#include "PracticalSocket.h"
+#include <boost/thread.hpp>
+#include "Queue.h"
+#include <string>
 
+using namespace std;
+
+typedef struct StreamItem {
+	void *data;
+	int length;
+} StreamItem_t;
 
 class Streamer {
 public:
 	Streamer(string serverAddress);
 	virtual ~Streamer();
-	int Stream(string key, void *data, int length);
-	void SetStreamInterval();
+	void Start();
+	void Stop();
+	void Stream(StreamItem &item);
+
 private:
-	TCPSocket *_socket;
+	void _StreamForever();
+	boost::thread _thread;
+	bool _running;
+	Queue<StreamItem> *_queue;
+	int _sockfd;
+	//WallmonPacket *_wallmonPacket;
 	int _numBytesStreamed;
 	int _numBytesLogTrigger;
 };

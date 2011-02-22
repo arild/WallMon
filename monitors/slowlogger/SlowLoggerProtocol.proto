@@ -1,0 +1,6 @@
+package SlowLogger;
+
+message DataPacket  
+{
+	required bytes junk = 1;
+}

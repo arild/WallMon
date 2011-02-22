@@ -38,13 +38,6 @@ Dispatcher::~Dispatcher()
 	delete _socket;
 }
 
-void prints(char *s, int len)
-{
-	int i;
-	for (i = 0; i < len; i++)
-		LOG(INFO) << (char) s[i];
-}
-
 void Dispatcher::Start()
 {
 	LOG(INFO) << "Starting dispatcher...";
@@ -74,6 +67,7 @@ void Dispatcher::_ListenForever()
 	string sourceAddress; // Address of datagram source
 	unsigned short sourcePort; // Port of datagram source
 	Streamer *streamer = NULL;
+	IDataCollector *collector = NULL;
 
 	while (_running) {
 		try {
@@ -92,7 +86,6 @@ void Dispatcher::_ListenForever()
 			LOG(INFO) << "Valid request received: filename=" << filePath << " saddr="
 					<< sourceAddress << " | port=" << sourcePort;
 
-			IDataCollector *collector = NULL;
 			try {
 				ClassLoader loader(filePath);
 				collector = loader.LoadAndInstantiateCollector();
@@ -103,7 +96,9 @@ void Dispatcher::_ListenForever()
 
 			// TODO: Add support for using multiple streamers based of server addresses
 			if (streamer == NULL) {
+				sourceAddress = "129.242.22.61";
 				streamer = new Streamer(sourceAddress);
+				streamer->Start();
 				_scheduler->SetStreamer(streamer);
 			}
 			_scheduler->RegisterColllector(collector);
@@ -117,4 +112,7 @@ void Dispatcher::_ListenForever()
 		}
 	}
 	_socket->disconnect();
+	_scheduler->Stop();
+	if (streamer != NULL)
+		streamer->Stop();
 }

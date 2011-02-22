@@ -9,12 +9,12 @@
 #define DATAROUTER_H_
 
 #include <string>
-//#include <boost/unordered_map.hpp>
-#include <map>
+#include <boost/unordered_map.hpp>
 #include "IDataHandler.h"
 
-//using namespace std;
-typedef std::map<string, IDataHandler *> handlerMap;
+using std::string;
+
+typedef boost::unordered_map<string, IDataHandler *> handlerMap;
 
 class DataRouter {
 public:
@@ -23,7 +23,8 @@ public:
 	void RegisterHandler(IDataHandler *handler);
 	void Route(char *packet, int length);
 private:
-	handlerMap _handlers;
+	handlerMap *_handlers;
+	unsigned long _numSamplesRouted;
 };
 
 #endif /* DATAROUTER_H_ */

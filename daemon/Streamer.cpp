@@ -10,57 +10,103 @@
 #include <cstdlib>            // For atoi()
 #include <glog/logging.h>
 #include <netinet/in.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <assert.h>
 
 #include "Config.h"
 #include "Streamer.h"
-#include "PracticalSocket.h"
-using namespace std;
-
 
 #define NUM_BYTES_LOG_INTERVAL	1 << 20; // 1MB
-
+void printb(char *s, int len)
+{
+	int i;
+	for (i = 0; i < len; i++)
+		LOG(INFO) << "Byte at index " << i << ":" << (int) s[i];
+}
 
 Streamer::Streamer(string serverAddress)
 {
 	_numBytesStreamed = 0;
 	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
-	try {
-		_socket = new TCPSocket(serverAddress, STREAMER_ENTRY_PORT);
-		LOG(INFO) << "streamer successfully connected to server";
-	} catch (SocketException &e) {
-		LOG(ERROR) << "failed connecting to server: " << e.what();
-		exit(1);
-	}
+	_queue = new Queue<StreamItem>(100);
+	struct sockaddr_in addr;
+
+	bzero(&addr, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(serverAddress.c_str());
+	addr.sin_port = htons(STREAMER_ENTRY_PORT);
+
+	_sockfd = socket(PF_INET, SOCK_STREAM, 0);
+	LOG_IF(FATAL, _sockfd < 0) << "failed creating socket";
+	int ret = connect(_sockfd, (struct sockaddr *) &addr, sizeof(addr));
+	LOG_IF(FATAL, ret < 0) << "failed connecting to server";
+	LOG(INFO) << "streamer successfully connected to server";
 }
 
 Streamer::~Streamer()
 {
-	delete _socket;
+	delete _queue;
 }
 
-int Streamer::Stream(string key, void *data, int dataLength)
+void Streamer::Start()
 {
-	int messageLengthHeader = key.length() + dataLength;
-	int totalLength = messageLengthHeader + 4;
-	LOG(INFO) << "Sending num bytes: " << messageLengthHeader;
-	char packet[totalLength];
+	LOG(INFO) << "Starting streamer...";
+	_running = true;
+	_thread = boost::thread(&Streamer::_StreamForever, this);
+	LOG(INFO) << "Streamer started";
+}
 
-	unsigned int tmp = htonl(messageLengthHeader);
-	memcpy(packet, &tmp, sizeof(int));
-	memcpy(packet + sizeof(int), key.c_str(), key.length() + 1);
-	memcpy(packet + sizeof(int) + key.length() + 1, data, dataLength);
+/**
+ * Stops the streamer thread by changing the thread's termination flag and
+ * then putting a dummy item on the queue that the thread listen on.
+ */
+void Streamer::Stop()
+{
+	_running = false;
+	StreamItem_t item;
+	_queue->Push(item);
+	_thread.join();
+	LOG(INFO) << "Streamer terminated";
+}
 
-	_socket->send(packet, totalLength);
-	_numBytesStreamed += totalLength;
-	if (_numBytesStreamed >= _numBytesLogTrigger) {
-		int megaBytesStreamed = _numBytesStreamed/NUM_BYTES_LOG_INTERVAL;
-		LOG(INFO) << megaBytesStreamed << " bytes streamed";
-		_numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
+void Streamer::Stream(StreamItem &item)
+{
+	_queue->Push(item);
+}
+
+void Streamer::_StreamForever()
+{
+	while (true) {
+		LOG(INFO) << "Streamer popping item...";
+		StreamItem item = _queue->Pop();
+		LOG(INFO) << "Item popped";
+		if (_running == false)
+			break;
+
+		int headerLength = sizeof(unsigned int);
+		int packetLength = headerLength + item.length;
+		char packet[packetLength];
+		int dataLengthNetworkByteOrder = htonl(item.length);
+		memcpy(packet, &dataLengthNetworkByteOrder, sizeof(int));
+		memcpy(packet + headerLength, item.data, item.length);
+
+		//printb((char *)&packet[4], 10);
+		int numBytesSent = write(_sockfd, packet, packetLength);//, MSG_CONFIRM);
+		LOG(INFO) << "bytes sent: " << packetLength;
+		if (numBytesSent == -1) {
+			LOG(ERROR) << "stream socket down";
+			break;
+		}
+		LOG_IF(FATAL, numBytesSent != packetLength) << "all bytes not sent";
+
+		_numBytesStreamed += numBytesSent;
+		 if (_numBytesStreamed >= _numBytesLogTrigger) {
+			 int megaBytesStreamed = _numBytesStreamed / NUM_BYTES_LOG_INTERVAL;
+			 LOG(INFO) << megaBytesStreamed << " bytes streamed";
+			 _numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
+		 }
 	}
-	return 0;
-}
-
-void Streamer::SetStreamInterval()
-{
-
+	close(_sockfd);
 }
