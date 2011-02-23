@@ -10,7 +10,7 @@
 
 #include <boost/thread.hpp>
 #include <ev++.h>
-#include "IDataCollector.h"
+#include "Wallmon.h"
 #include "Streamer.h"
 #include <boost/unordered_map.hpp>
 
@@ -21,8 +21,7 @@ class Scheduler {
 public:
 	Scheduler();
 	virtual ~Scheduler();
-	void SetStreamer(Streamer *streamer);
-	void RegisterColllector(IDataCollector *collector);
+	void RegisterColllector(IDataCollector &collector, Streamer &streamer);
 	void Start();
 	void Stop();
 	static Streamer *_streamer;

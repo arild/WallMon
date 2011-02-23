@@ -24,12 +24,12 @@ Dispatcher::Dispatcher(Scheduler *scheduler)
 	try {
 		_socket = new UDPSocket(MULTICAST_LISTEN_PORT);
 	} catch (SocketException &e) {
-		LOG(ERROR) << "failed creating udp multicast socket: " << e.what();
+		LOG(FATAL) << "failed creating udp multicast socket: " << e.what();
 	}
 	try {
 		_socket->joinGroup(MULITCAST_ADDRESS);
 	} catch (SocketException &e) {
-		LOG(ERROR) << "failed joining multicast group: " << e.what();
+		LOG(FATAL) << "failed joining multicast group: " << e.what();
 	}
 }
 
@@ -74,11 +74,12 @@ void Dispatcher::_ListenForever()
 			int bytesRcvd = _socket->recvFrom(recvBuf, RECV_BUFFER_SIZE, sourceAddress, sourcePort);
 			recvBuf[bytesRcvd] = '\0';
 
+			if (memcmp(recvBuf, TERMINATION_TOKEN, strlen(TERMINATION_TOKEN)) == 0) {
+				LOG(INFO) << "termination message received";
+				break;
+			}
 			if (memcmp(recvBuf, PROTOCOL_PREFIX, strlen(PROTOCOL_PREFIX)) != 0) {
-				if (memcmp(recvBuf, TERMINATION_TOKEN, strlen(TERMINATION_TOKEN)) == 0)
-					LOG(INFO) << "termination message received";
-				else
-					LOG(ERROR) << "invalid message: protocol prefix does not match";
+				LOG(WARNING) << "invalid message: protocol prefix does not match";
 				continue;
 			}
 
@@ -96,12 +97,11 @@ void Dispatcher::_ListenForever()
 
 			// TODO: Add support for using multiple streamers based of server addresses
 			if (streamer == NULL) {
-				sourceAddress = "129.242.22.61";
+				//sourceAddress = "129.242.22.61";
 				streamer = new Streamer(sourceAddress);
 				streamer->Start();
-				_scheduler->SetStreamer(streamer);
 			}
-			_scheduler->RegisterColllector(collector);
+			_scheduler->RegisterColllector(*collector, *streamer);
 			LOG(INFO) << "collector successfully registered";
 		} catch (SocketException &e) {
 			LOG(ERROR) << "socket error: " << e.what();

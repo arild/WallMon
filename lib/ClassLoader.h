@@ -9,8 +9,7 @@
 #define CLASSLOADER_H_
 
 #include <string>
-#include "IDataHandler.h"
-#include "IDataCollector.h"
+#include "Wallmon.h"
 
 using std::string;
 

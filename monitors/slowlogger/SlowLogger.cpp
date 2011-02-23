@@ -8,32 +8,33 @@
 #include <glog/logging.h>
 #include "SlowLogger.h"
 
-#define KEY					"SLOWLOGGER"
-#define SAMPLE_SIZE			4000
-#define SAMPLE_INTERVAL_MS 	1000
+#define KEY						"SLOW_LOGGER"
+#define SAMPLE_SIZE				700
+#define SAMPLE_FREQUENCY_MS 	1000
 
-void SlowLoggerHandler::OnStart()
+void SlowLoggerHandler::OnInit(Context *ctx)
 {
+	_ctx = ctx;
+	_ctx->key = KEY;
 }
 
 void SlowLoggerHandler::OnStop()
 {
 }
 
-string SlowLoggerHandler::GetKey()
-{
-	return KEY;
-}
-
-void SlowLoggerHandler::Handle(unsigned char *data, int length)
+void SlowLoggerHandler::Handle(void *data, int length)
 {
 }
 
-void SlowLoggerCollector::OnStart()
+void SlowLoggerCollector::OnInit(Context *ctx)
 {
+	_ctx = ctx;
+	_ctx->key = KEY;
+	_ctx->sampleFrequencyMsec = SAMPLE_FREQUENCY_MS;
+
 	_dataPacket = new SlowLogger::DataPacket();
-	_dataJunk = new unsigned char[SAMPLE_SIZE];
-	_dataEncoded = new unsigned char[SAMPLE_SIZE * 2];
+	_dataJunk = new char[SAMPLE_SIZE];
+	_dataEncoded = new char[SAMPLE_SIZE * 2];
 	memset(_dataJunk, 'a', SAMPLE_SIZE);
 }
 
@@ -44,17 +45,7 @@ void SlowLoggerCollector::OnStop()
 	delete _dataEncoded;
 }
 
-string SlowLoggerCollector::GetKey()
-{
-	return KEY;
-}
-
-int SlowLoggerCollector::GetScheduleIntervalInMsec()
-{
-	return SAMPLE_INTERVAL_MS;
-}
-
-int SlowLoggerCollector::Sample(unsigned char **data)
+int SlowLoggerCollector::Sample(void **data)
 {
 	_dataPacket->set_junk(_dataJunk, SAMPLE_SIZE);
 	_dataPacket->SerializeToArray(_dataEncoded, SAMPLE_SIZE);

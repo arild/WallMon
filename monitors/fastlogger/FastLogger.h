@@ -8,31 +8,29 @@
 #ifndef FASTLOGGER_H_
 #define FASTLOGGER_H_
 
-#include "IDataHandler.h"
-#include "IDataCollector.h"
+#include "Wallmon.h"
 #include "FastLoggerProtocol.pb.h"
 
 class FastLoggerHandler: public IDataHandler {
 public:
-	virtual void OnStart();
+	virtual void OnInit(Context *ctx);
 	virtual void OnStop();
-	virtual string GetKey();
-	virtual void Handle(unsigned char *data, int length);
+	virtual void Handle(void *data, int length);
 private:
+	Context *_ctx;
 	FastLogger::DataPacket *_dataPacket;
 };
 
 class FastLoggerCollector: public IDataCollector {
 public:
-	virtual void OnStart();
+	virtual void OnInit(Context *ctx);
 	virtual void OnStop();
-	virtual string GetKey();
-	virtual int GetScheduleIntervalInMsec();
-	virtual int Sample(unsigned char **data);
+	virtual int Sample(void **data);
 private:
+	Context *_ctx;
 	FastLogger::DataPacket *_dataPacket;
-	unsigned char *_dataJunk;
-	unsigned char *_dataEncoded;
+	char *_dataJunk;
+	char *_dataEncoded;
 };
 
 #endif /* FASTLOGGER_H_ */

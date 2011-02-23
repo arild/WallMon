@@ -47,7 +47,7 @@ void SharedLibraryWatcher::_HandleSharedLibrary(string filePath)
 		LOG(ERROR) << "failed loading and instatiating handler: " << e.what();
 		return;
 	}
-	_router->RegisterHandler(handler);
+	_router->RegisterHandler(*handler);
 	_dispatcher->Dispatch(filePath);
 }
 

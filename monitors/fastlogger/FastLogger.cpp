@@ -10,30 +10,31 @@
 
 #define KEY					"FAST_LOGGER"
 #define SAMPLE_SIZE			913
-#define SAMPLE_INTERVAL_MS 	40
+#define SAMPLE_FREQUENCY_MS 	40
 
-void FastLoggerHandler::OnStart()
+void FastLoggerHandler::OnInit(Context *ctx)
 {
+	_ctx = ctx;
+	_ctx->key = KEY;
 }
 
 void FastLoggerHandler::OnStop()
 {
 }
 
-string FastLoggerHandler::GetKey()
-{
-	return KEY;
-}
-
-void FastLoggerHandler::Handle(unsigned char *data, int length)
+void FastLoggerHandler::Handle(void *data, int length)
 {
 }
 
-void FastLoggerCollector::OnStart()
+void FastLoggerCollector::OnInit(Context *ctx)
 {
+	_ctx = ctx;
+	_ctx->key = KEY;
+	_ctx->sampleFrequencyMsec = SAMPLE_FREQUENCY_MS;
+
 	_dataPacket = new FastLogger::DataPacket();
-	_dataJunk = new unsigned char[SAMPLE_SIZE];
-	_dataEncoded = new unsigned char[SAMPLE_SIZE * 2];
+	_dataJunk = new char[SAMPLE_SIZE];
+	_dataEncoded = new char[SAMPLE_SIZE * 2];
 	memset(_dataJunk, 'a', SAMPLE_SIZE);
 }
 
@@ -44,24 +45,13 @@ void FastLoggerCollector::OnStop()
 	delete _dataEncoded;
 }
 
-string FastLoggerCollector::GetKey()
-{
-	return KEY;
-}
-
-int FastLoggerCollector::GetScheduleIntervalInMsec()
-{
-	return SAMPLE_INTERVAL_MS;
-}
-
-int FastLoggerCollector::Sample(unsigned char **data)
+int FastLoggerCollector::Sample(void **data)
 {
 	_dataPacket->set_junk(_dataJunk, SAMPLE_SIZE);
 	_dataPacket->SerializeToArray(_dataEncoded, SAMPLE_SIZE);
 	*data = _dataEncoded;
 	return _dataPacket->ByteSize();
 }
-
 
 // class factories - needed to bootstrap object orientation with dlfcn.h
 extern "C" FastLoggerHandler *create_handler()

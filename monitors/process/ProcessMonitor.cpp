@@ -18,8 +18,9 @@ void printb(unsigned char *a, int len)
 		LOG(INFO) << "-> " << (unsigned int) a[i];
 }
 
-void ProcessMonitorHandler::OnStart()
+void ProcessMonitorHandler::OnInit(Context *ctx)
 {
+	ctx->key = KEY;
 	_dataPacket = new DataPacket();
 }
 
@@ -28,12 +29,7 @@ void ProcessMonitorHandler::OnStop()
 	delete _dataPacket;
 }
 
-string ProcessMonitorHandler::GetKey()
-{
-	return KEY;
-}
-
-void ProcessMonitorHandler::Handle(unsigned char *data, int length)
+void ProcessMonitorHandler::Handle(void *data, int length)
 {
 	if (_dataPacket->ParseFromArray(data, length) == false)
 		LOG(ERROR) << "Protocol buffer parsing failed: ";
@@ -41,8 +37,10 @@ void ProcessMonitorHandler::Handle(unsigned char *data, int length)
 	LOG(INFO) << "User time  : " << _dataPacket->usertime();
 }
 
-void ProcessMonitorCollector::OnStart()
+void ProcessMonitorCollector::OnInit(Context *ctx)
 {
+	ctx->key = KEY;
+	ctx->sampleFrequencyMsec = 1000;
 	int pid = System::GetPid("mad_worm");
 	if (pid == -1)
 		pid = System::GetPid("spotify");
@@ -51,7 +49,7 @@ void ProcessMonitorCollector::OnStart()
 
 	_monitor = new LinuxProcessMonitor(pid);
 	_dataPacket = new DataPacket();
-	_buffer = new unsigned char[1024];
+	_buffer = new char[1024];
 	memset(_buffer, 0, 1024);
 }
 
@@ -62,17 +60,7 @@ void ProcessMonitorCollector::OnStop()
 	delete _buffer;
 }
 
-string ProcessMonitorCollector::GetKey()
-{
-	return KEY;
-}
-
-int ProcessMonitorCollector::GetScheduleIntervalInMsec()
-{
-	return 50;
-}
-
-int ProcessMonitorCollector::Sample(unsigned char **data)
+int ProcessMonitorCollector::Sample(void **data)
 {
 	_monitor->update();
 	int numThreads = _monitor->num_threads();
