@@ -37,10 +37,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	Scheduler *scheduler = new Scheduler();
-	Dispatcher *dispatcher = new Dispatcher(scheduler);
 
+	// Create and start threads based on dependencies between each other
+	Streamer *streamer = new Streamer();
+	streamer->Start();
+
+	Scheduler *scheduler = new Scheduler(streamer);
 	scheduler->Start();
+
+	Dispatcher *dispatcher = new Dispatcher(scheduler);
 	dispatcher->Start();
 
 	while (RUNNING) {
@@ -48,11 +53,15 @@ int main(int argc, char *argv[])
 		usleep(1000 * 1000);
 	}
 
+	// Stop in reverse order
 	dispatcher->Stop();
-	// Note: dispatcher will stop scheduler
+	scheduler->Stop();
+	streamer->Stop();
 
 	delete dispatcher;
 	delete scheduler;
+	delete streamer;
+
 	LOG(INFO) << "Daemon successfully terminated";
 }
 

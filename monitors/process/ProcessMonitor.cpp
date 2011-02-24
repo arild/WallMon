@@ -39,6 +39,7 @@ void ProcessMonitorHandler::Handle(void *data, int length)
 
 void ProcessMonitorCollector::OnInit(Context *ctx)
 {
+	ctx->server = "129.242.22.61";
 	ctx->key = KEY;
 	ctx->sampleFrequencyMsec = 1000;
 	int pid = System::GetPid("mad_worm");

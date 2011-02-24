@@ -66,7 +66,6 @@ void Dispatcher::_ListenForever()
 	char recvBuf[RECV_BUFFER_SIZE];
 	string sourceAddress; // Address of datagram source
 	unsigned short sourcePort; // Port of datagram source
-	Streamer *streamer = NULL;
 	IDataCollector *collector = NULL;
 
 	while (_running) {
@@ -95,13 +94,19 @@ void Dispatcher::_ListenForever()
 				LOG(ERROR) << "failed loading user-defined collector: " << e.what();
 			}
 
-			// TODO: Add support for using multiple streamers based of server addresses
-			if (streamer == NULL) {
-				//sourceAddress = "129.242.22.61";
-				streamer = new Streamer(sourceAddress);
-				streamer->Start();
+			// Adhere to interface contract
+			Context *ctx = new Context();
+			try {
+				collector->OnInit(ctx);
+				if (ctx->server.length() == 0)
+					// Server not defined, use source
+					ctx->server = sourceAddress;
+
+			} catch (exception &e) {
+				LOG(ERROR) << "user-defined OnStart() failed: " << e.what();
 			}
-			_scheduler->RegisterColllector(*collector, *streamer);
+
+			_scheduler->RegisterColllector(*collector, ctx);
 			LOG(INFO) << "collector successfully registered";
 		} catch (SocketException &e) {
 			LOG(ERROR) << "socket error: " << e.what();
@@ -112,7 +117,4 @@ void Dispatcher::_ListenForever()
 		}
 	}
 	_socket->disconnect();
-	_scheduler->Stop();
-	if (streamer != NULL)
-		streamer->Stop();
 }

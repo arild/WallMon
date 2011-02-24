@@ -19,12 +19,12 @@
 
 class Scheduler {
 public:
-	Scheduler();
+	Scheduler(Streamer *streamer);
 	virtual ~Scheduler();
-	void RegisterColllector(IDataCollector &collector, Streamer &streamer);
+	void RegisterColllector(IDataCollector &collector, Context *ctx);
 	void Start();
 	void Stop();
-	static Streamer *_streamer;
+	static Streamer *streamer;
 private:
 	boost::thread _thread;
 	bool _running;

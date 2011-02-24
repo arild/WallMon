@@ -26,11 +26,28 @@ void printb(char *s, int len)
 		LOG(INFO) << "Byte at index " << i << ":" << (int) s[i];
 }
 
-Streamer::Streamer(string serverAddress)
+Streamer::Streamer()
 {
 	_numBytesStreamed = 0;
 	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
-	_queue = new Queue<StreamItem>(100);
+	_queue = new Queue<StreamItem> (100);
+	_serverMap = *new ServerMap();
+}
+
+Streamer::~Streamer()
+{
+	delete _queue;
+}
+
+// TODO: Deal with possible concurrency problems
+int Streamer::RegisterServerAddress(string serverAddress)
+{
+	// Check if address already is associated with a file descriptor
+	ServerMap::iterator it;
+	for (it = _serverMap.begin(); it != _serverMap.end(); it++)
+		if ((*it).first == serverAddress)
+			return (*it).second;
+
 	struct sockaddr_in addr;
 
 	bzero(&addr, sizeof(addr));
@@ -38,16 +55,15 @@ Streamer::Streamer(string serverAddress)
 	addr.sin_addr.s_addr = inet_addr(serverAddress.c_str());
 	addr.sin_port = htons(STREAMER_ENTRY_PORT);
 
-	_sockfd = socket(PF_INET, SOCK_STREAM, 0);
-	LOG_IF(FATAL, _sockfd < 0) << "failed creating socket";
-	int ret = connect(_sockfd, (struct sockaddr *) &addr, sizeof(addr));
+	int fd = socket(PF_INET, SOCK_STREAM, 0);
+	LOG_IF(FATAL, fd < 0)<< "failed creating socket";
+	int ret = connect(fd, (struct sockaddr *) &addr, sizeof(addr));
 	LOG_IF(FATAL, ret < 0) << "failed connecting to server";
 	LOG(INFO) << "streamer successfully connected to server";
-}
 
-Streamer::~Streamer()
-{
-	delete _queue;
+	// Save the relationship: server_address -> socket_fd
+	_serverMap[serverAddress] = fd;
+	return fd;
 }
 
 void Streamer::Start()
@@ -93,20 +109,20 @@ void Streamer::_StreamForever()
 		memcpy(packet + headerLength, item.data, item.length);
 
 		//printb((char *)&packet[4], 10);
-		int numBytesSent = write(_sockfd, packet, packetLength);//, MSG_CONFIRM);
+		int numBytesSent = write(item.sockfd, packet, packetLength);//, MSG_CONFIRM);
 		LOG(INFO) << "bytes sent: " << packetLength;
 		if (numBytesSent == -1) {
 			LOG(ERROR) << "stream socket down";
 			break;
 		}
-		LOG_IF(FATAL, numBytesSent != packetLength) << "all bytes not sent";
+		LOG_IF(FATAL, numBytesSent != packetLength)<< "all bytes not sent";
 
 		_numBytesStreamed += numBytesSent;
-		 if (_numBytesStreamed >= _numBytesLogTrigger) {
-			 int megaBytesStreamed = _numBytesStreamed / NUM_BYTES_LOG_INTERVAL;
-			 LOG(INFO) << megaBytesStreamed << " bytes streamed";
-			 _numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
-		 }
+		if (_numBytesStreamed >= _numBytesLogTrigger) {
+			int megaBytesStreamed = _numBytesStreamed / NUM_BYTES_LOG_INTERVAL;
+			LOG(INFO) << megaBytesStreamed << " bytes streamed";
+			_numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
+		}
 	}
-	close(_sockfd);
+//	close(_sockfd);
 }
