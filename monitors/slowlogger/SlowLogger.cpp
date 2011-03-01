@@ -9,7 +9,7 @@
 #include "SlowLogger.h"
 
 #define KEY						"SLOW_LOGGER"
-#define SAMPLE_SIZE				1024 * 1000
+#define SAMPLE_SIZE				1024
 #define SAMPLE_FREQUENCY_MS 	500
 
 int cnt = 0;
