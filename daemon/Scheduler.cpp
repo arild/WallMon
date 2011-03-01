@@ -19,9 +19,9 @@ ev_tstamp last_ts;
 
 class CollectorEvent {
 public:
-	IDataCollector *collector;
-	Context *ctx;
-	int sockfd;
+	IDataCollector *collector; // The collector implementation itself
+	Context *ctx; // The context which is shared and known by the collector
+	int sockfd; // The file descriptor of associated streamer socket
 };
 
 Streamer *Scheduler::streamer;
@@ -90,20 +90,24 @@ void Scheduler::_ScheduleForever()
 void Scheduler::_InterceptCallback(struct ev_loop *loop, ev_timer *w, int revents)
 {
 	ev_timer_again(loop, w);
-//	double start = ev_time();
+	//	double start = ev_time();
 	double now_ts = ev_now(loop);
 	//LOG(INFO) << "Last: " << last_ts << " Now: " << now_ts << " Diff: " << now_ts - last_ts;
 	//LOG(INFO) << "timer->at: " << w->at << " timer->repeat: " << w->repeat;
 	CollectorEvent *event = (CollectorEvent *) w->data;
 
-	char *buf = new char[1024 * 10];
 	void *tmp;
-
 	StreamItem_t item = *new StreamItem();
 	int dataLen = event->collector->Sample(&tmp);
 
+	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
 	string key = event->ctx->key;
 	int keyLen = key.length() + 1;
+
+	// Allocate buffer for aligning key and data
+	char *buf = new char[keyLen + dataLen];
+	LOG_IF(ERROR, buf == NULL) << "out of memory";
+
 	memcpy(buf, key.c_str(), keyLen);
 	memcpy(buf + keyLen, tmp, dataLen);
 

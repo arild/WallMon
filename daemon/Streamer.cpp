@@ -117,6 +117,9 @@ void Streamer::_StreamForever()
 		}
 		LOG_IF(FATAL, numBytesSent != packetLength)<< "all bytes not sent";
 
+		delete item.data;
+		//delete &item; Why not possible
+
 		_numBytesStreamed += numBytesSent;
 		if (_numBytesStreamed >= _numBytesLogTrigger) {
 			int megaBytesStreamed = _numBytesStreamed / NUM_BYTES_LOG_INTERVAL;

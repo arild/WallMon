@@ -26,12 +26,13 @@ void protobuf_AssignDesc_Protocol_2eproto() {
       "Protocol.proto");
   GOOGLE_CHECK(file != NULL);
   DataPacket_descriptor_ = file->message_type(0);
-  static const int DataPacket_offsets_[5] = {
+  static const int DataPacket_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, numthreads_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, usertime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, systemtime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, usercpuload_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, systemcpuload_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataPacket, hostname_),
   };
   DataPacket_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -74,10 +75,10 @@ void protobuf_AddDesc_Protocol_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\016Protocol.proto\"r\n\nDataPacket\022\022\n\nnumThr"
-    "eads\030\001 \002(\r\022\020\n\010userTime\030\002 \002(\001\022\022\n\nsystemTi"
-    "me\030\003 \002(\001\022\023\n\013userCpuLoad\030\004 \002(\001\022\025\n\rsystemC"
-    "puLoad\030\005 \002(\001", 132);
+    "\n\016Protocol.proto\"\204\001\n\nDataPacket\022\022\n\nnumTh"
+    "reads\030\001 \002(\r\022\020\n\010userTime\030\002 \002(\001\022\022\n\nsystemT"
+    "ime\030\003 \002(\001\022\023\n\013userCpuLoad\030\004 \002(\001\022\025\n\rsystem"
+    "CpuLoad\030\005 \002(\001\022\020\n\010hostname\030\006 \002(\t", 151);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "Protocol.proto", &protobuf_RegisterTypes);
   DataPacket::default_instance_ = new DataPacket();
@@ -95,12 +96,14 @@ struct StaticDescriptorInitializer_Protocol_2eproto {
 
 // ===================================================================
 
+const ::std::string DataPacket::_default_hostname_;
 #ifndef _MSC_VER
 const int DataPacket::kNumThreadsFieldNumber;
 const int DataPacket::kUserTimeFieldNumber;
 const int DataPacket::kSystemTimeFieldNumber;
 const int DataPacket::kUserCpuLoadFieldNumber;
 const int DataPacket::kSystemCpuLoadFieldNumber;
+const int DataPacket::kHostnameFieldNumber;
 #endif  // !_MSC_VER
 
 DataPacket::DataPacket()
@@ -124,6 +127,7 @@ void DataPacket::SharedCtor() {
   systemtime_ = 0;
   usercpuload_ = 0;
   systemcpuload_ = 0;
+  hostname_ = const_cast< ::std::string*>(&_default_hostname_);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -132,6 +136,9 @@ DataPacket::~DataPacket() {
 }
 
 void DataPacket::SharedDtor() {
+  if (hostname_ != &_default_hostname_) {
+    delete hostname_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -163,6 +170,11 @@ void DataPacket::Clear() {
     systemtime_ = 0;
     usercpuload_ = 0;
     systemcpuload_ = 0;
+    if (_has_bit(5)) {
+      if (hostname_ != &_default_hostname_) {
+        hostname_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -249,6 +261,23 @@ bool DataPacket::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(50)) goto parse_hostname;
+        break;
+      }
+      
+      // required string hostname = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_hostname:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_hostname()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->hostname().data(), this->hostname().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -296,6 +325,15 @@ void DataPacket::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(5, this->systemcpuload(), output);
   }
   
+  // required string hostname = 6;
+  if (_has_bit(5)) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->hostname().data(), this->hostname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->hostname(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -327,6 +365,16 @@ void DataPacket::SerializeWithCachedSizes(
   // required double systemCpuLoad = 5;
   if (_has_bit(4)) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(5, this->systemcpuload(), target);
+  }
+  
+  // required string hostname = 6;
+  if (_has_bit(5)) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->hostname().data(), this->hostname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->hostname(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -365,6 +413,13 @@ int DataPacket::ByteSize() const {
     // required double systemCpuLoad = 5;
     if (has_systemcpuload()) {
       total_size += 1 + 8;
+    }
+    
+    // required string hostname = 6;
+    if (has_hostname()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->hostname());
     }
     
   }
@@ -409,6 +464,9 @@ void DataPacket::MergeFrom(const DataPacket& from) {
     if (from._has_bit(4)) {
       set_systemcpuload(from.systemcpuload());
     }
+    if (from._has_bit(5)) {
+      set_hostname(from.hostname());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -426,7 +484,7 @@ void DataPacket::CopyFrom(const DataPacket& from) {
 }
 
 bool DataPacket::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000001f) != 0x0000001f) return false;
+  if ((_has_bits_[0] & 0x0000003f) != 0x0000003f) return false;
   
   return true;
 }
@@ -438,6 +496,7 @@ void DataPacket::Swap(DataPacket* other) {
     std::swap(systemtime_, other->systemtime_);
     std::swap(usercpuload_, other->usercpuload_);
     std::swap(systemcpuload_, other->systemcpuload_);
+    std::swap(hostname_, other->hostname_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

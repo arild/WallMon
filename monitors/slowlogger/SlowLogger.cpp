@@ -9,9 +9,10 @@
 #include "SlowLogger.h"
 
 #define KEY						"SLOW_LOGGER"
-#define SAMPLE_SIZE				700
-#define SAMPLE_FREQUENCY_MS 	1000
+#define SAMPLE_SIZE				1024 * 1000
+#define SAMPLE_FREQUENCY_MS 	500
 
+int cnt = 0;
 void SlowLoggerHandler::OnInit(Context *ctx)
 {
 	_ctx = ctx;
@@ -24,6 +25,9 @@ void SlowLoggerHandler::OnStop()
 
 void SlowLoggerHandler::Handle(void *data, int length)
 {
+	int i;
+	for (i = 0; i < 10000; i++)
+		;
 }
 
 void SlowLoggerCollector::OnInit(Context *ctx)
@@ -47,6 +51,9 @@ void SlowLoggerCollector::OnStop()
 
 int SlowLoggerCollector::Sample(void **data)
 {
+	//if (++cnt % 10 == 0)
+	//	_ctx->sampleFrequencyMsec--;
+
 	_dataPacket->set_junk(_dataJunk, SAMPLE_SIZE);
 	_dataPacket->SerializeToArray(_dataEncoded, SAMPLE_SIZE);
 	*data = _dataEncoded;

@@ -1,0 +1,12 @@
+- *.o
+- *.a
+- *.so
+- *.c
+- *.py
+- *.d
+- *.mk
+- .*
+- **/Debug/
+- /server/wallmons
+- /daemon/wallmond
+- /test/test

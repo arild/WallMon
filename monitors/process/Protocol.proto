@@ -6,4 +6,5 @@ message DataPacket
 	required double systemTime = 3;
 	required double userCpuLoad = 4;
 	required double systemCpuLoad = 5;
+	required string hostname = 6;
 }

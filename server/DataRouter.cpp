@@ -44,8 +44,8 @@ void DataRouter::Route(char *packet, int length)
 	int dataLength = length - key.length();
 	void *data = (void *)&packet[key.length() + 1]; // +1 for skipping '\0' in string
 
-	LOG(INFO) << "Routing:  Key: " << key << "(" << key.length() << ") | " << "dataLength = "
-			<< dataLength;
+	//LOG(INFO) << "Routing:  Key: " << key << "(" << key.length() << ") | " << "dataLength = "
+	//		<< dataLength;
 	HandlerEvent event = _handlers[key];
 	event.handler->Handle(data, dataLength);
 }

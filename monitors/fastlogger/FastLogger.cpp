@@ -9,8 +9,10 @@
 #include "FastLogger.h"
 
 #define KEY					"FAST_LOGGER"
-#define SAMPLE_SIZE			913
-#define SAMPLE_FREQUENCY_MS 	40
+#define SAMPLE_SIZE				1024
+#define SAMPLE_FREQUENCY_MS 	50
+
+int cnt = 0;
 
 void FastLoggerHandler::OnInit(Context *ctx)
 {
@@ -24,6 +26,10 @@ void FastLoggerHandler::OnStop()
 
 void FastLoggerHandler::Handle(void *data, int length)
 {
+	return;
+	int i;
+	for (i = 0; i < 10000; i++)
+		;
 }
 
 void FastLoggerCollector::OnInit(Context *ctx)
@@ -47,6 +53,8 @@ void FastLoggerCollector::OnStop()
 
 int FastLoggerCollector::Sample(void **data)
 {
+	//if (++cnt % 10 == 0)
+	//	_ctx->sampleFrequencyMsec--;
 	_dataPacket->set_junk(_dataJunk, SAMPLE_SIZE);
 	_dataPacket->SerializeToArray(_dataEncoded, SAMPLE_SIZE);
 	*data = _dataEncoded;

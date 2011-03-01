@@ -1,10 +1,8 @@
-# Delete all .o, .so and binary files. 
-# They need to be compiled on rocksvv
-sh cleanup.sh
-
+#!/bin/bash
 DEST=arild@rocksvv.cs.uit.no:.
-SRC="/home/arild/Dropbox/thesis/WallMon"
+SRC="/home/arild/WallMon"
+EXCLUDE_FILE=rsync_exclude
 
-rsync -rvu $SRC $DEST
+rsync -rvu --copy-links --exclude-from=$EXCLUDE_FILE $SRC $DEST
 rsync -rvu $SRC/../apps $DEST
 rsync -rvu ~/src $DEST

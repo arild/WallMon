@@ -16,7 +16,9 @@
 #include "ByteBuffer.h"
 
 #define NUM_BYTES_LOG_INTERVAL	(1024 * 1000); // 1MB
+#define RECEIVE_BUF_START_SIZE	1024 * 100 // 100 KB
 using namespace std;
+
 
 void printb(char *s, int len)
 {
@@ -37,11 +39,13 @@ DataSink::DataSink(DataRouter *router)
 	struct sockaddr_in addr;
 	int sd;
 
+	// Static variables
 	_router = router;
 	_numConnectedClients = 0;
 	_totalNumBytesReceived = 0;
 	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
 
+	// Socket setup
 	bzero(&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(STREAMER_ENTRY_PORT);
@@ -54,6 +58,7 @@ DataSink::DataSink(DataRouter *router)
 	ret = listen(sd, 2);
 	LOG_IF(FATAL, ret < 0) << "failed listening on socket";
 
+	// Libev setup - dispatch accept watcher
 	_loop = ev_default_loop(0);
 	ev::io *accept_watcher = new ev::io(_loop);
 	accept_watcher->set<DataSink, &DataSink::_AcceptCallback> (this);
@@ -111,7 +116,7 @@ void DataSink::_AcceptCallback(ev::io &watcher, int revents)
 	// Initialize and start watcher to read client requests
 	ev::io *readWatcher = new ev::io(watcher.loop);
 	readWatcher->set<DataSink, &DataSink::_ReadCallback> (this);
-	readWatcher->data = new ByteBuffer(1024 * 50); // Buffer for saving concatenated messages
+	readWatcher->data = new ByteBuffer(RECEIVE_BUF_START_SIZE); // Buffer for saving concatenated messages
 	readWatcher->start(client_sd, 1);
 	_watcherSet->insert(readWatcher);
 }
@@ -127,9 +132,9 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 	ByteBuffer *buf = (ByteBuffer *) watcher.data;
 	buf->Defragment();
 	int len = buf->GetContinuousBytesLeft();
-	numBytesReceived = read(watcher.fd, buf->GetWriteReference(), len);//, 0);
+	numBytesReceived = read(watcher.fd, buf->GetWriteReference(), len);
 	buf->BytesWritten(numBytesReceived);
-	LOG(INFO) << "Received: " << numBytesReceived;
+	//LOG(INFO) << "Received: " << numBytesReceived;
 	if (numBytesReceived < 0) {
 		LOG(ERROR) << "failed reading socket - client probably disconnected";
 		return;
@@ -144,13 +149,19 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 
 	int frag = 0;
 	while (buf->GetBytesAvailable() > 4) {
+		// As long as there are more than 4 bytes available there could be
+		// (at least) one more full message in the buffer
 		int messageLength = ntohl(*((unsigned int *) buf->GetReadReference()));
-		LOG(INFO) << "MSG length: " << messageLength;
+		//LOG(INFO) << "MSG length: " << messageLength;
 		if (messageLength > buf->GetCapacity() - 4) {
-			// Current buffer too small
-			buf->Resize(buf->GetCapacity() * 3);
-			LOG(INFO) << "resizing buffer from " << buf->GetCapacity() << " to "
-					<< buf->GetCapacity() * 3;
+			// Current buffer too small, double the capacity at a minimum
+			// and wait until next read on socket
+			if (messageLength > buf->GetCapacity() * 2)
+				buf->Resize(messageLength);
+			else
+				buf->Resize(buf->GetCapacity() * 2);
+
+			LOG(INFO) << "Buffer resized, new capacity: " << buf->GetCapacity();
 			break;
 		}
 		if (buf->GetBytesAvailable() - 4 < messageLength)

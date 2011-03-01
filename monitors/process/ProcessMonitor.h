@@ -11,6 +11,7 @@
 #include "Wallmon.h"
 #include "Protocol.pb.h"
 #include "LinuxProcessMonitor.h"
+#include "BarChart.h"
 
 class ProcessMonitorHandler: public IDataHandler {
 public:
@@ -19,6 +20,7 @@ public:
 	virtual void Handle(void *data, int length);
 private:
 	DataPacket *_dataPacket;
+	BarChart *_barChart;
 };
 
 class ProcessMonitorCollector: public IDataCollector {

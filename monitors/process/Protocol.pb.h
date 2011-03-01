@@ -123,6 +123,16 @@ class DataPacket : public ::google::protobuf::Message {
   inline double systemcpuload() const;
   inline void set_systemcpuload(double value);
   
+  // required string hostname = 6;
+  inline bool has_hostname() const;
+  inline void clear_hostname();
+  static const int kHostnameFieldNumber = 6;
+  inline const ::std::string& hostname() const;
+  inline void set_hostname(const ::std::string& value);
+  inline void set_hostname(const char* value);
+  inline void set_hostname(const char* value, size_t size);
+  inline ::std::string* mutable_hostname();
+  
   // @@protoc_insertion_point(class_scope:DataPacket)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -133,11 +143,13 @@ class DataPacket : public ::google::protobuf::Message {
   double systemtime_;
   double usercpuload_;
   double systemcpuload_;
+  ::std::string* hostname_;
+  static const ::std::string _default_hostname_;
   friend void  protobuf_AddDesc_Protocol_2eproto();
   friend void protobuf_AssignDesc_Protocol_2eproto();
   friend void protobuf_ShutdownFile_Protocol_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -238,6 +250,48 @@ inline double DataPacket::systemcpuload() const {
 inline void DataPacket::set_systemcpuload(double value) {
   _set_bit(4);
   systemcpuload_ = value;
+}
+
+// required string hostname = 6;
+inline bool DataPacket::has_hostname() const {
+  return _has_bit(5);
+}
+inline void DataPacket::clear_hostname() {
+  if (hostname_ != &_default_hostname_) {
+    hostname_->clear();
+  }
+  _clear_bit(5);
+}
+inline const ::std::string& DataPacket::hostname() const {
+  return *hostname_;
+}
+inline void DataPacket::set_hostname(const ::std::string& value) {
+  _set_bit(5);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+}
+inline void DataPacket::set_hostname(const char* value) {
+  _set_bit(5);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+}
+inline void DataPacket::set_hostname(const char* value, size_t size) {
+  _set_bit(5);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataPacket::mutable_hostname() {
+  _set_bit(5);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  return hostname_;
 }
 
 

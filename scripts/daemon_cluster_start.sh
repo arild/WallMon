@@ -1,2 +1,8 @@
-WMON=/home/arild/WallMon
-cluster-fork --nodes="tile-0-%d:0-1" --bg "cd ${WMON}/daemon && ./wallmond -d"
+#!/bin/bash
+DAEMON_DIR=/home/arild/WallMon/daemon
+DAEMON_EXECUTE="./wallmond -d"
+
+cluster-fork --bg "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
+cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
+
+
