@@ -13,6 +13,7 @@
 #include <iostream>
 #include <glog/logging.h>
 #include "System.h"
+#include <boost/algorithm/string.hpp>
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
@@ -86,4 +87,37 @@ int System::GetPid(string processName)
 		return -1;
 	return atoi(buf);
 }
+
+
+void tokenize_file(FILE *file, list<int> *list)
+{
+    char *word;
+    char buf[101];
+    buf[100] = 0;
+
+    while (!feof(file)) {
+		/* Skip non-letters */
+		fscanf(file, "%*[^a-zA-Z0-9'_]");
+		/* Scan up to 100 letters */
+		if (fscanf(file, "%100[a-zA-Z0-9'_]", buf) == 1) {
+	    	list->push_back(atoi(buf));
+		}
+    }
+}
+
+list<int> *System::System::GetAllPids()
+{
+	string cmd = "ps ax | awk '{print $1}'";
+	FILE *fp = popen(cmd.c_str(), "r");
+	if (fp == NULL) {
+		LOG(ERROR) << "failed to run command";
+	}
+	list<int> *l = new list<int>;
+	tokenize_file(fp, l);
+	pclose(fp);
+	return l;
+}
+
+
+
 

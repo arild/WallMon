@@ -109,12 +109,16 @@ void Streamer::_StreamForever()
 		memcpy(packet + headerLength, item.data, item.length);
 
 		//printb((char *)&packet[4], 10);
-		int numBytesSent = write(item.sockfd, packet, packetLength);//, MSG_CONFIRM);
-		LOG(INFO) << "bytes sent: " << packetLength;
-		if (numBytesSent == -1) {
-			LOG(ERROR) << "stream socket down";
-			break;
-		}
+		int numBytesSent = 0;
+		do {
+			numBytesSent += write(item.sockfd, packet, packetLength);
+			if (numBytesSent == -1) {
+				LOG(ERROR) << "stream socket down";
+				break;
+			}
+		} while (numBytesSent < packetLength);
+			LOG(INFO) << "bytes sent: " << packetLength;
+
 		LOG_IF(FATAL, numBytesSent != packetLength)<< "all bytes not sent";
 
 		delete item.data;
