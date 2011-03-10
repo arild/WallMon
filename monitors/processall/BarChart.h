@@ -14,29 +14,46 @@ using namespace std;
 class BarData {
 public:
 	string label;
-	double value;
+	double user;
+	double system;
+	vector<double> vals;
 
-	BarData(string _label, double _value)
+	BarData(string _label, double _user, double _system)
 	{
 		label = _label;
-		value = _value;
+		user = _user;
+		system = _system;
+	}
+
+	vector<double> *GetValues()
+	{
+		vals.clear();
+		if (user < 0.)
+			user = 0.;
+		if (system < 0.)
+			system = 0.;
+		vals.push_back(system);
+		vals.push_back(user);
+		return &vals;
 	}
 };
 
 class BarChart {
 public:
-	BarChart();
+	BarChart(int numBars);
 	virtual ~BarChart();
-	void Render(vector<BarData *> &values);
+	void Render(double utilization, vector<BarData *> &barData);
 private:
-	void _DrawBar(PLFLT barIndex, PLFLT value);
-	void _DrawLabel( PLFLT barIndex, string label );
+	void _DrawUtilization(PLFLT util);
+	void _DrawBar(PLFLT barIndex, vector<double> &values);
+	void _DrawLabel(PLFLT barIndex, string label);
 	void _ClearAllBars();
 	void _ClearAllLabels();
 	void _ClearScreen();
 	plstream *pls;
 	plstream *frame;
-	static PLFLT pos[], red[], green[], blue[];
-	void _SelectBarWind();
-	void _SelectLabelWind();
+	void _SelectTopWind();
+	void _SelectMidWind();
+	void _SelectBottomWind();
+	PLFLT _window[4];
 };

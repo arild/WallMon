@@ -12,7 +12,7 @@
 
 #define KEY		"PROCESS_MON"
 
-void ProcessMonitorHandler::OnInit(Context *ctx)
+void Handler::OnInit(Context *ctx)
 {
 	ctx->key = KEY;
 	_dataPacket = new DataPacket();
@@ -22,12 +22,12 @@ void ProcessMonitorHandler::OnInit(Context *ctx)
 #endif
 }
 
-void ProcessMonitorHandler::OnStop()
+void Handler::OnStop()
 {
 	delete _dataPacket;
 }
 
-void ProcessMonitorHandler::Handle(void *data, int length)
+void Handler::Handle(void *data, int length)
 {
 	if (_dataPacket->ParseFromArray(data, length) == false)
 		;//LOG(ERROR) << "Protocol buffer parsing failed: ";
@@ -38,7 +38,7 @@ void ProcessMonitorHandler::Handle(void *data, int length)
 #endif
 }
 
-void ProcessMonitorCollector::OnInit(Context *ctx)
+void Collector::OnInit(Context *ctx)
 {
 	ctx->server = "129.242.19.57";
 	ctx->key = KEY;
@@ -56,14 +56,14 @@ void ProcessMonitorCollector::OnInit(Context *ctx)
 	memset(_buffer, 0, 1024);
 }
 
-void ProcessMonitorCollector::OnStop()
+void Collector::OnStop()
 {
 	delete _monitor;
 	delete _dataPacket;
 	delete _buffer;
 }
 
-int ProcessMonitorCollector::Sample(void **data)
+int Collector::Sample(void **data)
 {
 	_monitor->update();
 
@@ -89,22 +89,22 @@ int ProcessMonitorCollector::Sample(void **data)
 }
 
 // class factories - needed to bootstrap object orientation with dlfcn.h
-extern "C" ProcessMonitorHandler *create_handler()
+extern "C" Handler *create_handler()
 {
-	return new ProcessMonitorHandler;
+	return new Handler;
 }
 
-extern "C" void destroy_handler(ProcessMonitorHandler *p)
+extern "C" void destroy_handler(Handler *p)
 {
 	delete p;
 }
 
-extern "C" ProcessMonitorCollector *create_collector()
+extern "C" Collector *create_collector()
 {
-	return new ProcessMonitorCollector;
+	return new Collector;
 }
 
-extern "C" void destroy_collector(ProcessMonitorCollector *p)
+extern "C" void destroy_collector(Collector *p)
 {
 	delete p;
 }

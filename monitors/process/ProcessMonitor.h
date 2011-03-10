@@ -13,7 +13,7 @@
 #include "LinuxProcessMonitor.h"
 #include "BarChart.h"
 
-class ProcessMonitorHandler: public IDataHandler {
+class Handler: public IDataHandler {
 public:
 	virtual void OnInit(Context *ctx);
 	virtual void OnStop();
@@ -23,7 +23,7 @@ private:
 	BarChart *_barChart;
 };
 
-class ProcessMonitorCollector: public IDataCollector {
+class Collector: public IDataCollector {
 public:
 	virtual void OnInit(Context *ctx);
 	virtual void OnStop();

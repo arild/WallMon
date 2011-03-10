@@ -33,36 +33,27 @@
 using namespace std;
 #endif
 
-PLFLT BarChart::pos[] = { 0.0, 0.25, 0.5, 0.75, 1.0 };
-PLFLT BarChart::red[] = { 0.0, 0.25, 0.5, 1.0, 1.0 };
-PLFLT BarChart::green[] = { 1.0, 0.5, 0.5, 0.5, 1.0 };
-PLFLT BarChart::blue[] = { 1.0, 1.0, 0.5, 0.25, 0.0 };
+#define COLOR_BLACK		0
+#define COLOR_RED		1
+#define COLOR_YELLOW	2
+#define COLOR_GREEN		3
+#define COLOR_GREY		7
+#define COLOR_BROWN		8
 
 const char *argv = "-geometry 1000x600";
 int argc = 1;
 
-PLFLT BAR_WINDOW[4] = { 0., 10., 0., 100. };
-PLFLT LABEL_WINDOW[4] = { 0., 10., 0., 100. };
-
-BarChart::BarChart()
+BarChart::BarChart(int numBars)
 {
+	_window[0] = _window[2] = 0.;
+	_window[1] = (double)numBars;
+	_window[3] = 105.;
 	pls = new plstream();
 	pls->parseopts(&argc, &argv, PL_PARSE_NOPROGRAM);
 	plsdev("xwin"); // output device
 	pls->init();
 	pls->adv(0); // Select the only sub-page present
-
-	// "Sets up a standard viewport, leaving a left-hand margin of seven character heights, and four
-	//character heights around the other three sides."
-	//pls->vsta();
-	_SelectBarWind();
-
-	pls->col0(2);
-	//pls->lab("Process Names", "CPU Usage", "");
-	pls->scmap1l(true, 5, pos, red, green, blue, NULL);
-	//pls->box("bcnst", 0.0, 0, "bcnstv", 0.0, 0);
-
-	//frame = new plstream();
+	_SelectMidWind();
 }
 
 BarChart::~BarChart()
@@ -70,40 +61,67 @@ BarChart::~BarChart()
 	delete pls;
 }
 
-void BarChart::Render(vector<BarData *> &barData)
+void BarChart::Render(double utilization, vector<BarData *> &barData)
 {
 	_ClearScreen();
 	for (int x = 0; x < barData.size(); x++) {
-		pls->col1(x / BAR_WINDOW[1]);
-		_DrawBar(x, barData[x]->value);
+		pls->col1(x / _window[1]);
+		_DrawUtilization(utilization);
+		_DrawBar(x, *barData[x]->GetValues());
 		_DrawLabel(x, barData[x]->label);
 	}
+	//_SelectBarWind();
+	//pls->box( "bc", 1.0, 0, "bcnvt", 10.0, 0);
 	pls->flush();
 }
 
-void BarChart::_DrawBar(PLFLT barIndex, PLFLT value)
+void BarChart::_DrawUtilization(PLFLT util)
 {
-	PLFLT x[4] = { barIndex, barIndex, barIndex + 1., barIndex + 1. };
-	PLFLT y[4] = { 0., value, value, 0. };
+	_SelectTopWind();
+	char label[100];
+	sprintf( label, "Total CPU Utilization: %.2f", util );
+	PLFLT disp = 0.;
+	PLFLT pos = 0.5;
+	PLFLT just = 0.5;
+	pls->mtex("b", disp, pos, just, label);
+	//pls->ptex( 0., 0., 0., 0., .5, label);
+}
 
-	_SelectBarWind();
-	pls->fill(4, x, y);
-	pls->col0(1);
+void BarChart::_DrawBar(PLFLT barIndex, vector<double> &values)
+{
+	PLFLT valSum = 0.;
+	int colors[2] = {COLOR_BROWN, COLOR_GREEN};
+	_SelectMidWind();
+	for (int i = 0; i < values.size(); i++) {
+		PLFLT val = values[i];
+
+		PLFLT x[4] = { barIndex, barIndex, barIndex + 1., barIndex + 1. };
+		PLFLT y[4] = { valSum, valSum + val, valSum + val, valSum };
+
+		pls->col0(colors[i % 2]);
+		pls->fill(4, x, y);
+		valSum += val;
+	}
+
+	PLFLT x[4] = { barIndex, barIndex, barIndex + 1., barIndex + 1. };
+	PLFLT y[4] = { 0., valSum, valSum, 0.};
 	pls->lsty(1);
+	pls->col0(COLOR_RED);
 	pls->line(4, x, y);
 
 	char valueLabel[100];
-	sprintf( valueLabel, "%.1f", value );
-	pls->ptex( ( barIndex + .5 ), (value + 3. ), 1.0, 0.0, .5, valueLabel);
+	sprintf( valueLabel, "%.1f", valSum );
+	pls->ptex( ( barIndex + .5 ), (valSum + 3. ), 1.0, 0.0, .5, valueLabel);
 }
 
 void BarChart::_DrawLabel(PLFLT barIndex, string label)
 {
-	_SelectLabelWind();
+	_SelectBottomWind();
 	PLFLT disp = -0.8;
 	if ((int) barIndex % 2 == 0)
 		disp = -2.4;
-	PLFLT pos = (barIndex * .1 + .05);
+	double fraction = (1 / (double)_window[1]);
+	PLFLT pos = (barIndex * fraction + (fraction / (double)2));
 	PLFLT just = .5;
 
 	if (label.length() > 10) {
@@ -123,23 +141,23 @@ void BarChart::_DrawLabel(PLFLT barIndex, string label)
 
 void BarChart::_ClearAllBars()
 {
-	PLFLT *p = BAR_WINDOW;
+	PLFLT *p = _window;
 	PLFLT x[4] = { p[0], p[0], p[1], p[1] };
 	PLFLT y[4] = { p[2], p[3], p[3], p[2] };
 
-	_SelectBarWind();
-	pls->col0(0);
+	_SelectMidWind();
+	pls->col0(COLOR_BLACK);
 	pls->fill(4, x, y);
 }
 
 void BarChart::_ClearAllLabels()
 {
-	PLFLT *p = LABEL_WINDOW;
+	PLFLT *p = _window;
 	PLFLT x[4] = { p[0], p[0], p[1], p[1] };
 	PLFLT y[4] = { p[2], p[3], p[3], p[2] };
 
-	_SelectLabelWind();
-	pls->col0(0);
+	_SelectBottomWind();
+	pls->col0(COLOR_BLACK);
 	pls->fill(4, x, y);
 }
 
@@ -150,20 +168,31 @@ void BarChart::_ClearScreen()
 	PLFLT x[4] = { 0., 0., 1., 1. };
 	PLFLT y[4] = { 0., 1., 1., 0. };
 
-	pls->col0(0);
+	pls->col0(COLOR_BLACK);
 	pls->fill(4, x, y);
 }
 
-void BarChart::_SelectBarWind()
+void BarChart::_SelectTopWind()
 {
-	double *p = BAR_WINDOW;
-	pls->vpor(0.1, 0.9, 0.2, 0.95);
+	double *p = _window;
+	pls->vpor(0.1, 0.9, 0.95, 1.);
 	pls->wind(p[0], p[1], p[2], p[3]); // Relative to points in plot
 }
 
-void BarChart::_SelectLabelWind()
+
+void BarChart::_SelectMidWind()
 {
-	double *p = LABEL_WINDOW;
+	double *p = _window;
+	pls->vpor(0.1, 0.9, 0.2, 0.9);
+	pls->wind(p[0], p[1], p[2], p[3]); // Relative to points in plot
+}
+
+void BarChart::_SelectBottomWind()
+{
+	double *p = _window;
 	pls->vpor(0.1, 0.9, 0.1, 0.2);
 	pls->wind(p[0], p[1], p[2], p[3]); // Relative to points in plot
 }
+
+
+
