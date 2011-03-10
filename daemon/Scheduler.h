@@ -12,10 +12,6 @@
 #include <ev++.h>
 #include "Wallmon.h"
 #include "Streamer.h"
-#include <boost/unordered_map.hpp>
-
-//using std::string;
-//typedef boost::unordered_map<string, IDataHandler *> handlerMap;
 
 class Scheduler {
 public:

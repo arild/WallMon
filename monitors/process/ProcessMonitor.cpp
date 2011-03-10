@@ -10,7 +10,7 @@
 #include "System.h"
 #include "unistd.h"
 
-#define KEY		"TestKey"
+#define KEY		"PROCESS_MON"
 
 void ProcessMonitorHandler::OnInit(Context *ctx)
 {
@@ -34,13 +34,13 @@ void ProcessMonitorHandler::Handle(void *data, int length)
 	double cpuload = _dataPacket->usercpuload();
 	cpuload += _dataPacket->systemcpuload();
 #ifdef GRAPHICS
-	_barChart->Update(_dataPacket->hostname(), (int)cpuload);
+	_barChart->Render(_dataPacket->hostname(), (int)cpuload);
 #endif
 }
 
 void ProcessMonitorCollector::OnInit(Context *ctx)
 {
-	//ctx->server = "129.242.19.57";
+	ctx->server = "129.242.19.57";
 	ctx->key = KEY;
 	ctx->sampleFrequencyMsec = 100;
 

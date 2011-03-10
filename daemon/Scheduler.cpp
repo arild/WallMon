@@ -97,7 +97,7 @@ void Scheduler::_InterceptCallback(struct ev_loop *loop, ev_timer *w, int revent
 	CollectorEvent *event = (CollectorEvent *) w->data;
 
 	void *tmp;
-	StreamItem_t item = *new StreamItem();
+	StreamItem *item = new StreamItem();
 	int dataLen = event->collector->Sample(&tmp);
 
 	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
@@ -111,12 +111,12 @@ void Scheduler::_InterceptCallback(struct ev_loop *loop, ev_timer *w, int revent
 	memcpy(buf, key.c_str(), keyLen);
 	memcpy(buf + keyLen, tmp, dataLen);
 
-	item.length = keyLen + dataLen;
-	item.data = (void *) buf;
-	item.sockfd = event->sockfd;
+	item->length = keyLen + dataLen;
+	item->data = (void *) buf;
+	item->sockfd = event->sockfd;
 
 	LOG(INFO) << "Item ready, streaming it. Key: " << key;
-	Scheduler::streamer->Stream(item);
+	Scheduler::streamer->Stream(*item);
 	//LOG(INFO) << "collector execution time: " << ev_time() - start << " msec";
 	//LOG(INFO) << "timer schedule offset: " << now_ts - last_ts << " msec";
 	last_ts = now_ts;

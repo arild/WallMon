@@ -16,8 +16,8 @@ public:
     BarChart();
     virtual ~BarChart();
     void Update(string label, int value);
-    void plfbox( PLFLT, PLFLT );
-    void Clear(PLFLT, PLFLT);
+    void _DrawBar( PLFLT, PLFLT );
+    void _ClearBar(PLFLT, PLFLT);
 private:
     LabelMap _labelMap;
     int _labelPos;

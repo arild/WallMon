@@ -1,7 +1,7 @@
 include ../Makefile.inc
 include ../../Makefile.inc
 
-LIB=-lpthread -lglog -lprotobuf
+LIB=-lpthread -lglog -lprotobuf -lLinuxProcessMonitor
 SRC=*.cpp
 CFLAGS_LOCAL=-O2
 

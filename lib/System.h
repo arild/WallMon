@@ -17,11 +17,10 @@ using std::list;
 
 class System {
 public:
-	System();
-	virtual ~System();
 	static void Daemonize();
 	static int GetPid(string processName);
 	static list<int> *GetAllPids();
+	static double GetTimeInSec();
 };
 
 #endif /* SYSTEM_H_ */

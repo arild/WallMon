@@ -1,7 +1,7 @@
-DIRS = 	process \
+DIRS = 	processall \
 		fastlogger \
 		slowlogger
-		#process2
+		#process 
 
 all: 	
 	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE}) ; done

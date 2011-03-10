@@ -1,10 +1,25 @@
 #include "LinuxProcessMonitor.h"
 
-LinuxProcessMonitor::LinuxProcessMonitor(int pid)
+LinuxProcessMonitor::LinuxProcessMonitor()
 {
-
 	_jiffy = sysconf(_SC_CLK_TCK);
+	_buffer = new char[300]; // size is 200 but we use 300 for future versions (ubuntu version for example has many more fields...)
+	memset(_buffer, 0, 300);
 
+	_procstat = NULL;
+	_procstatm = NULL;
+}
+
+LinuxProcessMonitor::~LinuxProcessMonitor()
+{
+	if (_procstat)
+		fclose(_procstat);
+	if (_procstatm)
+		fclose(_procstatm);
+}
+
+bool LinuxProcessMonitor::open(int pid)
+{
 	stringstream ssprocstat, ssprocstatm;
 
 	ssprocstat << "/proc/" << pid << "/stat";
@@ -19,13 +34,9 @@ LinuxProcessMonitor::LinuxProcessMonitor(int pid)
 	if (!_procstat || !_procstatm) {
 
 		cout << "Error opening files..." << endl;
-		exit(1);
+		return false;
 	}
-
-	_buffer = new char[300]; // size is 200 but we use 300 for future versions (ubuntu version for example has many more fields...)
-	memset(_buffer, 0, 300);
-
-	update();
+	return true;
 }
 
 double getTime()
@@ -147,12 +158,6 @@ double LinuxProcessMonitor::getResidentSetSize()
 	return (double) (_resident * 4096.0) / (1024. * 1024.0);
 }
 
-LinuxProcessMonitor::~LinuxProcessMonitor()
-{
-
-	fclose(_procstat);
-	fclose(_procstatm);
-}
 
 int LinuxProcessMonitor::pid()
 {

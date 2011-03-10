@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h> // gettimeofday()
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iostream>
@@ -18,16 +19,6 @@
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
-System::System()
-{
-	// TODO Auto-generated constructor stub
-
-}
-
-System::~System()
-{
-	// TODO Auto-generated destructor stub
-}
 
 // From: http://www.qgd.unizh.ch/~dpotter/howto/daemonize
 void System::Daemonize()
@@ -117,6 +108,15 @@ list<int> *System::System::GetAllPids()
 	pclose(fp);
 	return l;
 }
+
+double System::GetTimeInSec()
+{
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	return (double) t.tv_sec + 0.000001 * (double) t.tv_usec;
+}
+
+
 
 
 

@@ -147,7 +147,7 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 		return;
 	}
 
-	int frag = 0;
+	//int frag = 0;
 	while (buf->GetBytesAvailable() > 4) {
 		// As long as there are more than 4 bytes available there could be
 		// (at least) one more full message in the buffer
@@ -174,9 +174,9 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 		//printb(buf->GetReadReference(), 10);
 		_router->Route(buf->GetReadReference(), messageLength);
 		buf->BytesRead(messageLength);
-		frag++;
-		if (frag >= 2)
-			LOG(INFO) << "Fragmentation: " << frag << " | Bytes received: " << numBytesReceived;
+		//frag++;
+		//if (frag >= 2)
+		//	LOG(INFO) << "Fragmentation: " << frag << " | Bytes received: " << numBytesReceived;
 	}
 
 	_totalNumBytesReceived += numBytesReceived;

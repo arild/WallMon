@@ -53,8 +53,8 @@ void FastLoggerCollector::OnStop()
 
 int FastLoggerCollector::Sample(void **data)
 {
-	//if (++cnt % 10 == 0)
-	//	_ctx->sampleFrequencyMsec--;
+	if (++cnt % 10 == 0 && _ctx->sampleFrequencyMsec > 3)
+		;//_ctx->sampleFrequencyMsec--;
 	_dataPacket->set_junk(_dataJunk, SAMPLE_SIZE);
 	_dataPacket->SerializeToArray(_dataEncoded, SAMPLE_SIZE);
 	*data = _dataEncoded;

@@ -9,7 +9,6 @@
 #define DATAROUTER_H_
 
 #include <string>
-//#include <boost/unordered_map.hpp>
 #include <map>
 #include <boost/thread.hpp>
 #include "Queue.h"
@@ -34,11 +33,11 @@ public:
 
 	~RouterItem()
 	{
-		//delete message;
+		delete message;
 	}
 };
 
-typedef std::map<string, HandlerEvent> handlerMap;
+typedef std::map<string, HandlerEvent *> handlerMap;
 
 class DataRouter {
 public:
@@ -51,8 +50,8 @@ public:
 private:
 	boost::thread _thread;
 	bool _running;
-	Queue<RouterItem> *_queue;
-	handlerMap _handlers;
+	Queue<RouterItem *> *_queue;
+	handlerMap *_handlers;
 	void _RouteForever();
 };
 

@@ -20,9 +20,14 @@ ByteBuffer:
 	$(CC) $(CFLAGS) ByteBuffer.cpp
 	ar cru libByteBuffer.a ByteBuffer.o
 
-#LinuxProcessMonitor: 
-#	$(CC) -fPIC -static $(CFLAGS) LinuxProcessMonitor.cpp
-#	ar cru libLinuxProcessMonitor.a LinuxProcessMonitor.o
+LinuxProcessMonitor: 
+	$(CC) -c LinuxProcessMonitor.cpp
+	ar rcs libLinuxProcessMonitor.a LinuxProcessMonitor.o
+
+
+#LinuxProcessMonitor:
+#	$(CC) -static -shared -c -fPIC LinuxProcessMonitor.cpp
+#	$(CC) -static -lc -shared -o libLinuxProcessMonitor.so LinuxProcessMonitor.o
 
 clean:
 	rm -f *.o

@@ -1,5 +1,5 @@
-CC = g++
-CFLAGS_COMMON = -rdynamic -O2 -fno-stack-protector -Wall
+CC = g++ -O2
+CFLAGS_COMMON = -rdynamic -fno-stack-protector -Wall
 
 LIB_COMMON=-lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem
 

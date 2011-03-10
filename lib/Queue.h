@@ -18,7 +18,8 @@ template<class T>
 class Queue {
 public:
 	Queue(int capacity);
-	void Push(T &item);
+	int GetSize();
+	void Push(T item);
 	T Pop();
 private:
 	int _capacity;
@@ -29,6 +30,7 @@ private:
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
+
 template<class T>
 Queue<T>::Queue(int capacity)
 {
@@ -36,7 +38,15 @@ Queue<T>::Queue(int capacity)
 }
 
 template<class T>
-void Queue<T>::Push(T &item)
+int Queue<T>::GetSize()
+{
+	scoped_lock lock(_mutex);
+	return _queue.size();
+}
+
+
+template<class T>
+void Queue<T>::Push(T item)
 {
 	scoped_lock lock(_mutex);
 	while (_queue.size() >= _capacity)

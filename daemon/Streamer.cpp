@@ -30,13 +30,14 @@ Streamer::Streamer()
 {
 	_numBytesStreamed = 0;
 	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
-	_queue = new Queue<StreamItem> (100);
-	_serverMap = *new ServerMap();
+	_queue = new Queue<StreamItem *> (100);
+	_serverMap = new ServerMap();
 }
 
 Streamer::~Streamer()
 {
 	delete _queue;
+	delete _serverMap;
 }
 
 // TODO: Deal with possible concurrency problems
@@ -44,7 +45,7 @@ int Streamer::RegisterServerAddress(string serverAddress)
 {
 	// Check if address already is associated with a file descriptor
 	ServerMap::iterator it;
-	for (it = _serverMap.begin(); it != _serverMap.end(); it++)
+	for (it = _serverMap->begin(); it != _serverMap->end(); it++)
 		if ((*it).first == serverAddress)
 			return (*it).second;
 
@@ -62,7 +63,7 @@ int Streamer::RegisterServerAddress(string serverAddress)
 	LOG(INFO) << "streamer successfully connected to server";
 
 	// Save the relationship: server_address -> socket_fd
-	_serverMap[serverAddress] = fd;
+	(*_serverMap)[serverAddress] = fd;
 	return fd;
 }
 
@@ -81,48 +82,44 @@ void Streamer::Start()
 void Streamer::Stop()
 {
 	_running = false;
-	StreamItem_t item;
-	_queue->Push(item);
+	StreamItem item;
+	_queue->Push(&item);
 	_thread.join();
 	LOG(INFO) << "Streamer terminated";
 }
 
 void Streamer::Stream(StreamItem &item)
 {
-	_queue->Push(item);
+	_queue->Push(&item);
 }
 
 void Streamer::_StreamForever()
 {
 	while (true) {
-		LOG(INFO) << "Streamer popping item...";
-		StreamItem item = _queue->Pop();
-		LOG(INFO) << "Item popped";
+		StreamItem *item = _queue->Pop();
 		if (_running == false)
 			break;
 
 		int headerLength = sizeof(unsigned int);
-		int packetLength = headerLength + item.length;
+		int packetLength = headerLength + item->length;
 		char packet[packetLength];
-		int dataLengthNetworkByteOrder = htonl(item.length);
+		int dataLengthNetworkByteOrder = htonl(item->length);
 		memcpy(packet, &dataLengthNetworkByteOrder, sizeof(int));
-		memcpy(packet + headerLength, item.data, item.length);
+		memcpy(packet + headerLength, item->data, item->length);
 
 		//printb((char *)&packet[4], 10);
 		int numBytesSent = 0;
 		do {
-			numBytesSent += write(item.sockfd, packet, packetLength);
+			numBytesSent += write(item->sockfd, packet, packetLength);
 			if (numBytesSent == -1) {
 				LOG(ERROR) << "stream socket down";
 				break;
 			}
 		} while (numBytesSent < packetLength);
-			LOG(INFO) << "bytes sent: " << packetLength;
-
 		LOG_IF(FATAL, numBytesSent != packetLength)<< "all bytes not sent";
 
-		delete item.data;
-		//delete &item; Why not possible
+		delete item->data;
+		//delete &item-> Why not possible
 
 		_numBytesStreamed += numBytesSent;
 		if (_numBytesStreamed >= _numBytesLogTrigger) {

@@ -16,11 +16,12 @@
 typedef std::map<std::string, int> ServerMap;
 using namespace std;
 
-typedef struct StreamItem {
+class StreamItem {
+public:
 	void *data;
 	int length;
 	int sockfd;
-} StreamItem_t;
+};
 
 class Streamer {
 public:
@@ -35,8 +36,8 @@ private:
 	void _StreamForever();
 	boost::thread _thread;
 	bool _running;
-	Queue<StreamItem> *_queue;
-	ServerMap _serverMap;
+	Queue<StreamItem *> *_queue;
+	ServerMap *_serverMap;
 	int _numBytesStreamed;
 	int _numBytesLogTrigger;
 };

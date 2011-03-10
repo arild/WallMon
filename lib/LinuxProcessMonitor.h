@@ -20,9 +20,10 @@ class LinuxProcessMonitor {
 
 public:
 
-	LinuxProcessMonitor(int pid);
+	LinuxProcessMonitor();
 	virtual ~LinuxProcessMonitor();
 
+	bool open(int pid);
 	void update();
 	void printAll();
 

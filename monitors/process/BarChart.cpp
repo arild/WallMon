@@ -76,7 +76,7 @@ BarChart::~BarChart()
 	delete pls;
 }
 
-void BarChart::plfbox( PLFLT x0, PLFLT y0 )
+void BarChart::_DrawBar( PLFLT x0, PLFLT y0 )
 {
     PLFLT *x = new PLFLT[4];
     PLFLT *y = new PLFLT[4];
@@ -99,7 +99,7 @@ void BarChart::plfbox( PLFLT x0, PLFLT y0 )
     delete[] y;
 }
 
-void BarChart::Clear( PLFLT x0, PLFLT y0 )
+void BarChart::_ClearBar( PLFLT x0, PLFLT y0 )
 {
     PLFLT *x = new PLFLT[4];
     PLFLT *y = new PLFLT[4];
@@ -130,10 +130,10 @@ void BarChart::Update(string label, int value)
 	//pls->col1(0.5);
 	//plscol0(0.5, 0, 0, 0);
 
-	Clear(x, 100);
+	_ClearBar(x, 100);
 	pls->col1( x / 29.0 );
 	pls->psty( 0 );
-	plfbox(x , value);
+	_DrawBar(x , value);
 	char valueLabel[100];
 	sprintf( valueLabel, "%d", value );
 	pls->ptex( ( x + .5 ), (value + 3. ), 1.0, 0.0, .5, valueLabel);
