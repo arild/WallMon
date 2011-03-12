@@ -1,22 +1,36 @@
+/**
+ * @file   Main.cpp
+ * @Author Arild Nilsen
+ * @date   January, 2011
+ *
+ * Starts and terminates core modules in the daemon
+ */
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <signal.h>
 #include <glog/logging.h>
+#include <boost/thread/condition.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "Dispatcher.h"
 #include "Streamer.h"
 #include "System.h"
 
-bool RUNNING = true;
-void sigproc(int k)
+boost::condition mainThreadCondition;
+boost::mutex mainThreadMutex;
+
+void sigproc(int signal)
 {
-	RUNNING = false;
+	LOG(INFO) << "signal catched: " << signal;
+	mainThreadCondition.notify_one();
 }
 
 int main(int argc, char *argv[])
 {
 	google::InitGoogleLogging(argv[0]);
-	signal(SIGINT, &sigproc);
+	signal(SIGINT, &sigproc); // CTRL+C
+	signal(SIGTERM, &sigproc); // pkill -SIGTERM wallmond
+
 	for (int c; (c = getopt(argc, argv, "d")) != -1;) {
 		switch (c)
 		{
@@ -37,7 +51,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
 	// Create and start threads based on dependencies between each other
 	Streamer *streamer = new Streamer();
 	streamer->Start();
@@ -48,10 +61,8 @@ int main(int argc, char *argv[])
 	Dispatcher *dispatcher = new Dispatcher(scheduler);
 	dispatcher->Start();
 
-	while (RUNNING) {
-		LOG(INFO) << "Running...";
-		usleep(1000 * 1000);
-	}
+	// Block main thread and wait for termination signal
+	mainThreadCondition.wait(mainThreadMutex);
 
 	// Stop in reverse order
 	dispatcher->Stop();
@@ -62,28 +73,5 @@ int main(int argc, char *argv[])
 	delete scheduler;
 	delete streamer;
 
-	LOG(INFO) << "Daemon successfully terminated";
+	LOG(INFO) << "daemon successfully terminated";
 }
-
-/*
- * 	FILE *fp;
- int status;
- char path[1035];
-
- status = 2;
-
- LOG(INFO) << "Found " << 2 << " cookies";
-
- fp = popen("ls ~", "r");
- if (fp == NULL) {
- printf("Failed to run command\n");
- exit(0);
- }
-
- while (fgets(path, sizeof(path) - 1, fp) != NULL) {
- ;//printf("%s", path);
- }
-
- pclose(fp);
- */
-

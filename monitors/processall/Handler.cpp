@@ -17,7 +17,7 @@
 #define MESSAGE_BUF_SIZE		1024 * 1000
 #define SAMPLE_FREQUENCY_MSEC 	1000
 #define FRAMES_PER_SEC			2
-#define NUM_PROCESSES_TO_DISPLAY	6
+#define NUM_PROCESSES_TO_DISPLAY	8
 
 int numMessagesReceived = 0;
 int totalBytesReceived = 0;
@@ -64,6 +64,7 @@ void Handler::Handle(void *data, int length)
 			// Process name not registered
 			(*_processNameMap)[processName] = new ProcNameStat();
 		ProcNameStat *procNameStat = (*_processNameMap)[processName];
+		numUniqueProcesses = procNameStat->procMap->size();
 
 		// Retrieve per process statistics
 		ProcStat *procStat = procNameStat->Get(procKey);
@@ -85,10 +86,13 @@ void Handler::Handle(void *data, int length)
 	totalBytesReceived += length;
 	numMessagesReceived += 1;
 	totalUpdateTime += _message->updatetime();
-	LOG_EVERY_N(INFO, 10) << "Num unique process names: " << _processNameMap->size();
-	LOG_EVERY_N(INFO, 10) << "Average message size    : " << totalBytesReceived
+
+	LOG_EVERY_N(INFO, 50) << "--- Statistics ---";
+	LOG_EVERY_N(INFO, 50) << "Num unique process names: " << _processNameMap->size();
+	LOG_EVERY_N(INFO, 50) << "Num unique processes    : " << numUniqueProcesses;
+	LOG_EVERY_N(INFO, 50) << "Average message size    : " << totalBytesReceived
 				/ numMessagesReceived;
-	LOG_EVERY_N(INFO, 10)
+	LOG_EVERY_N(INFO, 50)
 		<< "Average update time     : " << totalUpdateTime / (double) numMessagesReceived;
 
 #ifdef GRAPHICS
@@ -125,8 +129,6 @@ void Handler::_UpdateBarChart()
 
 		totalUserCpuLoad += procNameStat->totalUserCpuLoad;
 		totalSystemCpuLoad += procNameStat->totalSystemCpuLoad;
-
-		LOG(INFO) << "PROC NAME: " << processName;
 
 		// -1 since "Others" process category will be included
 		if (heap.size() < (NUM_PROCESSES_TO_DISPLAY - 1)) {
@@ -172,9 +174,9 @@ void Handler::_UpdateBarChart()
 	heap.push_back(new BarData("others", relativeUser, relativeSystem));
 	sort(heap.begin(), heap.end(), cmp);
 
-	LOG(INFO) << "Top Processes:";
-	for (int i = 0; i < heap.size(); i++)
-		LOG(INFO) << heap[i]->label << " -> " << heap[i]->GetValues();
+	//LOG(INFO) << "Top Processes:";
+	//for (int i = 0; i < heap.size(); i++)
+	//	LOG(INFO) << heap[i]->label << " -> " << heap[i]->GetValues();
 
 	double utilization = totalCpuLoad / (double)2900.;
 	_barChart->Render(utilization, heap);

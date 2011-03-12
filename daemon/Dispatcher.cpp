@@ -1,19 +1,15 @@
-/*
- * Dispatcher.cpp
+/**
+ * @file   Dispatcher.cpp
+ * @Author Arild Nilsen
+ * @date   January, 2011
  *
- *  Created on: Jan 23, 2011
- *      Author: arild
+ * Loads and starts user-defined collectors based on incoming requests.
  */
-#include <iostream>          // For cout and cerr
-#include <cstdlib>           // For atoi()
-#include <string.h>
+
 #include <glog/logging.h>
-#include <stdio.h>
-#include <dlfcn.h>
 #include "Config.h"
 #include "Dispatcher.h"
 #include "ClassLoader.h"
-#include <unistd.h>
 
 #define RECV_BUFFER_SIZE	1024
 #define TERMINATION_TOKEN	"9797AB"
@@ -40,15 +36,13 @@ Dispatcher::~Dispatcher()
 
 void Dispatcher::Start()
 {
-	LOG(INFO) << "Starting dispatcher...";
 	_running = true;
 	_thread = boost::thread(&Dispatcher::_ListenForever, this);
-	LOG(INFO) << "Dispatcher started";
 }
 
 void Dispatcher::Stop()
 {
-	LOG(INFO) << "Stopping dispatcher...";
+	LOG(INFO) << "stopping Dispatcher...";
 	try {
 		_running = false;
 		// Interrupt blocking dispatcher thread
@@ -68,6 +62,7 @@ void Dispatcher::_ListenForever()
 	unsigned short sourcePort; // Port of datagram source
 	IDataCollector *collector = NULL;
 
+	LOG(INFO) << "Dispatcher started and serving requests";
 	while (_running) {
 		try {
 			int bytesRcvd = _socket->recvFrom(recvBuf, RECV_BUFFER_SIZE, sourceAddress, sourcePort);
@@ -94,9 +89,9 @@ void Dispatcher::_ListenForever()
 				LOG(ERROR) << "failed loading user-defined collector: " << e.what();
 			}
 
-			// Adhere to interface contract
 			Context *ctx = new Context();
 			try {
+				// Adhere to interface contract
 				collector->OnInit(ctx);
 				if (ctx->server.length() == 0)
 					// Server not defined, use source

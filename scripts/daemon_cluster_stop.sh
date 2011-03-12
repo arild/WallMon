@@ -1,3 +1,3 @@
 NAME="wallmond"
-cluster-fork  --bg pkill -9 -f $NAME
-pkill -f $NAME
+cluster-fork  --bg pkill -SIGTERM $NAME
+pkill -SIGTERM $NAME

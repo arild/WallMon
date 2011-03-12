@@ -1,27 +1,39 @@
-/*
- * Scheduler.cpp
+/**
+ * @file   Scheduler.cpp
+ * @Author Arild Nilsen
+ * @date   January, 2011
  *
- *  Created on: Jan 28, 2011
- *      Author: arild
+ * Schedules user-defined collectors according to specified intervals.
  */
 
-#include <sys/time.h>
-#include <string>
-#include <unistd.h>
-#include <iostream>
 #include <glog/logging.h>
 #include "Scheduler.h"
 #include "Streamer.h"
 
 using namespace std;
 
-ev_tstamp last_ts;
-
+/**
+ * Container for user-data associated with timers.
+ *
+ * Timers in libev have a special attribute where the user (programmer)
+ * can store arbitrary data. The timers used here stope an instance of this class.
+ */
 class CollectorEvent {
 public:
 	IDataCollector *collector; // The collector implementation itself
 	Context *ctx; // The context which is shared and known by the collector
 	int sockfd; // The file descriptor of associated streamer socket
+
+	double timeStampInMsec;
+	double divergenceinMsec; // Accumulated divergence on sample invocations
+	unsigned int numSamples; // Number of times the collector has been invoked
+
+	CollectorEvent()
+	{
+		timeStampInMsec = 0.;
+		divergenceinMsec = 0.;
+		numSamples = 0;
+	}
 };
 
 Streamer *Scheduler::streamer;
@@ -29,12 +41,39 @@ Streamer *Scheduler::streamer;
 Scheduler::Scheduler(Streamer *streamer)
 {
 	_loop = ev_default_loop(0);
-	LOG(INFO) << "LOOP CREATED";
+	_timers = new TimerContainer();
 	Scheduler::streamer = streamer;
 }
 
 Scheduler::~Scheduler()
 {
+	ev_loop_destroy(_loop);
+}
+
+void Scheduler::Start()
+{
+	_running = true;
+	_thread = boost::thread(&Scheduler::_ScheduleForever, this);
+	LOG(INFO) << "Scheduler started";
+}
+
+void Scheduler::Stop()
+{
+	LOG(INFO) << "stopping Scheduler...";
+	_running = false;
+	_loopCondition.notify_one(); // In case no timers are registered
+	// Stop all timers, this will cause the event loop to terminate
+	TimerContainer::iterator it;
+	for (it = _timers->begin(); it != _timers->end(); it++) {
+		ev_timer *timer = *it;
+		ev_timer_stop(_loop, timer);
+
+		// Release memory allocated in RegisterColllector()
+		delete timer->data;
+		delete timer;
+	}
+	_thread.join(); // Wait for event loop to terminate
+	LOG(INFO) << "Scheduler stopped";
 }
 
 /**
@@ -44,12 +83,10 @@ Scheduler::~Scheduler()
 void Scheduler::RegisterColllector(IDataCollector &collector, Context *ctx)
 {
 	ev_timer *timer = new ev_timer();
-	LOG(INFO) << "Before GetScheduleInterval()";
-
-	int sockfd = streamer->RegisterServerAddress(ctx->server);
+	int sockfd = streamer->SetupStream(ctx->server);
 
 	double scheduleIntervalInSec = ctx->sampleFrequencyMsec / (double) 1000;
-	ev_timer_init (timer, &Scheduler::_InterceptCallback, scheduleIntervalInSec, 0.);
+	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, 0.);
 	timer->repeat = scheduleIntervalInSec;
 
 	CollectorEvent *event = new CollectorEvent();
@@ -59,66 +96,64 @@ void Scheduler::RegisterColllector(IDataCollector &collector, Context *ctx)
 
 	timer->data = (void *) event;
 	ev_timer_again(_loop, timer);
-	LOG(INFO) << "register done";
+	_loopCondition.notify_one();
+
+	// Book-keep for cleanup
+	_timers->push_back(timer);
 }
 
-void Scheduler::Start()
-{
-	_running = true;
-	_thread = boost::thread(&Scheduler::_ScheduleForever, this);
-	LOG(INFO) << "Scheduler running";
-}
-
-void Scheduler::Stop()
-{
-	_running = false;
-	_thread.join();
-	LOG(INFO) << "Scheduler terminated";
-}
-
+/**
+ * Starts the event loop that schedules timer events.
+ *
+ * The ev_run() call blocks as long as there are one or more timers registered.
+ * In order to avoid spinning when there are no timers registered, the RegisterCollector()
+ * call will notify a shared condition variable whenever a new collector/timer is registered.
+ */
 void Scheduler::_ScheduleForever()
 {
+	LOG(INFO) << "Scheduler started and serving requests";
 	while (_running) {
-		LOG(INFO) << "Scheduling loop";
-		// Blocks as long as there are one or more timers registered.
-		// In order to terminate the loop, all registered timers must be removed.
+		_loopCondition.wait(_loopMutex);
 		ev_run(_loop, 0);
-		usleep(1000 * 500); // 500 Msec
 	}
 }
 
-void Scheduler::_InterceptCallback(struct ev_loop *loop, ev_timer *w, int revents)
+/**
+ * This method serves as a callback when a timer is scheduled.
+ */
+void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 {
-	ev_timer_again(loop, w);
-	//	double start = ev_time();
-	double now_ts = ev_now(loop);
-	//LOG(INFO) << "Last: " << last_ts << " Now: " << now_ts << " Diff: " << now_ts - last_ts;
-	//LOG(INFO) << "timer->at: " << w->at << " timer->repeat: " << w->repeat;
+	ev_timer_again(loop, w); // Reschedule collector
+	double timeStampNowInMsec = ev_now(loop);
 	CollectorEvent *event = (CollectorEvent *) w->data;
 
-	void *tmp;
-	StreamItem *item = new StreamItem();
-	int dataLen = event->collector->Sample(&tmp);
+	// Update statistics
+	event->divergenceinMsec += (timeStampNowInMsec - event->timeStampInMsec);
+	event->timeStampInMsec = timeStampNowInMsec;
+	event->numSamples += 1;
 
+	void *data;
+	int dataLen = event->collector->Sample(&data);
 	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
+
+	// Assemble data for network transmission. Note that the call to
+	// StreamItemFactory() copies all provided data, therefore we do not
+	// have to worry about corrupting and when to release the provided data
 	string key = event->ctx->key;
-	int keyLen = key.length() + 1;
+	int keyLen = key.length() + 1; // +1 in order to include string termination symbol
+	void *dataItems[2] = { (void *) key.c_str(), data };
+	int lengthItems[2] = { keyLen, dataLen };
+	StreamItem &item = streamer->StreamItemFactory(dataItems, lengthItems, 2, event->sockfd);
 
-	// Allocate buffer for aligning key and data
-	char *buf = new char[keyLen + dataLen];
-	LOG_IF(ERROR, buf == NULL) << "out of memory";
+	// Queue data for transmission
+	Scheduler::streamer->Stream(item);
 
-	memcpy(buf, key.c_str(), keyLen);
-	memcpy(buf + keyLen, tmp, dataLen);
-
-	item->length = keyLen + dataLen;
-	item->data = (void *) buf;
-	item->sockfd = event->sockfd;
-
-	LOG(INFO) << "Item ready, streaming it. Key: " << key;
-	Scheduler::streamer->Stream(*item);
-	//LOG(INFO) << "collector execution time: " << ev_time() - start << " msec";
-	//LOG(INFO) << "timer schedule offset: " << now_ts - last_ts << " msec";
-	last_ts = now_ts;
+	if (event->numSamples % 100 == 0) {
+		LOG(INFO) << "--- Statistics about collector. Key=" << event->ctx->key << " ---";
+		LOG(INFO) << "Num samples        : " << event->numSamples;
+		LOG(INFO) << "Total divergence   : " << event->divergenceinMsec << " msec";
+		LOG(INFO) << "Average. divergence: " << event->divergenceinMsec
+				/ (double) event->numSamples << " msec";
+	}
 }
 

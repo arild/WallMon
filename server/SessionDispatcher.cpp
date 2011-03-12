@@ -4,11 +4,6 @@
  *  Created on: Jan 23, 2011
  *      Author: arild
  */
-#include <iostream>           // For cout and cerr
-#include <cstdlib>            // For atoi()
-#include <unistd.h>           // For sleep()
-#include <string.h>
-#include <pthread.h>
 #include <glog/logging.h>
 #include "Config.h"
 #include "SessionDispatcher.h"

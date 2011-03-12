@@ -8,20 +8,15 @@
 #ifndef NETWORK_H_
 #define NETWORK_H_
 
-#include <boost/thread.hpp>
-#include "Queue.h"
 #include <string>
 #include <map>
+#include <boost/thread.hpp>
+#include "Queue.h"
 
-typedef std::map<std::string, int> ServerMap;
 using namespace std;
+typedef map<string, int> ServerMap;
 
-class StreamItem {
-public:
-	void *data;
-	int length;
-	int sockfd;
-};
+class StreamItem;
 
 class Streamer {
 public:
@@ -29,7 +24,8 @@ public:
 	virtual ~Streamer();
 	void Start();
 	void Stop();
-	int RegisterServerAddress(string serverAddress);
+	int SetupStream(string serverAddress);
+	StreamItem &StreamItemFactory(void **dataItems, int *lengthItems, int numItems, int sockfd);
 	void Stream(StreamItem &item);
 
 private:

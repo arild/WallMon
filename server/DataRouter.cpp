@@ -1,8 +1,9 @@
-/*
- * DataRouter.cpp
+/**
+ * @file   DataRouter.cpp
+ * @Author Arild Nilsen
+ * @date   January, 2011
  *
- *  Created on: Jan 31, 2011
- *      Author: arild
+ * Parses messages from clients and invokes related handlers.
  */
 
 #include <string.h>
@@ -34,11 +35,12 @@ void DataRouter::Start()
  */
 void DataRouter::Stop()
 {
+	LOG(INFO) << "stopping DataRouter...";
 	_running = false;
 	RouterItem item(1);
 	_queue->Push(&item);
 	_thread.join();
-	LOG(INFO) << "DataRouter terminated";
+	LOG(INFO) << "DataRouter stopped";
 }
 
 void DataRouter::RegisterHandler(IDataHandler &handler)
@@ -57,18 +59,17 @@ void DataRouter::RegisterHandler(IDataHandler &handler)
 void DataRouter::Route(char *message, int length)
 {
 	if (message == NULL || length == 0) {
-		LOG(ERROR) << "invalid packet";
+		LOG(ERROR) << "invalid message";
 		return;
 	}
 	RouterItem *item = new RouterItem(length);
 	memcpy(item->message, message, length);
 	_queue->Push(item);
-	//LOG(INFO) << "Routing:  Key: " << key << "(" << key.length() << ") | " << "dataLength = "
-	//		<< dataLength;
 }
 
 void DataRouter::_RouteForever()
 {
+	LOG(INFO) << "DataRouter started and serving requests";
 	while (true) {
 		RouterItem *item = _queue->Pop();
 		if (_running == false)
