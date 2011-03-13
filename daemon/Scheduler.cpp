@@ -21,8 +21,9 @@ using namespace std;
  */
 class CollectorEvent {
 public:
-	IDataCollector *collector; // The collector implementation itself
 	Context *ctx; // The context which is shared and known by the collector
+	IDataCollector *collector; // The collector implementation itself
+	IDataCollectorProtobuf *collectorProtobuf;
 	int sockfd; // The file descriptor of associated streamer socket
 
 	double timeStampInMsec;
@@ -82,7 +83,7 @@ void Scheduler::Stop()
  * Registers a given collector with an event timer that is
  * inserted into the global event loop.
  */
-void Scheduler::RegisterColllector(IDataCollector &collector, Context *ctx)
+void Scheduler::RegisterColllector(IBase &collector, Context *ctx)
 {
 	ev_timer *timer = new ev_timer();
 	int sockfd = streamer->SetupStream(ctx->server);
@@ -92,8 +93,9 @@ void Scheduler::RegisterColllector(IDataCollector &collector, Context *ctx)
 	timer->repeat = scheduleIntervalInSec;
 
 	CollectorEvent *event = new CollectorEvent();
-	event->collector = &collector;
 	event->ctx = ctx;
+	event->collector = dynamic_cast<IDataCollector *>(&collector);
+	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *>(&collector);
 	event->sockfd = sockfd;
 
 	timer->data = (void *) event;
@@ -134,14 +136,21 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	event->timeStampInMsec = timeStampNowInMsec;
 	event->numSamples += 1;
 
-	void *data;
-	int dataLen = event->collector->Sample(&data);
-	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
-
-	// Populate protobuf structure
 	WallmonMessage msg;
 	msg.set_key(event->ctx->key);
-	msg.set_data(data, dataLen);
+
+	if (event->collector) {
+		void *data;
+		int dataLen = event->collector->Sample(&data);
+		msg.set_data(data, dataLen);
+	}
+	else if (event->collectorProtobuf) {
+		event->collectorProtobuf->Sample(&msg);
+	}
+	else
+		LOG(FATAL) << "unknown collector type";
+
+	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
 
 	// Compose network message
 	StreamItem &item = * new StreamItem(msg.ByteSize());

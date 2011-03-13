@@ -15,11 +15,11 @@
 
 using namespace std;
 
-class Collector: public IDataCollector {
+class Collector: public IDataCollectorProtobuf {
 public:
 	virtual void OnInit(Context *ctx);
 	virtual void OnStop();
-	virtual int Sample(void **data);
+	virtual void Sample(WallmonMessage *msg);
 private:
 	list<LinuxProcessMonitor *> *_monitors;
 	char *_buffer;

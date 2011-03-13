@@ -60,7 +60,7 @@ void Dispatcher::_ListenForever()
 	char recvBuf[RECV_BUFFER_SIZE];
 	string sourceAddress; // Address of datagram source
 	unsigned short sourcePort; // Port of datagram source
-	IDataCollector *collector = NULL;
+	IBase *collector = NULL;
 
 	LOG(INFO) << "Dispatcher started and serving requests";
 	while (_running) {

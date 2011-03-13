@@ -39,7 +39,7 @@ SharedLibraryWatcher::~SharedLibraryWatcher()
 void SharedLibraryWatcher::_HandleSharedLibrary(string filePath)
 {
 	// TODO: Fix memory-leak. (Problem related to closing descriptor used by the class loader)
-	IDataHandler *handler;
+	IBase *handler;
 	try {
 		ClassLoader *loader = new ClassLoader(filePath);
 		handler = loader->LoadAndInstantiateHandler();

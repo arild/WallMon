@@ -20,7 +20,7 @@ public:
 	virtual ~Scheduler();
 	void Start();
 	void Stop();
-	void RegisterColllector(IDataCollector &collector, Context *ctx);
+	void RegisterColllector(IBase &collector, Context *ctx);
 	static Streamer *streamer;
 private:
 	boost::thread _thread;

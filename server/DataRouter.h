@@ -17,8 +17,15 @@
 
 class HandlerEvent {
 public:
-	IDataHandler *handler;
 	Context *ctx;
+	IDataHandler *handler;
+	IDataHandlerProtobuf *handlerProtobuf;
+
+	HandlerEvent()
+	{
+		handler = NULL;
+		handlerProtobuf = NULL;
+	}
 };
 
 class RouterItem {
@@ -46,7 +53,7 @@ public:
 	virtual ~DataRouter();
 	void Start();
 	void Stop();
-	void RegisterHandler(IDataHandler &handler);
+	void RegisterHandler(IBase &handler);
 	void Route(char *message, int length);
 private:
 	boost::thread _thread;

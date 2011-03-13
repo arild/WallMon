@@ -9,6 +9,7 @@
 #define WALLMON_H_
 
 #include <string>
+#include "Wallmon.pb.h"
 
 using std::string;
 
@@ -28,26 +29,44 @@ public:
 	}
 };
 
-class IDataHandler {
+class IBase {
 public:
-	virtual ~IDataHandler() {}
+	virtual ~IBase() {}
 	virtual void OnInit(Context *ctx) = 0;
 	virtual void OnStop() = 0;
+};
+
+
+class IDataHandler : virtual public IBase {
+public:
+	virtual ~IDataHandler() {}
 	virtual void Handle(void *data, int length) = 0;
 };
 
-class IDataCollector {
+class IDataCollector : virtual public IBase {
 public:
 	virtual ~IDataCollector() {}
-	virtual void OnInit(Context *ctx) = 0;
-	virtual void OnStop() = 0;
 	virtual int Sample(void **data) = 0;
 };
 
+
+class IDataHandlerProtobuf : virtual public IBase {
+public:
+	virtual ~IDataHandlerProtobuf() {}
+	virtual void Handle(WallmonMessage *msg) = 0;
+};
+
+class IDataCollectorProtobuf : virtual public IBase {
+public:
+	virtual ~IDataCollectorProtobuf() {}
+	virtual void Sample(WallmonMessage *msg) = 0;
+};
+
+
 // the types of the class factories
-typedef IDataHandler *create_handler_t();
-typedef void destroy_handler_t(IDataHandler *);
-typedef IDataCollector *create_collector_t();
-typedef void destroy_collector_t(IDataCollector *);
+typedef IBase *create_handler_t();
+typedef void destroy_handler_t(IBase *);
+typedef IBase *create_collector_t();
+typedef void destroy_collector_t(IBase*);
 
 #endif /* WALLMON_H_ */

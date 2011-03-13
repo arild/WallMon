@@ -17,8 +17,8 @@ class ClassLoader {
 public:
 	ClassLoader(string filePath);
 	virtual ~ClassLoader();
-	IDataHandler *LoadAndInstantiateHandler();
-	IDataCollector *LoadAndInstantiateCollector();
+	IBase *LoadAndInstantiateHandler();
+	IBase *LoadAndInstantiateCollector();
 
 private:
 	void *_dl_handle;

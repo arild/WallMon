@@ -15,6 +15,7 @@
 
 #include "Wallmon.h"
 #include "Protocol.pb.h"
+#include "Wallmon.pb.h"
 #include "BarChart.h"
 
 using namespace std;
@@ -79,11 +80,11 @@ public:
 typedef map<string, ProcNameStat *> ProcNameMap;
 
 
-class Handler: public IDataHandler {
+class Handler: public IDataHandlerProtobuf {
 public:
 	virtual void OnInit(Context *ctx);
 	virtual void OnStop();
-	virtual void Handle(void *data, int length);
+	virtual void Handle(WallmonMessage *msg);
 private:
 	void _UpdateBarChart();
 	ProcNameMap *_processNameMap;

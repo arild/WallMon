@@ -45,8 +45,10 @@ void Handler::OnStop()
 	delete _message;
 }
 
-void Handler::Handle(void *data, int length)
+void Handler::Handle(WallmonMessage *msg)
 {
+	const char *data = msg->data().c_str();
+	int length = msg->data().length();
 	if (_message->ParseFromArray(data, length) == false)
 		LOG(FATAL) << "Protocol buffer parsing failed: ";
 

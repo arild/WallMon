@@ -24,18 +24,18 @@ ClassLoader::~ClassLoader()
 	//dlclose(_dl_handle);
 }
 
-IDataHandler *ClassLoader::LoadAndInstantiateHandler()
+IBase *ClassLoader::LoadAndInstantiateHandler()
 {
 	/* Resolve the symbol (method) from the object */
 	create_handler_t *create_handler = (create_handler_t*) dlsym(_dl_handle, "create_handler");
 	char *error = dlerror();
 	if (error != NULL)
 		LOG(ERROR) << "dlsym() failed: " << dlerror();
-	IDataHandler *handler = (IDataHandler *) create_handler();
+	IBase *handler = (IBase *) create_handler();
 	return handler;
 }
 
-IDataCollector *ClassLoader::LoadAndInstantiateCollector()
+IBase *ClassLoader::LoadAndInstantiateCollector()
 {
 	/* Resolve the symbol (method) from the object */
 	create_collector_t *create_collector = (create_collector_t*) dlsym(_dl_handle,
@@ -43,7 +43,7 @@ IDataCollector *ClassLoader::LoadAndInstantiateCollector()
 	char *error = dlerror();
 	if (error != NULL)
 		LOG(ERROR) << "dlsym() failed(): " << dlerror();
-	IDataCollector *handler = (IDataCollector *) create_collector();
+	IBase *handler = (IBase *) create_collector();
 	return handler;
 }
 

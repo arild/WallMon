@@ -47,9 +47,8 @@ void Collector::OnStop()
 	delete _buffer;
 }
 
-int Collector::Sample(void **data)
+void Collector::Sample(WallmonMessage *msg)
 {
-
 	ProcessesMessage processesMsg;
 	char hostname[100];
 	gethostname(hostname, 100);
@@ -80,8 +79,7 @@ int Collector::Sample(void **data)
 	LOG(INFO) << "Serializing num bytes: " << processesMsg.ByteSize();
 	if (processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
 		LOG(ERROR) << "Protocol buffer serialization failed";
-	*data = _buffer;
-	return processesMsg.ByteSize();
+	msg->set_data(_buffer, processesMsg.ByteSize());
 }
 
 extern "C" Collector *create_collector()

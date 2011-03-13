@@ -6,10 +6,12 @@
  * Parses messages from clients and invokes related handlers.
  */
 
+#include <iostream>
 #include <string.h>
 #include <stdlib.h> // For NULL
 #include <glog/logging.h>
 #include "DataRouter.h"
+#include <typeinfo>
 
 DataRouter::DataRouter()
 {
@@ -45,14 +47,17 @@ void DataRouter::Stop()
 	LOG(INFO) << "DataRouter stopped";
 }
 
-void DataRouter::RegisterHandler(IDataHandler &handler)
+void DataRouter::RegisterHandler(IBase &handler)
 {
 	Context *ctx = new Context();
 	handler.OnInit(ctx);
 
+	// Save and determine type of handler: the dynamic_cast() method
+	// will return NULL if the specified cast type does not match.
 	HandlerEvent *event = new HandlerEvent();
-	event->handler = &handler;
 	event->ctx = ctx;
+	event->handler = dynamic_cast<IDataHandler *>(&handler);
+	event->handlerProtobuf = dynamic_cast<IDataHandlerProtobuf *>(&handler);;
 
 	string key = ctx->key;
 	(*_handlers)[key] = event;
@@ -78,8 +83,14 @@ void DataRouter::_RouteForever()
 			break;
 		_msg->ParseFromArray(item->message, item->length);
 
+		// Retrieve and invoke associated handler
 		HandlerEvent *event = (*_handlers)[_msg->key()];
-		event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
+		if (event->handler)
+			event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
+		else if (event->handlerProtobuf)
+			event->handlerProtobuf->Handle(_msg);
+		else
+			LOG(FATAL) << "unknown handler type";
 
 		delete item;
 	}
