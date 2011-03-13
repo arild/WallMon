@@ -1,12 +1,5 @@
-/*
- * AlignedRingBuffer.h
- *
- *  Created on: Feb 19, 2011
- *      Author: arild
- */
-
-#ifndef ALIGNEDRINGBUFFER_H_
-#define ALIGNEDRINGBUFFER_H_
+#ifndef BYTEBUFFER_H_
+#define BYTEBUFFER_H_
 
 class ByteBuffer {
 public:
@@ -32,4 +25,4 @@ private:
 };
 
 
-#endif /* ALIGNEDRINGBUFFER_H_ */
+#endif /* BYTEBUFFER_H_ */

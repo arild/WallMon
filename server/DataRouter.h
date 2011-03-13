@@ -12,6 +12,7 @@
 #include <map>
 #include <boost/thread.hpp>
 #include "Queue.h"
+#include "Wallmon.pb.h"
 #include "Wallmon.h"
 
 class HandlerEvent {
@@ -52,6 +53,7 @@ private:
 	bool _running;
 	Queue<RouterItem *> *_queue;
 	handlerMap *_handlers;
+	WallmonMessage *_msg;
 	void _RouteForever();
 };
 

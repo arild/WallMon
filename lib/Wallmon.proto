@@ -1,5 +1,5 @@
 
-message WallmonPacket  
+message WallmonMessage
 {
 	required string key = 1;
 	required bytes data = 2;

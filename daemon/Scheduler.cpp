@@ -7,6 +7,7 @@
  */
 
 #include <glog/logging.h>
+#include "Wallmon.pb.h"
 #include "Scheduler.h"
 #include "Streamer.h"
 
@@ -48,6 +49,7 @@ Scheduler::Scheduler(Streamer *streamer)
 Scheduler::~Scheduler()
 {
 	ev_loop_destroy(_loop);
+	delete _timers;
 }
 
 void Scheduler::Start()
@@ -136,16 +138,17 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	int dataLen = event->collector->Sample(&data);
 	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
 
-	// Assemble data for network transmission. Note that the call to
-	// StreamItemFactory() copies all provided data, therefore we do not
-	// have to worry about corrupting and when to release the provided data
-	string key = event->ctx->key;
-	int keyLen = key.length() + 1; // +1 in order to include string termination symbol
-	void *dataItems[2] = { (void *) key.c_str(), data };
-	int lengthItems[2] = { keyLen, dataLen };
-	StreamItem &item = streamer->StreamItemFactory(dataItems, lengthItems, 2, event->sockfd);
+	// Populate protobuf structure
+	WallmonMessage msg;
+	msg.set_key(event->ctx->key);
+	msg.set_data(data, dataLen);
 
-	// Queue data for transmission
+	// Compose network message
+	StreamItem &item = * new StreamItem(msg.ByteSize());
+	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
+	item.sockfd = event->sockfd;
+
+	// Queue message for transmission
 	Scheduler::streamer->Stream(item);
 
 	if (event->numSamples % 100 == 0) {

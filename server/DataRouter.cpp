@@ -15,12 +15,14 @@ DataRouter::DataRouter()
 {
 	_queue = new Queue<RouterItem *> (100);
 	_handlers = new handlerMap();
+	_msg = new WallmonMessage();
 }
 
 DataRouter::~DataRouter()
 {
 	delete _queue;
 	delete _handlers;
+	delete _msg;
 }
 
 void DataRouter::Start()
@@ -74,14 +76,10 @@ void DataRouter::_RouteForever()
 		RouterItem *item = _queue->Pop();
 		if (_running == false)
 			break;
+		_msg->ParseFromArray(item->message, item->length);
 
-		string key = item->message;
-		int totalKeyLength = key.length() + 1; // +1 for skipping '\0' in string
-		int dataLength = item->length - totalKeyLength;
-		void *data = (void *) &item->message[totalKeyLength];
-
-		HandlerEvent *event = (*_handlers)[key];
-		event->handler->Handle(data, dataLength);
+		HandlerEvent *event = (*_handlers)[_msg->key()];
+		event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
 
 		delete item;
 	}

@@ -16,13 +16,6 @@
 
 #define NUM_BYTES_LOG_INTERVAL	1 << 20; // 1MB
 
-class StreamItem {
-public:
-	void *packet;
-	int length;
-	int sockfd;
-};
-
 Streamer::Streamer()
 {
 	_numBytesStreamed = 0;
@@ -51,7 +44,7 @@ void Streamer::Stop()
 {
 	LOG(INFO) << "stopping Streamer...";
 	_running = false;
-	StreamItem item;
+	StreamItem item(1);
 	_queue->Push(&item);
 	_thread.join();
 	LOG(INFO) << "Streamer stopped";
@@ -94,43 +87,6 @@ int Streamer::SetupStream(string serverAddress)
 	return fd;
 }
 
-
-/**
- * Prepares data for network transmission, that is, creates and returns an instance of StreamItem.
- *
- * This method accepts arbitrary many data pointers pointing to data of arbitrary size, and
- * align them in memory. This includes copying all the data, therefore the user does not have
- * to worry about corrupting the data after the call has finished. The allocated data will be
- * released by the streamer thread after it has been sent out on the network.
- */
-StreamItem &Streamer::StreamItemFactory(void **dataItems, int *lengthItems, int numItems, int sockfd)
-{
-	// Determine the combined length of all data provided
-	int totalDataLength = 0;
-	for (int i = 0; i < numItems; i++)
-		totalDataLength += lengthItems[i];
-
-	// Take into account packet header and allocate packet buffer
-	int headerLength = sizeof(unsigned int);
-	int packetLength = headerLength + totalDataLength;
-	char *packet = new char[packetLength];
-
-	// Align all provided data
-	int dataLengthNetworkByteOrder = htonl(totalDataLength);
-	memcpy(packet, &dataLengthNetworkByteOrder, sizeof(int));
-	int offset = sizeof(int);
-	for (int i = 0; i < numItems; i++) {
-		memcpy(packet + offset, dataItems[i], lengthItems[i]);
-		offset += lengthItems[i];
-	}
-
-	StreamItem &item = * new StreamItem();
-	item.packet = packet;
-	item.length = packetLength;
-	item.sockfd = sockfd;
-	return item;
-}
-
 /**
  * Pushes an item on the FIFO queue that is continuously
  * being drained by the streamer thread
@@ -155,16 +111,16 @@ void Streamer::_StreamForever()
 
 		int numBytesSent = 0;
 		do {
-			numBytesSent += write(item->sockfd, item->packet, item->length);
+			numBytesSent += write(item->sockfd, item->message, item->messageLength);
 			if (numBytesSent == -1) {
 				LOG(ERROR) << "stream socket down";
 				break;
 			}
-		} while (numBytesSent < item->length);
-		LOG_IF(FATAL, numBytesSent != item->length)<< "all bytes not sent";
+		} while (numBytesSent < item->messageLength);
+		LOG_IF(FATAL, numBytesSent != item->messageLength)<< "all bytes not sent";
 
 		// Release the memory originally allocated in StreamItemFactory()
-		delete item->packet;
+		//delete item->packet;
 		delete item;
 
 		_numBytesStreamed += numBytesSent;
@@ -181,6 +137,9 @@ void Streamer::_StreamForever()
 		close(i.second);
 	}
 }
+
+
+
 
 
 

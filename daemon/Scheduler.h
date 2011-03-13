@@ -1,10 +1,3 @@
-/*
- * Scheduler.h
- *
- *  Created on: Jan 28, 2011
- *      Author: arild
- */
-
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
@@ -14,6 +7,7 @@
 #include <boost/thread/mutex.hpp>
 #include <ev++.h>
 #include "Wallmon.h"
+#include "Wallmon.pb.h"
 #include "Streamer.h"
 
 using namespace std;
@@ -34,8 +28,8 @@ private:
 	struct ev_loop *_loop;
 	boost::condition _loopCondition;
 	boost::mutex _loopMutex;
-
 	TimerContainer *_timers;
+
 	void _ScheduleForever();
 	static void _TimerCallback(struct ev_loop *loop, ev_timer *w, int revents);
 };

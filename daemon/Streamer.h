@@ -1,22 +1,14 @@
-/*
- * Network.h
- *
- *  Created on: Jan 12, 2011
- *      Author: arild
- */
-
-#ifndef NETWORK_H_
-#define NETWORK_H_
+#ifndef STREAMER_H_
+#define STREAMER_H_
 
 #include <string>
 #include <map>
 #include <boost/thread.hpp>
 #include "Queue.h"
+#include "StreamItem.h"
 
 using namespace std;
 typedef map<string, int> ServerMap;
-
-class StreamItem;
 
 class Streamer {
 public:
@@ -25,7 +17,6 @@ public:
 	void Start();
 	void Stop();
 	int SetupStream(string serverAddress);
-	StreamItem &StreamItemFactory(void **dataItems, int *lengthItems, int numItems, int sockfd);
 	void Stream(StreamItem &item);
 
 private:
@@ -38,4 +29,4 @@ private:
 	int _numBytesLogTrigger;
 };
 
-#endif /* NETWORK_H_ */
+#endif /* STREAMER_H_ */
