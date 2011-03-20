@@ -11,9 +11,7 @@
 #include <string>
 #include <list>
 
-
-using std::string;
-using std::list;
+using namespace std;
 
 class System {
 public:
@@ -21,6 +19,8 @@ public:
 	static int GetPid(string processName);
 	static list<int> *GetAllPids();
 	static double GetTimeInSec();
+	static double GetTimeInMsec();
+	static string &GetHostname();
 };
 
 #endif /* SYSTEM_H_ */

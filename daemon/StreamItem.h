@@ -3,7 +3,7 @@
 
 class StreamItem {
 public:
-	char *message; // Start of message (headec + payload)
+	char *message; // Start of message (header + payload)
 	int messageLength; // Accounts for header and payload
 	int sockfd;
 

@@ -23,6 +23,7 @@ public:
 private:
 	list<LinuxProcessMonitor *> *_monitors;
 	char *_buffer;
+	Context *_ctx;
 };
 
 #endif /* COLLECTOR_H_ */

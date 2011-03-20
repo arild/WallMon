@@ -22,9 +22,13 @@
 int numMessagesReceived = 0;
 int totalBytesReceived = 0;
 int numProcessMessagesReceived = 0;
-double totalUpdateTime = 0;
+double totalSampleTime = 0;
+double totalSampleFrequency = 0;
 int numUniqueProcesses = 0;
 int numUniqueHostNames = 0;
+double timestampPreviousMsec = 0.;
+double timestampNowMsec = 0.;
+double timestampShowStatisticsMsec = 0.;
 
 void Handler::OnInit(Context *ctx)
 {
@@ -58,17 +62,17 @@ void Handler::Handle(WallmonMessage *msg)
 
 		// Lookup keys
 		string processName = processMessage->processname();
-		string procKey =
-				ProcNameStat::CreateProcMapKey(_message->hostname(), processMessage->pid());
+		string procKey = ProcNameStat::CreateProcMapKey(msg->hostname(), processMessage->pid());
 
 		// Retrieve process name statistics
 		if (_processNameMap->count(processName) == 0)
 			// Process name not registered
 			(*_processNameMap)[processName] = new ProcNameStat();
 		ProcNameStat *procNameStat = (*_processNameMap)[processName];
-		numUniqueProcesses = procNameStat->procMap->size();
 
 		// Retrieve per process statistics
+		if (procNameStat->Has(procKey) == false)
+			numUniqueProcesses += 1;
 		ProcStat *procStat = procNameStat->Get(procKey);
 
 		// Maintain aggregated statistics at various levels:
@@ -87,16 +91,31 @@ void Handler::Handle(WallmonMessage *msg)
 
 	totalBytesReceived += length;
 	numMessagesReceived += 1;
-	totalUpdateTime += _message->updatetime();
+	totalSampleTime += msg->sampletimemsec();
+	totalSampleFrequency += msg->samplefrequencymsec();
+	timestampPreviousMsec = timestampNowMsec;
+	timestampNowMsec = msg->timestampmsec();
+	if (timestampPreviousMsec == 0.0)
+		timestampPreviousMsec = timestampNowMsec;
 
-	LOG_EVERY_N(INFO, 50) << "--- Statistics ---";
-	LOG_EVERY_N(INFO, 50) << "Num unique process names: " << _processNameMap->size();
-	LOG_EVERY_N(INFO, 50) << "Num unique processes    : " << numUniqueProcesses;
-	LOG_EVERY_N(INFO, 50) << "Average message size    : " << totalBytesReceived
-				/ numMessagesReceived;
-	LOG_EVERY_N(INFO, 50)
-		<< "Average update time     : " << totalUpdateTime / (double) numMessagesReceived;
-
+	if (timestampNowMsec - (double)timestampShowStatisticsMsec > 1000.0) {
+		char buf[100];
+		LOG(INFO) << "--- Statistics ---";
+		LOG(INFO) << "Num unique process names: " << _processNameMap->size();
+		LOG(INFO) << "Num unique processes    : " << numUniqueProcesses;
+		LOG(INFO) << "Average message size    : " << totalBytesReceived / numMessagesReceived;
+		sprintf(buf, "%.4f msec", totalSampleTime / (double) numMessagesReceived);
+		LOG(INFO) << "Average sample time     : " << buf;
+		sprintf(buf, "%.4f msec", totalSampleFrequency / (double) numMessagesReceived);
+		LOG(INFO) << "Average sample frequency: " << buf;
+		sprintf(buf, "%.4f msec", msg->samplefrequencymsec());
+		LOG(INFO) << "Last sample frequency   : " << buf;
+		LOG(INFO) << "Time since last sample  : " << timestampNowMsec - (double)timestampPreviousMsec;
+		sprintf(buf, "%.4f msec", msg->scheduledriftmsec());
+		LOG(INFO) << "Scheduler drift         : " << buf;
+		LOG(INFO) << "Total num samples       : " << numMessagesReceived;
+		timestampShowStatisticsMsec = timestampNowMsec;
+	}
 #ifdef GRAPHICS
 	double timestampNow = System::GetTimeInSec();
 	if (timestampNow - _timestamp > (1 / (double)FRAMES_PER_SEC)) {
@@ -116,12 +135,13 @@ struct MinHeapCompare {
 
 void Handler::_UpdateBarChart()
 {
-	//BarData barData[NUM_PROCESSES_TO_DISPLAY + 1];
 	vector<BarData *> heap;
 	struct MinHeapCompare cmp;
 
 	double totalUserCpuLoad = 0.;
 	double totalSystemCpuLoad = 0.;
+	BarData barDataArray[NUM_PROCESSES_TO_DISPLAY - 1];
+
 
 	// Find the n processes with the most load
 	BOOST_FOREACH (ProcNameMap::value_type &i, *_processNameMap)
@@ -134,8 +154,10 @@ void Handler::_UpdateBarChart()
 
 		// -1 since "Others" process category will be included
 		if (heap.size() < (NUM_PROCESSES_TO_DISPLAY - 1)) {
-			BarData *barData = new BarData(processName, procNameStat->totalUserCpuLoad,
-					procNameStat->totalSystemCpuLoad);
+			BarData *barData = &barDataArray[heap.size()];
+			barData->label = processName;
+			barData->user = procNameStat->totalUserCpuLoad;
+			barData->system = procNameStat->totalSystemCpuLoad;
 			heap.push_back(barData);
 			push_heap(heap.begin(), heap.end(), cmp);
 		} else {
@@ -159,7 +181,7 @@ void Handler::_UpdateBarChart()
 	// Prepare data: relative share and sorted order
 	double othersUserCpuLoad = totalUserCpuLoad;
 	double othersSystemCpuLoad = totalSystemCpuLoad;
-	double totalCpuLoad = totalUserCpuLoad + (double)totalSystemCpuLoad;
+	double totalCpuLoad = totalUserCpuLoad + (double) totalSystemCpuLoad;
 
 	BOOST_FOREACH (BarData *barData, heap)
 	{
@@ -167,20 +189,21 @@ void Handler::_UpdateBarChart()
 		othersSystemCpuLoad -= barData->system;
 
 		// Convert to relative shares
-		barData->user = (barData->user / (double)totalCpuLoad) * 100.;
-		barData->system = (barData->system / (double)totalCpuLoad) * 100.;
+		barData->user = (barData->user / (double) totalCpuLoad) * 100.;
+		barData->system = (barData->system / (double) totalCpuLoad) * 100.;
 	}
 
-	double relativeUser = (othersUserCpuLoad / (double)totalCpuLoad) * 100.;
-	double relativeSystem = (othersSystemCpuLoad / (double)totalCpuLoad) * 100.;
-	heap.push_back(new BarData("others", relativeUser, relativeSystem));
+	double relativeUser = (othersUserCpuLoad / (double) totalCpuLoad) * 100.;
+	double relativeSystem = (othersSystemCpuLoad / (double) totalCpuLoad) * 100.;
+	BarData barData("others", relativeUser, relativeSystem);
+	heap.push_back(&barData);
 	sort(heap.begin(), heap.end(), cmp);
 
 	//LOG(INFO) << "Top Processes:";
 	//for (int i = 0; i < heap.size(); i++)
 	//	LOG(INFO) << heap[i]->label << " -> " << heap[i]->GetValues();
 
-	double utilization = totalCpuLoad / (double)2900.;
+	double utilization = totalCpuLoad / (double) 2900.;
 	_barChart->Render(utilization, heap);
 }
 

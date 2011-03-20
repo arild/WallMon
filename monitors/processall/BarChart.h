@@ -25,6 +25,8 @@ public:
 		system = _system;
 	}
 
+	BarData(){}
+
 	vector<double> *GetValues()
 	{
 		vals.clear();

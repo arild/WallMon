@@ -14,23 +14,20 @@
 #include "Config.h"
 #include "ByteBuffer.h"
 
-#define NUM_BYTES_LOG_INTERVAL	(1024 * 1000 * 10); // 1MB
 #define RECEIVE_BUF_START_SIZE	1024 * 100 // 100 KB
 // Declared static variables. Static because there are some scope
 // problems with libev during the socket read callback
 
 DataRouter *DataSink::_router;
+IoLogger *DataSink::_ioLogger;
 unsigned int DataSink::_numConnectedClients;
-unsigned int DataSink::_totalNumBytesReceived;
-unsigned int DataSink::_numBytesLogTrigger;
 
 DataSink::DataSink(DataRouter *router)
 {
 	// Static variables
 	_router = router;
+	_ioLogger = new IoLogger(1024 * 1000 * 10);
 	_numConnectedClients = 0;
-	_totalNumBytesReceived = 0;
-	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
 
 	// Setup the entry socket which does the accept() call
 	struct sockaddr_in addr;
@@ -157,12 +154,7 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 		buf->BytesRead(messageLength);
 	}
 
-	_totalNumBytesReceived += numBytesReceived;
-	if (_totalNumBytesReceived >= _numBytesLogTrigger) {
-		int megaBytesStreamed = _totalNumBytesReceived / NUM_BYTES_LOG_INTERVAL;
-		LOG(ERROR) << megaBytesStreamed << " MB received";
-		_numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
-	}
+	_ioLogger->Read(numBytesReceived);
 }
 
 void DataSink::_DeleteAndCleanupWatcher(ev::io &watcher)

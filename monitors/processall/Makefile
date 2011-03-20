@@ -2,7 +2,7 @@ include ../Makefile.inc
 include ../../Makefile.inc
 
 LIB=-lLinuxProcessMonitor -lSystem
-SRC=*.cpp
+SRC=*.cpp *.cc
 
 # Do not compile with graphics on rocksvv 
 LIB_PLPLOT=-lplplotcxxd -lplplotd -lltdl -ldl -lm -lcsirocsa -lqhull -lqsastime -lfreetype
@@ -13,6 +13,7 @@ ifneq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
 endif
 
 all: $(SRC)
+	protoc --cpp_out=. *.proto
 	$(CC) $(GRAPHICS) $(CFLAGS_SO_PREPARE) $(INC_PATH) $(SRC)
 	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o libprocessallmon.so *.o $(LIB)
 	cp *.so ../bin

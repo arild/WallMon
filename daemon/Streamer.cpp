@@ -14,20 +14,18 @@
 #include "Config.h"
 #include "Streamer.h"
 
-#define NUM_BYTES_LOG_INTERVAL	1 << 20; // 1MB
-
 Streamer::Streamer()
 {
-	_numBytesStreamed = 0;
-	_numBytesLogTrigger = NUM_BYTES_LOG_INTERVAL;
 	_queue = new Queue<StreamItem *> (100);
 	_serverMap = new ServerMap();
+	_ioLogger = new IoLogger(1024 * 1000 * 10);
 }
 
 Streamer::~Streamer()
 {
 	delete _queue;
 	delete _serverMap;
+	delete _ioLogger;
 }
 
 void Streamer::Start()
@@ -87,13 +85,14 @@ int Streamer::SetupStream(string serverAddress)
 	return fd;
 }
 
-/**
- * Pushes an item on the FIFO queue that is continuously
- * being drained by the streamer thread
- */
+	/**
+	 * Pushes an item on the FIFO queue that is continuously
+	 * being drained by the streamer thread
+	 */
 void Streamer::Stream(StreamItem &item)
 {
 	_queue->Push(&item);
+	//_SendAll(item);
 }
 
 /**
@@ -109,26 +108,13 @@ void Streamer::_StreamForever()
 			// Does not have to release memory of termination item
 			break;
 
-		int numBytesSent = 0;
-		do {
-			numBytesSent += write(item->sockfd, item->message, item->messageLength);
-			if (numBytesSent == -1) {
-				LOG(ERROR) << "stream socket down";
-				break;
-			}
-		} while (numBytesSent < item->messageLength);
+		int numBytesSent = _SendAll(*item);
 		LOG_IF(FATAL, numBytesSent != item->messageLength)<< "all bytes not sent";
 
 		// Release the memory originally allocated in StreamItemFactory()
-		//delete item->packet;
 		delete item;
 
-		_numBytesStreamed += numBytesSent;
-		if (_numBytesStreamed >= _numBytesLogTrigger) {
-			int megaBytesStreamed = _numBytesStreamed / NUM_BYTES_LOG_INTERVAL;
-			LOG(INFO) << megaBytesStreamed << " bytes streamed";
-			_numBytesLogTrigger += NUM_BYTES_LOG_INTERVAL;
-		}
+		_ioLogger->Write(numBytesSent);
 	}
 
 	// Close all sockets that have been opened
@@ -138,8 +124,16 @@ void Streamer::_StreamForever()
 	}
 }
 
-
-
-
-
+int Streamer::_SendAll(StreamItem &item)
+{
+	int numBytesSent = 0;
+	do {
+		int retval = write(item.sockfd, item.message + numBytesSent, item.messageLength
+				- numBytesSent);
+		if (retval == -1)
+			return numBytesSent;
+		numBytesSent += retval;
+	} while (numBytesSent < item.messageLength);
+	return numBytesSent;
+}
 

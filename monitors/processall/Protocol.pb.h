@@ -208,27 +208,10 @@ class ProcessesMessage : public ::google::protobuf::Message {
   
   // accessors -------------------------------------------------------
   
-  // required string hostname = 1;
-  inline bool has_hostname() const;
-  inline void clear_hostname();
-  static const int kHostnameFieldNumber = 1;
-  inline const ::std::string& hostname() const;
-  inline void set_hostname(const ::std::string& value);
-  inline void set_hostname(const char* value);
-  inline void set_hostname(const char* value, size_t size);
-  inline ::std::string* mutable_hostname();
-  
-  // required double updatetime = 2;
-  inline bool has_updatetime() const;
-  inline void clear_updatetime();
-  static const int kUpdatetimeFieldNumber = 2;
-  inline double updatetime() const;
-  inline void set_updatetime(double value);
-  
-  // repeated .ProcessesMessage.ProcessMessage processmessage = 3;
+  // repeated .ProcessesMessage.ProcessMessage processmessage = 1;
   inline int processmessage_size() const;
   inline void clear_processmessage();
-  static const int kProcessmessageFieldNumber = 3;
+  static const int kProcessmessageFieldNumber = 1;
   inline const ::ProcessesMessage_ProcessMessage& processmessage(int index) const;
   inline ::ProcessesMessage_ProcessMessage* mutable_processmessage(int index);
   inline ::ProcessesMessage_ProcessMessage* add_processmessage();
@@ -242,15 +225,12 @@ class ProcessesMessage : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
   
-  ::std::string* hostname_;
-  static const ::std::string _default_hostname_;
-  double updatetime_;
   ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage > processmessage_;
   friend void  protobuf_AddDesc_Protocol_2eproto();
   friend void protobuf_AssignDesc_Protocol_2eproto();
   friend void protobuf_ShutdownFile_Protocol_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -367,65 +347,7 @@ inline void ProcessesMessage_ProcessMessage::set_systemcpuload(double value) {
 
 // ProcessesMessage
 
-// required string hostname = 1;
-inline bool ProcessesMessage::has_hostname() const {
-  return _has_bit(0);
-}
-inline void ProcessesMessage::clear_hostname() {
-  if (hostname_ != &_default_hostname_) {
-    hostname_->clear();
-  }
-  _clear_bit(0);
-}
-inline const ::std::string& ProcessesMessage::hostname() const {
-  return *hostname_;
-}
-inline void ProcessesMessage::set_hostname(const ::std::string& value) {
-  _set_bit(0);
-  if (hostname_ == &_default_hostname_) {
-    hostname_ = new ::std::string;
-  }
-  hostname_->assign(value);
-}
-inline void ProcessesMessage::set_hostname(const char* value) {
-  _set_bit(0);
-  if (hostname_ == &_default_hostname_) {
-    hostname_ = new ::std::string;
-  }
-  hostname_->assign(value);
-}
-inline void ProcessesMessage::set_hostname(const char* value, size_t size) {
-  _set_bit(0);
-  if (hostname_ == &_default_hostname_) {
-    hostname_ = new ::std::string;
-  }
-  hostname_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ProcessesMessage::mutable_hostname() {
-  _set_bit(0);
-  if (hostname_ == &_default_hostname_) {
-    hostname_ = new ::std::string;
-  }
-  return hostname_;
-}
-
-// required double updatetime = 2;
-inline bool ProcessesMessage::has_updatetime() const {
-  return _has_bit(1);
-}
-inline void ProcessesMessage::clear_updatetime() {
-  updatetime_ = 0;
-  _clear_bit(1);
-}
-inline double ProcessesMessage::updatetime() const {
-  return updatetime_;
-}
-inline void ProcessesMessage::set_updatetime(double value) {
-  _set_bit(1);
-  updatetime_ = value;
-}
-
-// repeated .ProcessesMessage.ProcessMessage processmessage = 3;
+// repeated .ProcessesMessage.ProcessMessage processmessage = 1;
 inline int ProcessesMessage::processmessage_size() const {
   return processmessage_.size();
 }

@@ -13,6 +13,7 @@
 #include <ev++.h>
 #include "PracticalSocket.h"
 #include "DataRouter.h"
+#include "IoLogger.h"
 
 using namespace std;
 
@@ -30,8 +31,7 @@ private:
 	set<ev::io *> *_watcherSet;
 	static DataRouter *_router;
 	static unsigned int _numConnectedClients;
-	static unsigned int _totalNumBytesReceived;
-	static unsigned int _numBytesLogTrigger;
+	static IoLogger *_ioLogger;
 	void _ServeForever();
 	void _AcceptCallback(ev::io &watcher, int revents);
 	void _ReadCallback(ev::io &watcher, int revents);

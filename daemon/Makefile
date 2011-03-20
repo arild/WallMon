@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 EXECUTABLE_NAME=wallmond
-SRC=*.cpp
+SRC=*.cpp *.h
 
 all: wallmond
 

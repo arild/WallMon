@@ -6,6 +6,7 @@
 #include <boost/thread.hpp>
 #include "Queue.h"
 #include "StreamItem.h"
+#include "IoLogger.h"
 
 using namespace std;
 typedef map<string, int> ServerMap;
@@ -21,12 +22,12 @@ public:
 
 private:
 	void _StreamForever();
+	int _SendAll(StreamItem &item);
 	boost::thread _thread;
 	bool _running;
 	Queue<StreamItem *> *_queue;
 	ServerMap *_serverMap;
-	int _numBytesStreamed;
-	int _numBytesLogTrigger;
+	IoLogger *_ioLogger;
 };
 
 #endif /* STREAMER_H_ */

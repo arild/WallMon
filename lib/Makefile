@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 CFLAGS = -O2 -c $(INC_PATH) $(LIB_PATH) -lglog
 
-all: PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor WallmonMessage
+all: PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor WallmonMessage IoLogger
 
 PracticalSocket: 
 	$(CC) $(CFLAGS) PracticalSocket.cpp
@@ -24,9 +24,14 @@ LinuxProcessMonitor:
 	$(CC) -c LinuxProcessMonitor.cpp
 	ar rcs libLinuxProcessMonitor.a LinuxProcessMonitor.o
 
-WallmonMessage: 
-	$(CC) -c Wallmon.pb.cc
+WallmonMessage:
+	protoc --cpp_out=. *.proto 
+	$(CC) $(CFLAGS) -c -lprotobuf Wallmon.pb.cc
 	ar rcs libWallmonMessage.a Wallmon.pb.o
+
+IoLogger:
+	$(CC) $(CFLAGS) -c IoLogger.cpp
+	ar cru libIoLogger.a IoLogger.o
 
 clean:
 	rm -f *.o

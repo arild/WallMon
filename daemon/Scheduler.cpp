@@ -10,8 +10,7 @@
 #include "Wallmon.pb.h"
 #include "Scheduler.h"
 #include "Streamer.h"
-
-using namespace std;
+#include "System.h"
 
 /**
  * Container for user-data associated with timers.
@@ -26,14 +25,14 @@ public:
 	IDataCollectorProtobuf *collectorProtobuf;
 	int sockfd; // The file descriptor of associated streamer socket
 
-	double timeStampInMsec;
-	double divergenceinMsec; // Accumulated divergence on sample invocations
+	double timestampLastScheduleMsec;
+	double scheduleDriftinMsec; // Accumulated drift for when collector is scheduled
 	unsigned int numSamples; // Number of times the collector has been invoked
 
 	CollectorEvent()
 	{
-		timeStampInMsec = 0.;
-		divergenceinMsec = 0.;
+		timestampLastScheduleMsec = 0.;
+		scheduleDriftinMsec = 0.;
 		numSamples = 0;
 	}
 };
@@ -94,8 +93,8 @@ void Scheduler::RegisterColllector(IBase &collector, Context *ctx)
 
 	CollectorEvent *event = new CollectorEvent();
 	event->ctx = ctx;
-	event->collector = dynamic_cast<IDataCollector *>(&collector);
-	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *>(&collector);
+	event->collector = dynamic_cast<IDataCollector *> (&collector);
+	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *> (&collector);
 	event->sockfd = sockfd;
 
 	timer->data = (void *) event;
@@ -127,15 +126,10 @@ void Scheduler::_ScheduleForever()
  */
 void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 {
-	ev_timer_again(loop, w); // Reschedule collector
-	double timeStampNowInMsec = ev_now(loop);
+	double timestampBeforeSampleInMsec = System::GetTimeInMsec();
+	ev_timer_again(loop, w); // Re-schedule collector
+
 	CollectorEvent *event = (CollectorEvent *) w->data;
-
-	// Update statistics
-	event->divergenceinMsec += (timeStampNowInMsec - event->timeStampInMsec);
-	event->timeStampInMsec = timeStampNowInMsec;
-	event->numSamples += 1;
-
 	WallmonMessage msg;
 	msg.set_key(event->ctx->key);
 
@@ -143,29 +137,41 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 		void *data;
 		int dataLen = event->collector->Sample(&data);
 		msg.set_data(data, dataLen);
-	}
-	else if (event->collectorProtobuf) {
+	} else if (event->collectorProtobuf) {
 		event->collectorProtobuf->Sample(&msg);
 	}
 	else
 		LOG(FATAL) << "unknown collector type";
 
-	w->repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
+	if (event->ctx->sampleFrequencyMsec < 0) {
+		event->ctx->sampleFrequencyMsec = 0;
+		LOG(WARNING) << "negative sample frequency of key: " << event->ctx->key;
+	}
+	double timestampAfterSampleInMsec = System::GetTimeInMsec();
+
+	// Update local statistics
+	if (event->timestampLastScheduleMsec != 0.) {
+		double actualFrequencyMsec = (double)(timestampBeforeSampleInMsec - (double)event->timestampLastScheduleMsec);
+		event->scheduleDriftinMsec += (actualFrequencyMsec - event->ctx->sampleFrequencyMsec);
+	}
+	event->timestampLastScheduleMsec = timestampBeforeSampleInMsec; // Save timestamp until next schedule
+	event->numSamples += 1;
+
+	w->repeat = event->ctx->sampleFrequencyMsec / (double)1000.;
+
+	// Statistics sent to server
+	msg.set_timestampmsec(timestampAfterSampleInMsec);
+	msg.set_hostname(System::GetHostname());
+	msg.set_samplefrequencymsec(event->ctx->sampleFrequencyMsec);
+	msg.set_sampletimemsec(timestampAfterSampleInMsec - timestampBeforeSampleInMsec);
+	msg.set_scheduledriftmsec(event->scheduleDriftinMsec);
 
 	// Compose network message
-	StreamItem &item = * new StreamItem(msg.ByteSize());
+	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
 	item.sockfd = event->sockfd;
 
 	// Queue message for transmission
 	Scheduler::streamer->Stream(item);
-
-	if (event->numSamples % 100 == 0) {
-		LOG(INFO) << "--- Statistics about collector. Key=" << event->ctx->key << " ---";
-		LOG(INFO) << "Num samples        : " << event->numSamples;
-		LOG(INFO) << "Total divergence   : " << event->divergenceinMsec << " msec";
-		LOG(INFO) << "Average. divergence: " << event->divergenceinMsec
-				/ (double) event->numSamples << " msec";
-	}
 }
 

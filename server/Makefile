@@ -3,7 +3,7 @@ include ../Makefile.inc
 #LIB_PLPLOT=-lplplotcxxd -lplplotd -lltdl -ldl -lm -lcsirocsa  -lqhull -lqsastime -lfreetype
 LIB_LOCAL=-lboost_filesystem -lByteBuffer
 EXECUTABLE_NAME=wallmons
-SRC=*.cpp
+SRC=*.cpp *.h
 
 all: wallmons
 

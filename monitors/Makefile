@@ -1,6 +1,6 @@
-DIRS = 	processall \
-		fastlogger \
-		slowlogger
+DIRS = 	processall
+		#fastlogger \
+		#slowlogger
 		#process 
 
 all: 	

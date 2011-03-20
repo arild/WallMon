@@ -26,9 +26,14 @@ void protobuf_AssignDesc_Wallmon_2eproto() {
       "Wallmon.proto");
   GOOGLE_CHECK(file != NULL);
   WallmonMessage_descriptor_ = file->message_type(0);
-  static const int WallmonMessage_offsets_[2] = {
+  static const int WallmonMessage_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, key_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, data_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, timestampmsec_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, hostname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, samplefrequencymsec_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, sampletimemsec_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WallmonMessage, scheduledriftmsec_),
   };
   WallmonMessage_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -71,8 +76,11 @@ void protobuf_AddDesc_Wallmon_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\rWallmon.proto\"+\n\016WallmonMessage\022\013\n\003key"
-    "\030\001 \002(\t\022\014\n\004data\030\002 \002(\014", 60);
+    "\n\rWallmon.proto\"\244\001\n\016WallmonMessage\022\013\n\003ke"
+    "y\030\001 \002(\t\022\014\n\004data\030\002 \002(\014\022\025\n\rtimestampMsec\030\003"
+    " \002(\001\022\020\n\010hostname\030\004 \002(\t\022\033\n\023sampleFrequenc"
+    "yMsec\030\005 \002(\001\022\026\n\016sampleTimeMsec\030\006 \002(\001\022\031\n\021s"
+    "cheduleDriftMsec\030\007 \002(\001", 182);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "Wallmon.proto", &protobuf_RegisterTypes);
   WallmonMessage::default_instance_ = new WallmonMessage();
@@ -92,9 +100,15 @@ struct StaticDescriptorInitializer_Wallmon_2eproto {
 
 const ::std::string WallmonMessage::_default_key_;
 const ::std::string WallmonMessage::_default_data_;
+const ::std::string WallmonMessage::_default_hostname_;
 #ifndef _MSC_VER
 const int WallmonMessage::kKeyFieldNumber;
 const int WallmonMessage::kDataFieldNumber;
+const int WallmonMessage::kTimestampMsecFieldNumber;
+const int WallmonMessage::kHostnameFieldNumber;
+const int WallmonMessage::kSampleFrequencyMsecFieldNumber;
+const int WallmonMessage::kSampleTimeMsecFieldNumber;
+const int WallmonMessage::kScheduleDriftMsecFieldNumber;
 #endif  // !_MSC_VER
 
 WallmonMessage::WallmonMessage()
@@ -115,6 +129,11 @@ void WallmonMessage::SharedCtor() {
   _cached_size_ = 0;
   key_ = const_cast< ::std::string*>(&_default_key_);
   data_ = const_cast< ::std::string*>(&_default_data_);
+  timestampmsec_ = 0;
+  hostname_ = const_cast< ::std::string*>(&_default_hostname_);
+  samplefrequencymsec_ = 0;
+  sampletimemsec_ = 0;
+  scheduledriftmsec_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -128,6 +147,9 @@ void WallmonMessage::SharedDtor() {
   }
   if (data_ != &_default_data_) {
     delete data_;
+  }
+  if (hostname_ != &_default_hostname_) {
+    delete hostname_;
   }
   if (this != default_instance_) {
   }
@@ -165,6 +187,15 @@ void WallmonMessage::Clear() {
         data_->clear();
       }
     }
+    timestampmsec_ = 0;
+    if (_has_bit(3)) {
+      if (hostname_ != &_default_hostname_) {
+        hostname_->clear();
+      }
+    }
+    samplefrequencymsec_ = 0;
+    sampletimemsec_ = 0;
+    scheduledriftmsec_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -199,6 +230,87 @@ bool WallmonMessage::MergePartialFromCodedStream(
          parse_data:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_data()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(25)) goto parse_timestampMsec;
+        break;
+      }
+      
+      // required double timestampMsec = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_timestampMsec:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &timestampmsec_)));
+          _set_bit(2);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(34)) goto parse_hostname;
+        break;
+      }
+      
+      // required string hostname = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_hostname:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_hostname()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->hostname().data(), this->hostname().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(41)) goto parse_sampleFrequencyMsec;
+        break;
+      }
+      
+      // required double sampleFrequencyMsec = 5;
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_sampleFrequencyMsec:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &samplefrequencymsec_)));
+          _set_bit(4);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(49)) goto parse_sampleTimeMsec;
+        break;
+      }
+      
+      // required double sampleTimeMsec = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_sampleTimeMsec:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &sampletimemsec_)));
+          _set_bit(5);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(57)) goto parse_scheduleDriftMsec;
+        break;
+      }
+      
+      // required double scheduleDriftMsec = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_scheduleDriftMsec:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &scheduledriftmsec_)));
+          _set_bit(6);
         } else {
           goto handle_uninterpreted;
         }
@@ -239,6 +351,35 @@ void WallmonMessage::SerializeWithCachedSizes(
       2, this->data(), output);
   }
   
+  // required double timestampMsec = 3;
+  if (_has_bit(2)) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(3, this->timestampmsec(), output);
+  }
+  
+  // required string hostname = 4;
+  if (_has_bit(3)) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->hostname().data(), this->hostname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->hostname(), output);
+  }
+  
+  // required double sampleFrequencyMsec = 5;
+  if (_has_bit(4)) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(5, this->samplefrequencymsec(), output);
+  }
+  
+  // required double sampleTimeMsec = 6;
+  if (_has_bit(5)) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(6, this->sampletimemsec(), output);
+  }
+  
+  // required double scheduleDriftMsec = 7;
+  if (_has_bit(6)) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(7, this->scheduledriftmsec(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -264,6 +405,36 @@ void WallmonMessage::SerializeWithCachedSizes(
         2, this->data(), target);
   }
   
+  // required double timestampMsec = 3;
+  if (_has_bit(2)) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(3, this->timestampmsec(), target);
+  }
+  
+  // required string hostname = 4;
+  if (_has_bit(3)) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->hostname().data(), this->hostname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->hostname(), target);
+  }
+  
+  // required double sampleFrequencyMsec = 5;
+  if (_has_bit(4)) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(5, this->samplefrequencymsec(), target);
+  }
+  
+  // required double sampleTimeMsec = 6;
+  if (_has_bit(5)) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(6, this->sampletimemsec(), target);
+  }
+  
+  // required double scheduleDriftMsec = 7;
+  if (_has_bit(6)) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(7, this->scheduledriftmsec(), target);
+  }
+  
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -287,6 +458,33 @@ int WallmonMessage::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->data());
+    }
+    
+    // required double timestampMsec = 3;
+    if (has_timestampmsec()) {
+      total_size += 1 + 8;
+    }
+    
+    // required string hostname = 4;
+    if (has_hostname()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->hostname());
+    }
+    
+    // required double sampleFrequencyMsec = 5;
+    if (has_samplefrequencymsec()) {
+      total_size += 1 + 8;
+    }
+    
+    // required double sampleTimeMsec = 6;
+    if (has_sampletimemsec()) {
+      total_size += 1 + 8;
+    }
+    
+    // required double scheduleDriftMsec = 7;
+    if (has_scheduledriftmsec()) {
+      total_size += 1 + 8;
     }
     
   }
@@ -322,6 +520,21 @@ void WallmonMessage::MergeFrom(const WallmonMessage& from) {
     if (from._has_bit(1)) {
       set_data(from.data());
     }
+    if (from._has_bit(2)) {
+      set_timestampmsec(from.timestampmsec());
+    }
+    if (from._has_bit(3)) {
+      set_hostname(from.hostname());
+    }
+    if (from._has_bit(4)) {
+      set_samplefrequencymsec(from.samplefrequencymsec());
+    }
+    if (from._has_bit(5)) {
+      set_sampletimemsec(from.sampletimemsec());
+    }
+    if (from._has_bit(6)) {
+      set_scheduledriftmsec(from.scheduledriftmsec());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -339,7 +552,7 @@ void WallmonMessage::CopyFrom(const WallmonMessage& from) {
 }
 
 bool WallmonMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
   
   return true;
 }
@@ -348,6 +561,11 @@ void WallmonMessage::Swap(WallmonMessage* other) {
   if (other != this) {
     std::swap(key_, other->key_);
     std::swap(data_, other->data_);
+    std::swap(timestampmsec_, other->timestampmsec_);
+    std::swap(hostname_, other->hostname_);
+    std::swap(samplefrequencymsec_, other->samplefrequencymsec_);
+    std::swap(sampletimemsec_, other->sampletimemsec_);
+    std::swap(scheduledriftmsec_, other->scheduledriftmsec_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

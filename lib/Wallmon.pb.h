@@ -108,6 +108,44 @@ class WallmonMessage : public ::google::protobuf::Message {
   inline void set_data(const void* value, size_t size);
   inline ::std::string* mutable_data();
   
+  // required double timestampMsec = 3;
+  inline bool has_timestampmsec() const;
+  inline void clear_timestampmsec();
+  static const int kTimestampMsecFieldNumber = 3;
+  inline double timestampmsec() const;
+  inline void set_timestampmsec(double value);
+  
+  // required string hostname = 4;
+  inline bool has_hostname() const;
+  inline void clear_hostname();
+  static const int kHostnameFieldNumber = 4;
+  inline const ::std::string& hostname() const;
+  inline void set_hostname(const ::std::string& value);
+  inline void set_hostname(const char* value);
+  inline void set_hostname(const char* value, size_t size);
+  inline ::std::string* mutable_hostname();
+  
+  // required double sampleFrequencyMsec = 5;
+  inline bool has_samplefrequencymsec() const;
+  inline void clear_samplefrequencymsec();
+  static const int kSampleFrequencyMsecFieldNumber = 5;
+  inline double samplefrequencymsec() const;
+  inline void set_samplefrequencymsec(double value);
+  
+  // required double sampleTimeMsec = 6;
+  inline bool has_sampletimemsec() const;
+  inline void clear_sampletimemsec();
+  static const int kSampleTimeMsecFieldNumber = 6;
+  inline double sampletimemsec() const;
+  inline void set_sampletimemsec(double value);
+  
+  // required double scheduleDriftMsec = 7;
+  inline bool has_scheduledriftmsec() const;
+  inline void clear_scheduledriftmsec();
+  static const int kScheduleDriftMsecFieldNumber = 7;
+  inline double scheduledriftmsec() const;
+  inline void set_scheduledriftmsec(double value);
+  
   // @@protoc_insertion_point(class_scope:WallmonMessage)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -117,11 +155,17 @@ class WallmonMessage : public ::google::protobuf::Message {
   static const ::std::string _default_key_;
   ::std::string* data_;
   static const ::std::string _default_data_;
+  double timestampmsec_;
+  ::std::string* hostname_;
+  static const ::std::string _default_hostname_;
+  double samplefrequencymsec_;
+  double sampletimemsec_;
+  double scheduledriftmsec_;
   friend void  protobuf_AddDesc_Wallmon_2eproto();
   friend void protobuf_AssignDesc_Wallmon_2eproto();
   friend void protobuf_ShutdownFile_Wallmon_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -226,6 +270,112 @@ inline ::std::string* WallmonMessage::mutable_data() {
     data_ = new ::std::string;
   }
   return data_;
+}
+
+// required double timestampMsec = 3;
+inline bool WallmonMessage::has_timestampmsec() const {
+  return _has_bit(2);
+}
+inline void WallmonMessage::clear_timestampmsec() {
+  timestampmsec_ = 0;
+  _clear_bit(2);
+}
+inline double WallmonMessage::timestampmsec() const {
+  return timestampmsec_;
+}
+inline void WallmonMessage::set_timestampmsec(double value) {
+  _set_bit(2);
+  timestampmsec_ = value;
+}
+
+// required string hostname = 4;
+inline bool WallmonMessage::has_hostname() const {
+  return _has_bit(3);
+}
+inline void WallmonMessage::clear_hostname() {
+  if (hostname_ != &_default_hostname_) {
+    hostname_->clear();
+  }
+  _clear_bit(3);
+}
+inline const ::std::string& WallmonMessage::hostname() const {
+  return *hostname_;
+}
+inline void WallmonMessage::set_hostname(const ::std::string& value) {
+  _set_bit(3);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+}
+inline void WallmonMessage::set_hostname(const char* value) {
+  _set_bit(3);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+}
+inline void WallmonMessage::set_hostname(const char* value, size_t size) {
+  _set_bit(3);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* WallmonMessage::mutable_hostname() {
+  _set_bit(3);
+  if (hostname_ == &_default_hostname_) {
+    hostname_ = new ::std::string;
+  }
+  return hostname_;
+}
+
+// required double sampleFrequencyMsec = 5;
+inline bool WallmonMessage::has_samplefrequencymsec() const {
+  return _has_bit(4);
+}
+inline void WallmonMessage::clear_samplefrequencymsec() {
+  samplefrequencymsec_ = 0;
+  _clear_bit(4);
+}
+inline double WallmonMessage::samplefrequencymsec() const {
+  return samplefrequencymsec_;
+}
+inline void WallmonMessage::set_samplefrequencymsec(double value) {
+  _set_bit(4);
+  samplefrequencymsec_ = value;
+}
+
+// required double sampleTimeMsec = 6;
+inline bool WallmonMessage::has_sampletimemsec() const {
+  return _has_bit(5);
+}
+inline void WallmonMessage::clear_sampletimemsec() {
+  sampletimemsec_ = 0;
+  _clear_bit(5);
+}
+inline double WallmonMessage::sampletimemsec() const {
+  return sampletimemsec_;
+}
+inline void WallmonMessage::set_sampletimemsec(double value) {
+  _set_bit(5);
+  sampletimemsec_ = value;
+}
+
+// required double scheduleDriftMsec = 7;
+inline bool WallmonMessage::has_scheduledriftmsec() const {
+  return _has_bit(6);
+}
+inline void WallmonMessage::clear_scheduledriftmsec() {
+  scheduledriftmsec_ = 0;
+  _clear_bit(6);
+}
+inline double WallmonMessage::scheduledriftmsec() const {
+  return scheduledriftmsec_;
+}
+inline void WallmonMessage::set_scheduledriftmsec(double value) {
+  _set_bit(6);
+  scheduledriftmsec_ = value;
 }
 
 

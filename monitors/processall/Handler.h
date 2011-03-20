@@ -62,12 +62,19 @@ public:
 		delete procMap;
 	}
 
-	ProcStat *Get(string key)
+	bool Has(string procKey)
 	{
-		if (procMap->count(key) == 0)
-			// Host name not registered
-			(*procMap)[key] = new ProcStat();
-		return (*procMap)[key];
+		if (procMap->count(procKey) == 0)
+			return false;
+		return true;
+	}
+
+	ProcStat *Get(string procKey)
+	{
+		if (procMap->count(procKey) == 0)
+			// Unique process not present
+			(*procMap)[procKey] = new ProcStat();
+		return (*procMap)[procKey];
 	}
 
 	static string CreateProcMapKey(string hostName, int pid)

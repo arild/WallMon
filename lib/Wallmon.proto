@@ -3,4 +3,10 @@ message WallmonMessage
 {
 	required string key = 1;
 	required bytes data = 2;
+	
+	required double timestampMsec = 3;
+	required string hostname = 4;
+	required double sampleFrequencyMsec = 5;
+	required double sampleTimeMsec = 6;
+	required double scheduleDriftMsec = 7;
 }

@@ -13,16 +13,16 @@
 #include "unistd.h"
 
 #define KEY		"PROCESS_ALL_MON"
-#define MESSAGE_BUF_SIZE	1024 * 1000
+#define MESSAGE_BUF_SIZE	(1024 * 1000) * 5
 #define SAMPLE_FREQUENCY_MSEC 	1000
 
 
 void Collector::OnInit(Context *ctx)
 {
-	ctx->server = "129.242.19.57";
+	//ctx->server = "129.242.19.57";
 	ctx->key = KEY;
 	ctx->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
-
+	_ctx = ctx;
 	// Create a process monitor for each pid on system
 	std::list<int> *pids = System::GetAllPids();
 	_monitors = new std::list<LinuxProcessMonitor *>();
@@ -50,10 +50,6 @@ void Collector::OnStop()
 void Collector::Sample(WallmonMessage *msg)
 {
 	ProcessesMessage processesMsg;
-	char hostname[100];
-	gethostname(hostname, 100);
-
-	double start = System::GetTimeInSec();
 	for (list<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitor *monitor = (*it);
 		monitor->update();
@@ -73,13 +69,11 @@ void Collector::Sample(WallmonMessage *msg)
 		processMsg->set_systemcpuload(systemCpuLoad);
 	}
 
-	processesMsg.set_updatetime(System::GetTimeInSec() - (double) start);
-	processesMsg.set_hostname(hostname);
-
-	LOG(INFO) << "Serializing num bytes: " << processesMsg.ByteSize();
 	if (processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
 		LOG(ERROR) << "Protocol buffer serialization failed";
 	msg->set_data(_buffer, processesMsg.ByteSize());
+//	if (_ctx->sampleFrequencyMsec > 0)
+//		_ctx->sampleFrequencyMsec -= 1;
 }
 
 extern "C" Collector *create_collector()

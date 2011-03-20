@@ -19,6 +19,7 @@
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
+string *hostname = NULL;
 
 // From: http://www.qgd.unizh.ch/~dpotter/howto/daemonize
 void System::Daemonize()
@@ -79,21 +80,20 @@ int System::GetPid(string processName)
 	return atoi(buf);
 }
 
-
 void tokenize_file(FILE *file, list<int> *list)
 {
-    char *word;
-    char buf[101];
-    buf[100] = 0;
+	char *word;
+	char buf[101];
+	buf[100] = 0;
 
-    while (!feof(file)) {
+	while (!feof(file)) {
 		/* Skip non-letters */
 		fscanf(file, "%*[^a-zA-Z0-9'_]");
 		/* Scan up to 100 letters */
 		if (fscanf(file, "%100[a-zA-Z0-9'_]", buf) == 1) {
-	    	list->push_back(atoi(buf));
+			list->push_back(atoi(buf));
 		}
-    }
+	}
 }
 
 list<int> *System::System::GetAllPids()
@@ -103,7 +103,7 @@ list<int> *System::System::GetAllPids()
 	if (fp == NULL) {
 		LOG(ERROR) << "failed to run command";
 	}
-	list<int> *l = new list<int>;
+	list<int> *l = new list<int> ;
 	tokenize_file(fp, l);
 	pclose(fp);
 	return l;
@@ -116,8 +116,21 @@ double System::GetTimeInSec()
 	return (double) t.tv_sec + 0.000001 * (double) t.tv_usec;
 }
 
+double System::GetTimeInMsec()
+{
+//	struct timeval t;
+//	gettimeofday(&t, NULL);
+//	return ((double)t.tv_sec * 1000.0) + (double)(0.001 * (double)t.tv_usec);
+	return GetTimeInSec() * 1000.0;
+}
 
-
-
-
+string &System::GetHostname()
+{
+	if (hostname == NULL) {
+		char buf[200];
+		gethostname(buf, 200);
+		hostname = new string(buf);
+	}
+	return *hostname;
+}
 

@@ -8,7 +8,5 @@ message ProcessesMessage
 		required double userCpuLoad = 3;
 		required double systemCpuLoad = 4;
 	}
-	required string hostname = 1;
-	required double updatetime = 2;	
-	repeated ProcessMessage processmessage = 3;
+	repeated ProcessMessage processmessage = 1;
 }
