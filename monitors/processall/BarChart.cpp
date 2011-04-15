@@ -50,7 +50,7 @@ BarChart::BarChart(int numBars)
 	_window[3] = 105.;
 	pls = new plstream();
 	pls->parseopts(&argc, &argv, PL_PARSE_NOPROGRAM);
-	//plsdev("xwin"); // output device
+	plsdev("xwin"); // output device
 	pls->init();
 	pls->adv(0); // Select the only sub-page present
 	_SelectMidWind();

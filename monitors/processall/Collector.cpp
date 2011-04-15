@@ -19,7 +19,7 @@
 
 void Collector::OnInit(Context *ctx)
 {
-	//ctx->server = "129.242.19.57";
+	ctx->server = "129.242.19.57";
 	ctx->key = KEY;
 	ctx->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	_ctx = ctx;
