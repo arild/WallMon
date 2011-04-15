@@ -1,8 +1,15 @@
 include ../Makefile.inc
 
 CFLAGS = -O2 -c $(INC_PATH) $(LIB_PATH) -lglog
+DIRS = 	processcollector
 
 all: PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor WallmonMessage IoLogger
+	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE}) ; done
+
+clean: 	
+	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE} clean) ; done
+	rm -f *.o
+	rm -f *.a
 
 PracticalSocket: 
 	$(CC) $(CFLAGS) PracticalSocket.cpp
@@ -33,7 +40,4 @@ IoLogger:
 	$(CC) $(CFLAGS) -c IoLogger.cpp
 	ar cru libIoLogger.a IoLogger.o
 
-clean:
-	rm -f *.o
-	rm -f *.a
 

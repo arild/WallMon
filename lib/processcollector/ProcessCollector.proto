@@ -1,0 +1,13 @@
+
+message ProcessesMessage
+{
+	message ProcessMessage
+	{
+		optional string processname = 1;
+		optional uint32 pid = 2;
+		
+		optional double userCpuLoad = 3;
+		optional double systemCpuLoad = 4;
+	}
+	repeated ProcessMessage processmessage = 1;
+}
