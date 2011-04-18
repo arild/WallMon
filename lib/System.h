@@ -9,7 +9,7 @@
 #define SYSTEM_H_
 
 #include <string>
-#include <list>
+#include <vector>
 
 using namespace std;
 
@@ -17,10 +17,13 @@ class System {
 public:
 	static void Daemonize();
 	static int GetPid(string processName);
-	static list<int> *GetAllPids();
+	static vector<int> *GetAllPids();
 	static double GetTimeInSec();
 	static double GetTimeInMsec();
 	static string &GetHostname();
+	static int GetNumCores();
+	static int GetTotalMemory();
+	static bool HasSupportForProcPidIo();
 };
 
 #endif /* SYSTEM_H_ */

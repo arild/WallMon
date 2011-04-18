@@ -80,7 +80,7 @@ int System::GetPid(string processName)
 	return atoi(buf);
 }
 
-void tokenize_file(FILE *file, list<int> *list)
+void _TokenizeFile(FILE *file, vector<int> *v)
 {
 	char *word;
 	char buf[101];
@@ -91,22 +91,34 @@ void tokenize_file(FILE *file, list<int> *list)
 		fscanf(file, "%*[^a-zA-Z0-9'_]");
 		/* Scan up to 100 letters */
 		if (fscanf(file, "%100[a-zA-Z0-9'_]", buf) == 1) {
-			list->push_back(atoi(buf));
+			v->push_back(atoi(buf));
 		}
 	}
 }
 
-list<int> *System::System::GetAllPids()
+int _RunCommand(string cmd, char *buf, int len)
+{
+	FILE *fp = popen(cmd.c_str(), "r");
+	if (fp == NULL)
+		return -1;
+	void *res = fgets(buf, len, fp);
+	pclose(fp);
+	if (res == NULL)
+		return -1;
+	return 0;
+}
+
+vector<int> *System::System::GetAllPids()
 {
 	string cmd = "ps ax | awk '{print $1}'";
 	FILE *fp = popen(cmd.c_str(), "r");
 	if (fp == NULL) {
-		LOG(ERROR) << "failed to run command";
+		LOG(ERROR) << "failed to run command: " << cmd;
 	}
-	list<int> *l = new list<int> ;
-	tokenize_file(fp, l);
+	vector<int> *v = new vector<int> ;
+	_TokenizeFile(fp, v);
 	pclose(fp);
-	return l;
+	return v;
 }
 
 double System::GetTimeInSec()
@@ -133,4 +145,41 @@ string &System::GetHostname()
 	}
 	return *hostname;
 }
+
+int System::GetNumCores()
+{
+	char buf[4096];
+	string cmd = "cat /proc/cpuinfo | grep processor | wc -l";
+	_RunCommand(cmd, buf, 4096);
+	return atoi(buf);
+}
+
+int System::GetTotalMemory()
+{
+	char buf[4096];
+	string cmd = "cat /proc/meminfo | grep MemTotal: | awk '{print $2}'";
+	_RunCommand(cmd, buf, 4096);
+	return atoi(buf);
+}
+
+bool System::HasSupportForProcPidIo()
+{
+	char buf[4096];
+	string cmd = "hostname";
+	_RunCommand(cmd, buf, 4096);
+	string rocks = "rocksvv.cs.uit.no";
+	if (strncmp(buf, rocks.c_str(), rocks.length()) == 0)
+		return false;
+	if (strncmp(buf, "tile-", 5) == 0)
+		return false;
+	return true;
+}
+
+
+
+
+
+
+
+
 

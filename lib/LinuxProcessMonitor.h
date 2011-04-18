@@ -24,6 +24,7 @@ public:
 	virtual ~LinuxProcessMonitor();
 
 	bool open(int pid);
+	bool OpenIo(int pid);
 	void update();
 	void printAll();
 
@@ -89,9 +90,20 @@ public:
 	unsigned long data();
 	unsigned long dt();
 
-private:
+	unsigned long rchar();
+	unsigned long wchar();
+	unsigned long syscr();
+	unsigned long syscw();
+	unsigned long read_bytes();
+	unsigned long write_bytes();
+	unsigned long cancelled_write_bytes();
 
-	// stat variables
+	unsigned long GetNetworkInInBytes();
+	unsigned long GetNetworkOutInBytes();
+
+
+private:
+	// /proc/<pid>/stat variables
 	int _pid;
 	char _comm[PATH_MAX];
 	char _state;
@@ -132,20 +144,7 @@ private:
 	int _exit_signal;
 	int _processor;
 
-	long _jiffy; // (USER_HZ)
-	long _timesinceboot;
-
-	string _procstatfile;
-	string _procstatmfile;
-
-	char *_buffer;
-
-	unsigned long _prevutime;
-	unsigned long _prevstime;
-	double _updatetime;
-	double _prevupdatetime;
-
-	// statm variables
+	// /proc/<pid>/statm variables
 	unsigned long _size;
 	unsigned long _resident;
 	unsigned long _share;
@@ -154,18 +153,34 @@ private:
 	unsigned long _data;
 	unsigned long _dt;
 
-	/*
-	 unsigned long      _rt_priority;
-	 unsigned int       _policy;
-	 unsigned long long _delayacct_blkio_ticks;
+	// /proc/<pid>/io variables
+	unsigned long _rchar;
+	unsigned long _wchar;
+	unsigned long _syscr;
+	unsigned long _syscw;
+	unsigned long _read_bytes;
+	unsigned long _write_bytes;
+	unsigned long _cancelled_write_bytes;
 
-	 unsigned long      _guest_time,
-	 long int       	   _cguest_time
-	 */
+	long _jiffy; // (USER_HZ)
+	long _timesinceboot;
+	char *_buffer;
+
+	unsigned long _prevUserTime;
+	unsigned long _prevSystemTime;
+	unsigned long _prevTotalNetworkRead;
+	unsigned long _prevTotalNetworkWrite;
+	double _updateTime;
+	double _prevUpdateTime;
+
+
+	string _procstatfile;
+	string _procstatmfile;
+	string _prociofile;
 
 	FILE *_procstat;
 	FILE *_procstatm;
-
+	FILE *_procio;
 };
 
 #endif

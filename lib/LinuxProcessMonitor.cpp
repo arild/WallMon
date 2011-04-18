@@ -8,6 +8,9 @@ LinuxProcessMonitor::LinuxProcessMonitor()
 
 	_procstat = NULL;
 	_procstatm = NULL;
+	_procio = NULL;
+	_utime = _stime = _rchar = _wchar = 0;
+	_updateTime = 0.;
 }
 
 LinuxProcessMonitor::~LinuxProcessMonitor()
@@ -16,32 +19,39 @@ LinuxProcessMonitor::~LinuxProcessMonitor()
 		fclose(_procstat);
 	if (_procstatm)
 		fclose(_procstatm);
+	if (_procio)
+		fclose(_procio);
 }
 
 bool LinuxProcessMonitor::open(int pid)
 {
-	stringstream ssprocstat, ssprocstatm;
-
-	ssprocstat << "/proc/" << pid << "/stat";
-	ssprocstatm << "/proc/" << pid << "/statm";
-
-	_procstatfile = ssprocstat. str();
-	_procstatmfile = ssprocstatm.str();
-
-	_procstat = fopen(_procstatfile.c_str(), "r");
-	_procstatm = fopen(_procstatmfile.c_str(), "r");
+	stringstream sstat, sstatm;
+	sstat << "/proc/" << pid << "/stat";
+	sstatm << "/proc/" << pid << "/statm";
+	_procstat = fopen(sstat.str().c_str(), "r");
+	_procstatm = fopen(sstatm.str().c_str(), "r");
 
 	if (!_procstat || !_procstatm) {
-
 		cout << "Error opening files..." << endl;
 		return false;
 	}
 	return true;
 }
 
-double getTime()
-{ // returns the current time in seconds
+bool LinuxProcessMonitor::OpenIo(int pid)
+{
+	stringstream sio;
+	sio << "/proc/" << pid << "/io";
+	_procio = fopen(sio.str().c_str(), "r");
+	if (!_procio) {
+		cout << "Error opening files..." << endl;
+		return false;
+	}
+	return true;
+}
 
+double GetTimeInSec()
+{
 	struct timeval t;
 	gettimeofday(&t, NULL);
 
@@ -50,34 +60,42 @@ double getTime()
 
 void LinuxProcessMonitor::update()
 {
+	_prevUserTime = _utime;
+	_prevSystemTime = _stime;
+	_prevUpdateTime = _updateTime;
+	_prevTotalNetworkRead = _rchar;
+	_prevTotalNetworkWrite = _wchar;
+	_updateTime = GetTimeInSec();
 
-	_prevutime = _utime;
-	_prevstime = _stime;
-	_prevupdatetime = _updatetime;
-	_updatetime = getTime();
-
-	rewind(_procstat);
-	fread(_buffer, 1, 300, _procstat);
-
-	sscanf(
-			_buffer,
-			"%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d",
-			&_pid, _comm, &_state, &_ppid, &_pgrp, &_session, &_tty_nr, &_tpgid, &_flags, &_minflt,
-			&_cminflt, &_majflt, &_cmajflt, &_utime, &_stime, &_cutime, &_cstime, &_priority,
-			&_nice, &_num_threads, &_itrealvalue, &_starttime, &_vsize, &_rss, &_rsslim,
-			&_startcode, &_endcode, &_startstack, &_kstkesp, &_kstkeip, &_signal, &_blocked,
-			&_sigignore, &_sigcatch, &_wchan, &_nswap, &_cnswap, &_exit_signal, &_processor);
-
-	rewind(_procstatm);
-	fread(_buffer, 1, 300, _procstatm);
-	sscanf(_buffer, "%lu %lu %lu %lu %lu %lu %lu", &_size, &_resident, &_share, &_text, &_lib,
-			&_data, &_dt);
+	if (_procstat != NULL) {
+		rewind(_procstat);
+		fread(_buffer, 1, 300, _procstat);
+		sscanf(
+				_buffer,
+				"%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d",
+				&_pid, _comm, &_state, &_ppid, &_pgrp, &_session, &_tty_nr, &_tpgid, &_flags, &_minflt,
+				&_cminflt, &_majflt, &_cmajflt, &_utime, &_stime, &_cutime, &_cstime, &_priority,
+				&_nice, &_num_threads, &_itrealvalue, &_starttime, &_vsize, &_rss, &_rsslim,
+				&_startcode, &_endcode, &_startstack, &_kstkesp, &_kstkeip, &_signal, &_blocked,
+				&_sigignore, &_sigcatch, &_wchan, &_nswap, &_cnswap, &_exit_signal, &_processor);
+	}
+	if (_procstatm != NULL) {
+		rewind(_procstatm);
+		fread(_buffer, 1, 300, _procstatm);
+		sscanf(_buffer, "%lu %lu %lu %lu %lu %lu %lu", &_size, &_resident, &_share, &_text, &_lib,
+				&_data, &_dt);
+	}
+	if (_procio != NULL) {
+		rewind(_procio);
+		fread(_buffer, 1, 300, _procio);
+		sscanf(_buffer, "%*s %lu %*s %lu %*s %lu %*s %lu %*s %lu %*s %lu %*s %lu", &_rchar, &_wchar,
+				&_syscr, &_syscw, &_read_bytes, &_write_bytes, &_cancelled_write_bytes);
+	}
 }
 
 void LinuxProcessMonitor::printAll()
 {
-
-	double time = getTime();
+	double time = GetTimeInSec();
 	cout << fixed << setprecision(8) << time << ": ";
 
 	printf(
@@ -96,25 +114,21 @@ void LinuxProcessMonitor::printAll()
 
 double LinuxProcessMonitor::getUserTime()
 {
-
 	double seconds = (double) _utime / (double) _jiffy;
-
 	return seconds;
 }
 
 double LinuxProcessMonitor::getSystemTime()
 {
-
 	double seconds = (double) _stime / (double) _jiffy;
-
 	return seconds;
 }
 
 double LinuxProcessMonitor::getUserCPULoad()
 {
 
-	double load = (((double) _utime - (double) _prevutime) / (double) _jiffy) / (_updatetime
-			- _prevupdatetime);
+	double load = (((double) _utime - (double) _prevUserTime) / (double) _jiffy) / (_updateTime
+			- _prevUpdateTime);
 
 	return load * 100.0;
 }
@@ -122,8 +136,8 @@ double LinuxProcessMonitor::getUserCPULoad()
 double LinuxProcessMonitor::getSystemCPULoad()
 {
 
-	double load = (((double) _stime - (double) _prevstime) / (double) _jiffy) / (_updatetime
-			- _prevupdatetime);
+	double load = (((double) _stime - (double) _prevSystemTime) / (double) _jiffy) / (_updateTime
+			- _prevUpdateTime);
 
 	return load * 100.0;
 }
@@ -157,7 +171,6 @@ double LinuxProcessMonitor::getResidentSetSize()
 
 	return (double) (_resident * 4096.0) / (1024. * 1024.0);
 }
-
 
 int LinuxProcessMonitor::pid()
 {
@@ -349,4 +362,64 @@ unsigned long LinuxProcessMonitor::dt()
 {
 	return _dt;
 }
+
+unsigned long LinuxProcessMonitor::rchar()
+{
+	return _rchar;
+}
+
+unsigned long LinuxProcessMonitor::wchar()
+{
+	return _wchar;
+}
+
+unsigned long LinuxProcessMonitor::syscr()
+{
+	return _syscr;
+}
+
+unsigned long LinuxProcessMonitor::syscw()
+{
+	return _syscw;
+}
+
+unsigned long LinuxProcessMonitor::read_bytes()
+{
+	return _read_bytes;
+}
+
+unsigned long LinuxProcessMonitor::write_bytes()
+{
+	return _write_bytes;
+}
+
+unsigned long LinuxProcessMonitor::cancelled_write_bytes()
+{
+	return _cancelled_write_bytes;
+}
+
+unsigned long LinuxProcessMonitor::GetNetworkInInBytes()
+{
+	return _rchar - _prevTotalNetworkRead;
+}
+
+unsigned long LinuxProcessMonitor::GetNetworkOutInBytes()
+{
+	return _wchar - _prevTotalNetworkWrite;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

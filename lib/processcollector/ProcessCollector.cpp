@@ -7,12 +7,12 @@
 
 #include <glog/logging.h>
 #include <boost/foreach.hpp>
-
 #include "ProcessCollector.h"
 #include "System.h"
 #include "unistd.h"
 
-#define MESSAGE_BUF_SIZE	(1024 * 1000) * 5
+#define MESSAGE_BUF_SIZE				(1024 * 1000) * 5
+const double NETWORK_MAX_IN_AND_OUT_BYTES = (1024 * 1024 * 100) * 2;
 
 ProcessCollector::ProcessCollector()
 {
@@ -28,16 +28,21 @@ void ProcessCollector::OnInit(Context *ctx)
 	delete context;
 	context = ctx;
 
+	_numCores = System::GetNumCores();
+	_totalMemoryMb = (double)System::GetTotalMemory() / 1024.;
+
 	// Create a process monitor for each pid on system
-	std::list<int> *pids = System::GetAllPids();
-	_monitors = new std::list<LinuxProcessMonitor *>();
-	for (list<int>::iterator it = pids->begin(); it != pids->end(); it++) {
+	std::vector<int> *pids = System::GetAllPids();
+	_monitors = new std::vector<LinuxProcessMonitor *>();
+	for (vector<int>::iterator it = pids->begin(); it != pids->end(); it++) {
 		int pid = *it;
 		LinuxProcessMonitor *monitor = new LinuxProcessMonitor();
 		if (monitor->open(pid) == false) {
 			delete monitor;
 			continue;
 		}
+		if (System::HasSupportForProcPidIo())
+			monitor->OpenIo(pid);
 		monitor->update();
 		_monitors->push_back(monitor);
 		LOG(INFO) << pid;
@@ -53,14 +58,17 @@ void ProcessCollector::OnStop()
 	delete filter;
 }
 
+double maxIn = 0, maxOut = 0;
+
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
 	ProcessesMessage processesMsg;
-	for (list<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
+	for (vector<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitor *monitor = (*it);
 		monitor->update();
 		ProcessesMessage::ProcessMessage *processMsg = processesMsg.add_processmessage();
 
+		double util;
 		if (filter->has_processname()) {
 			string processName = monitor->comm();
 			// Remove '(' and ')' from the process name returned from comm()
@@ -75,6 +83,36 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			processMsg->set_usercpuload(monitor->getUserCPULoad());
 		if (filter->has_systemcpuload())
 			processMsg->set_systemcpuload(monitor->getSystemCPULoad());
+		if (filter->has_usercpuutilization()) {
+			util = monitor->getUserCPULoad() / (double)(_numCores * 100);
+			processMsg->set_usercpuutilization(util * 100.);
+		}
+		if (filter->has_systemcpuutilization()) {
+			util = monitor->getSystemCPULoad() / (double)(_numCores * 100);
+			processMsg->set_systemcpuutilization(util * 100.);
+		}
+		if (filter->has_memoryutilization()) {
+//			LOG(INFO) << "Prog : " << monitor->getTotalProgramSize();
+//			LOG(INFO) << "Total: " << _totalMemoryMb;
+			util = monitor->getTotalProgramSize() / (double)_totalMemoryMb;
+ 			processMsg->set_memoryutilization(util * 100.);
+		}
+		if (filter->has_networkinutilization()) {
+			util = monitor->GetNetworkInInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
+			if (util > maxIn) {
+				LOG(INFO) << "Network in : " << monitor->GetNetworkInInBytes();
+				maxIn = util;
+			}
+			processMsg->set_networkinutilization(util * 100.);
+		}
+		if (filter->has_networkoututilization()) {
+			util = monitor->GetNetworkOutInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
+			if (util > maxOut) {
+				LOG(INFO) << "Network out: " << monitor->GetNetworkOutInBytes();
+				maxOut = util;
+			}
+			processMsg->set_networkoututilization(util * 100.);
+		}
 	}
 
 	if (processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)

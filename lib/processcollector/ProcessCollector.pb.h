@@ -120,6 +120,41 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
   inline double systemcpuload() const;
   inline void set_systemcpuload(double value);
   
+  // optional double systemCpuUtilization = 5;
+  inline bool has_systemcpuutilization() const;
+  inline void clear_systemcpuutilization();
+  static const int kSystemCpuUtilizationFieldNumber = 5;
+  inline double systemcpuutilization() const;
+  inline void set_systemcpuutilization(double value);
+  
+  // optional double userCpuUtilization = 6;
+  inline bool has_usercpuutilization() const;
+  inline void clear_usercpuutilization();
+  static const int kUserCpuUtilizationFieldNumber = 6;
+  inline double usercpuutilization() const;
+  inline void set_usercpuutilization(double value);
+  
+  // optional double memoryUtilization = 7;
+  inline bool has_memoryutilization() const;
+  inline void clear_memoryutilization();
+  static const int kMemoryUtilizationFieldNumber = 7;
+  inline double memoryutilization() const;
+  inline void set_memoryutilization(double value);
+  
+  // optional uint32 networkInUtilization = 8;
+  inline bool has_networkinutilization() const;
+  inline void clear_networkinutilization();
+  static const int kNetworkInUtilizationFieldNumber = 8;
+  inline ::google::protobuf::uint32 networkinutilization() const;
+  inline void set_networkinutilization(::google::protobuf::uint32 value);
+  
+  // optional uint32 networkOutUtilization = 9;
+  inline bool has_networkoututilization() const;
+  inline void clear_networkoututilization();
+  static const int kNetworkOutUtilizationFieldNumber = 9;
+  inline ::google::protobuf::uint32 networkoututilization() const;
+  inline void set_networkoututilization(::google::protobuf::uint32 value);
+  
   // @@protoc_insertion_point(class_scope:ProcessesMessage.ProcessMessage)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -130,11 +165,16 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
   ::google::protobuf::uint32 pid_;
   double usercpuload_;
   double systemcpuload_;
+  double systemcpuutilization_;
+  double usercpuutilization_;
+  double memoryutilization_;
+  ::google::protobuf::uint32 networkinutilization_;
+  ::google::protobuf::uint32 networkoututilization_;
   friend void  protobuf_AddDesc_ProcessCollector_2eproto();
   friend void protobuf_AssignDesc_ProcessCollector_2eproto();
   friend void protobuf_ShutdownFile_ProcessCollector_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -341,6 +381,86 @@ inline double ProcessesMessage_ProcessMessage::systemcpuload() const {
 inline void ProcessesMessage_ProcessMessage::set_systemcpuload(double value) {
   _set_bit(3);
   systemcpuload_ = value;
+}
+
+// optional double systemCpuUtilization = 5;
+inline bool ProcessesMessage_ProcessMessage::has_systemcpuutilization() const {
+  return _has_bit(4);
+}
+inline void ProcessesMessage_ProcessMessage::clear_systemcpuutilization() {
+  systemcpuutilization_ = 0;
+  _clear_bit(4);
+}
+inline double ProcessesMessage_ProcessMessage::systemcpuutilization() const {
+  return systemcpuutilization_;
+}
+inline void ProcessesMessage_ProcessMessage::set_systemcpuutilization(double value) {
+  _set_bit(4);
+  systemcpuutilization_ = value;
+}
+
+// optional double userCpuUtilization = 6;
+inline bool ProcessesMessage_ProcessMessage::has_usercpuutilization() const {
+  return _has_bit(5);
+}
+inline void ProcessesMessage_ProcessMessage::clear_usercpuutilization() {
+  usercpuutilization_ = 0;
+  _clear_bit(5);
+}
+inline double ProcessesMessage_ProcessMessage::usercpuutilization() const {
+  return usercpuutilization_;
+}
+inline void ProcessesMessage_ProcessMessage::set_usercpuutilization(double value) {
+  _set_bit(5);
+  usercpuutilization_ = value;
+}
+
+// optional double memoryUtilization = 7;
+inline bool ProcessesMessage_ProcessMessage::has_memoryutilization() const {
+  return _has_bit(6);
+}
+inline void ProcessesMessage_ProcessMessage::clear_memoryutilization() {
+  memoryutilization_ = 0;
+  _clear_bit(6);
+}
+inline double ProcessesMessage_ProcessMessage::memoryutilization() const {
+  return memoryutilization_;
+}
+inline void ProcessesMessage_ProcessMessage::set_memoryutilization(double value) {
+  _set_bit(6);
+  memoryutilization_ = value;
+}
+
+// optional uint32 networkInUtilization = 8;
+inline bool ProcessesMessage_ProcessMessage::has_networkinutilization() const {
+  return _has_bit(7);
+}
+inline void ProcessesMessage_ProcessMessage::clear_networkinutilization() {
+  networkinutilization_ = 0u;
+  _clear_bit(7);
+}
+inline ::google::protobuf::uint32 ProcessesMessage_ProcessMessage::networkinutilization() const {
+  return networkinutilization_;
+}
+inline void ProcessesMessage_ProcessMessage::set_networkinutilization(::google::protobuf::uint32 value) {
+  _set_bit(7);
+  networkinutilization_ = value;
+}
+
+// optional uint32 networkOutUtilization = 9;
+inline bool ProcessesMessage_ProcessMessage::has_networkoututilization() const {
+  return _has_bit(8);
+}
+inline void ProcessesMessage_ProcessMessage::clear_networkoututilization() {
+  networkoututilization_ = 0u;
+  _clear_bit(8);
+}
+inline ::google::protobuf::uint32 ProcessesMessage_ProcessMessage::networkoututilization() const {
+  return networkoututilization_;
+}
+inline void ProcessesMessage_ProcessMessage::set_networkoututilization(::google::protobuf::uint32 value) {
+  _set_bit(8);
+  networkoututilization_ = value;
 }
 
 // -------------------------------------------------------------------

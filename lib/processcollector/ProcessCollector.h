@@ -15,6 +15,7 @@
 
 using namespace std;
 
+
 class ProcessCollector: public IDataCollectorProtobuf {
 public:
 	ProcessesMessage::ProcessMessage *filter;
@@ -26,8 +27,10 @@ public:
 	virtual void OnStop();
 	virtual void Sample(WallmonMessage *msg);
 private:
-	list<LinuxProcessMonitor *> *_monitors;
+	vector<LinuxProcessMonitor *> *_monitors;
 	char *_buffer;
+	int _numCores;
+	double _totalMemoryMb;
 };
 
 #endif /* PROCESSCOLLECTOR_H_ */

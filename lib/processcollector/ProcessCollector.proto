@@ -8,6 +8,15 @@ message ProcessesMessage
 		
 		optional double userCpuLoad = 3;
 		optional double systemCpuLoad = 4;
+		
+		optional double systemCpuUtilization = 5;
+		optional double userCpuUtilization = 6;
+		
+		optional double memoryUtilization = 7;
+		
+		optional uint32 networkInUtilization = 8;
+		optional uint32 networkOutUtilization = 9;
+		
 	}
 	repeated ProcessMessage processmessage = 1;
 }
