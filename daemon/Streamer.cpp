@@ -13,6 +13,7 @@
 #include <boost/foreach.hpp>
 #include "Config.h"
 #include "Streamer.h"
+#include "System.h"
 
 Streamer::Streamer()
 {
@@ -57,42 +58,60 @@ void Streamer::Stop()
  * one streamer thread. Users are responsible for supplying the streamer
  * thread with the file descriptor they wish the streamer thread to write to.
  *
+ * @param serverAddress  Either an IP address or hostname
  * @return File descriptor of socket connected to specified server address
  */
 int Streamer::SetupStream(string serverAddress)
 {
 	// Check if address already is associated with a file descriptor
-	ServerMap::iterator it;
-	for (it = _serverMap->begin(); it != _serverMap->end(); it++)
-		if ((*it).first == serverAddress)
-			return (*it).second;
+	if (_serverMap->count(serverAddress) > 0)
+		return (*_serverMap)[serverAddress];
+
+	string serverIpAddress = serverAddress;
+	if (System::IsValidIpAddress(serverIpAddress) == false) {
+		// Translate hostname to an ip address
+		vector<string> tmp = System::HostnameToIpAddress(serverIpAddress);
+		if (tmp.size() == 0) {
+			LOG(ERROR) << "unable to resolve hostname: " << serverIpAddress;
+			return -1;
+		}
+		serverIpAddress = tmp[0];
+		if (System::IsValidIpAddress(serverIpAddress) == false) {
+			LOG(ERROR) << "invalid ip address: " << serverIpAddress;
+			return -1;
+		}
+	}
 
 	struct sockaddr_in addr;
-
 	bzero(&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr(serverAddress.c_str());
+	addr.sin_addr.s_addr = inet_addr(serverIpAddress.c_str());
 	addr.sin_port = htons(STREAMER_ENTRY_PORT);
 
 	int fd = socket(PF_INET, SOCK_STREAM, 0);
-	LOG_IF(FATAL, fd < 0)<< "failed creating socket";
+	if (fd < 0) {
+		LOG(ERROR) << "failed creating socket";
+		return -1;
+	}
 	int ret = connect(fd, (struct sockaddr *) &addr, sizeof(addr));
-	LOG_IF(FATAL, ret < 0) << "failed connecting to server";
-	LOG(INFO) << "Streamer successfully connected to server";
+	if (ret < 0) {
+		LOG(ERROR) << "failed connecting to server";
+		return -1;
+	}
+	LOG(INFO) << "Streamer successfully connected to server: " << serverAddress;
 
-	// Save the relationship: server_address -> socket_fd
+	// Book-keep the relationship: server_address -> socket_fd
 	(*_serverMap)[serverAddress] = fd;
 	return fd;
 }
 
-	/**
-	 * Pushes an item on the FIFO queue that is continuously
-	 * being drained by the streamer thread
-	 */
+/**
+ * Pushes an item on the FIFO queue that is continuously
+ * being drained by the streamer thread
+ */
 void Streamer::Stream(StreamItem &item)
 {
 	_queue->Push(&item);
-	//_SendAll(item);
 }
 
 /**
@@ -102,19 +121,21 @@ void Streamer::Stream(StreamItem &item)
 void Streamer::_StreamForever()
 {
 	LOG(INFO) << "Streamer started and serving requests";
+	int maxQueueSize = -1;
 	while (true) {
 		StreamItem *item = _queue->Pop();
 		if (_running == false)
 			// Does not have to release memory of termination item
 			break;
 
-		int numBytesSent = _SendAll(*item);
-		LOG_IF(FATAL, numBytesSent != item->messageLength)<< "all bytes not sent";
+		if (_queue->GetSize() > maxQueueSize) {
+			maxQueueSize = _queue->GetSize();
+			LOG(INFO) << "max queue size: " << maxQueueSize;
+		}
 
-		// Release the memory originally allocated in StreamItemFactory()
+		_SendItem(*item);
+		// Release the memory originally allocated in StreamItem()
 		delete item;
-
-		_ioLogger->Write(numBytesSent);
 	}
 
 	// Close all sockets that have been opened
@@ -124,16 +145,44 @@ void Streamer::_StreamForever()
 	}
 }
 
-int Streamer::_SendAll(StreamItem &item)
+void Streamer::_SendItem(StreamItem & item)
+{
+	BOOST_FOREACH (int sockFd, item.serversSockFd)
+	{
+		int numBytesSent = _SendAll(sockFd, item.message, item.messageLength);
+		_ioLogger->Write(numBytesSent);
+		if (numBytesSent != item.messageLength) {
+			LOG(ERROR) << "all bytes not sent, connection probably broken";
+			_RemoveAndCleanupSockFd(sockFd);
+		}
+	}
+}
+
+int Streamer::_SendAll(int sockFd, char *message, int len)
 {
 	int numBytesSent = 0;
 	do {
-		int retval = write(item.sockfd, item.message + numBytesSent, item.messageLength
-				- numBytesSent);
+		int retval = write(sockFd, message + numBytesSent, len - numBytesSent);
 		if (retval == -1)
 			return numBytesSent;
 		numBytesSent += retval;
-	} while (numBytesSent < item.messageLength);
+	} while (numBytesSent < len);
 	return numBytesSent;
 }
+
+void Streamer::_RemoveAndCleanupSockFd(int sockFd)
+{
+	BOOST_FOREACH (ServerMap::value_type &i, *_serverMap)
+	{
+		string serverAddress = i.first;
+		int _sockFd = i.second;
+		if (sockFd == _sockFd) {
+			_serverMap->erase(serverAddress);
+			close(sockFd);
+			break;
+		}
+	}
+}
+
+
 

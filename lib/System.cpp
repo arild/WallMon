@@ -13,6 +13,9 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <glog/logging.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include "System.h"
 #include <boost/algorithm/string.hpp>
 
@@ -174,6 +177,33 @@ bool System::HasSupportForProcPidIo()
 		return false;
 	return true;
 }
+
+bool System::IsValidIpAddress(string ipAddress)
+{
+	struct sockaddr_in sa;
+	int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+	return result != 0;
+}
+
+vector<string> System::HostnameToIpAddress(string hostname)
+{
+	struct hostent *he;
+	struct in_addr a;
+	vector<string> result;
+
+	he = gethostbyname(hostname.c_str());
+	if (he) {
+		while (*he->h_addr_list) {
+			bcopy(*he->h_addr_list++, (char *) &a, sizeof(a));
+			result.push_back((string)inet_ntoa(a));
+		}
+	}
+	return result;
+}
+
+
+
+
 
 
 

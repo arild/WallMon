@@ -93,12 +93,13 @@ void Dispatcher::_ListenForever()
 			try {
 				// Adhere to interface contract
 				collector->OnInit(ctx);
-				if (ctx->server.length() == 0)
+				if (ctx->servers->size() == 0)
 					// Server not defined, use source
-					ctx->server = sourceAddress;
+					ctx->servers->push_back(sourceAddress);
+				LOG(INFO) << "user-defined OnInit() finished";
 
 			} catch (exception &e) {
-				LOG(ERROR) << "user-defined OnStart() failed: " << e.what();
+				LOG(ERROR) << "user-defined OnInit() failed: " << e.what();
 			}
 
 			_scheduler->RegisterColllector(*collector, ctx);

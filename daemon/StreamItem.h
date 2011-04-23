@@ -1,11 +1,15 @@
 #ifndef STREAMITEM_H_
 #define STREAMITEM_H_
 
+#include <vector>
+
+using std::vector;
+
 class StreamItem {
 public:
 	char *message; // Start of message (header + payload)
 	int messageLength; // Accounts for header and payload
-	int sockfd;
+	vector<int> serversSockFd;
 
 	StreamItem(int payloadLength);
 	~StreamItem();

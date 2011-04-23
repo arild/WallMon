@@ -7,6 +7,9 @@
  */
 
 #include <glog/logging.h>
+#include <vector>
+#include <string>
+#include <boost/foreach.hpp>
 #include "Wallmon.pb.h"
 #include "Scheduler.h"
 #include "Streamer.h"
@@ -16,14 +19,13 @@
  * Container for user-data associated with timers.
  *
  * Timers in libev have a special attribute where the user (programmer)
- * can store arbitrary data. The timers used here stope an instance of this class.
+ * can store arbitrary data. The timers used here store an instance of this class.
  */
 class CollectorEvent {
 public:
 	Context *ctx; // The context which is shared and known by the collector
 	IDataCollector *collector; // The collector implementation itself
 	IDataCollectorProtobuf *collectorProtobuf;
-	int sockfd; // The file descriptor of associated streamer socket
 
 	double timestampLastScheduleMsec;
 	double scheduleDriftinMsec; // Accumulated drift for when collector is scheduled
@@ -71,7 +73,7 @@ void Scheduler::Stop()
 		ev_timer_stop(_loop, timer);
 
 		// Release memory allocated in RegisterColllector()
-		delete timer->data;
+		delete (CollectorEvent *)timer->data;
 		delete timer;
 	}
 	_thread.join(); // Wait for event loop to terminate
@@ -85,7 +87,6 @@ void Scheduler::Stop()
 void Scheduler::RegisterColllector(IBase &collector, Context *ctx)
 {
 	ev_timer *timer = new ev_timer();
-	int sockfd = streamer->SetupStream(ctx->server);
 
 	double scheduleIntervalInSec = ctx->sampleFrequencyMsec / (double) 1000;
 	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, 0.);
@@ -95,7 +96,6 @@ void Scheduler::RegisterColllector(IBase &collector, Context *ctx)
 	event->ctx = ctx;
 	event->collector = dynamic_cast<IDataCollector *> (&collector);
 	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *> (&collector);
-	event->sockfd = sockfd;
 
 	timer->data = (void *) event;
 	ev_timer_again(_loop, timer);
@@ -169,8 +169,14 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	// Compose network message
 	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
-	item.sockfd = event->sockfd;
-
+	BOOST_FOREACH (string serverAddress, *event->ctx->servers)
+	{
+		int sockfd = streamer->SetupStream(serverAddress);
+		if (sockfd > -1)
+			item.serversSockFd.push_back(sockfd);
+		else
+			LOG(ERROR) << "invalid sockfd for: " << serverAddress;
+	}
 	// Queue message for transmission
 	Scheduler::streamer->Stream(item);
 }

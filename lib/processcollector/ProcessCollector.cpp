@@ -7,6 +7,7 @@
 
 #include <glog/logging.h>
 #include <boost/foreach.hpp>
+#include <vector>
 #include "ProcessCollector.h"
 #include "System.h"
 #include "unistd.h"
@@ -16,7 +17,7 @@ const double NETWORK_MAX_IN_AND_OUT_BYTES = (1024 * 1024 * 100) * 2;
 
 ProcessCollector::ProcessCollector()
 {
-	context = new Context;
+	context = new Context();
 	filter = new ProcessesMessage::ProcessMessage;
 }
 
@@ -25,6 +26,11 @@ void ProcessCollector::OnInit(Context *ctx)
 	ctx->server = context->server;
 	ctx->key = context->key;
 	ctx->sampleFrequencyMsec = context->sampleFrequencyMsec;
+	LOG(INFO) << "Copy, num servers: " << context->servers->size();
+	BOOST_FOREACH(string server, *context->servers)
+		ctx->servers->push_back(server);
+
+	LOG(INFO) << "Done copy";
 	delete context;
 	context = ctx;
 
@@ -45,7 +51,7 @@ void ProcessCollector::OnInit(Context *ctx)
 			monitor->OpenIo(pid);
 		monitor->update();
 		_monitors->push_back(monitor);
-		LOG(INFO) << pid;
+		//LOG(INFO) << pid;
 	}
 	LOG(INFO) << "Num processes being monitored: " << _monitors->size();
 	_buffer = new char[MESSAGE_BUF_SIZE];

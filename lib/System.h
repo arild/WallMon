@@ -24,6 +24,8 @@ public:
 	static int GetNumCores();
 	static int GetTotalMemory();
 	static bool HasSupportForProcPidIo();
+	static bool IsValidIpAddress(string ipAddress);
+	static vector<string> HostnameToIpAddress(string hostname);
 };
 
 #endif /* SYSTEM_H_ */

@@ -9,13 +9,16 @@
 #define WALLMON_H_
 
 #include <string>
+#include <vector>
+#include <glog/logging.h>
 #include "Wallmon.pb.h"
 
-using std::string;
+using namespace std;
 
 class Context {
 public:
 	string server;
+	vector<string> *servers;
 	string key;
 	int sampleFrequencyMsec;
 	bool concurrentExecution;
@@ -23,9 +26,27 @@ public:
 	Context()
 	{
 		server = "";
+		servers = new vector<string>();
 		key = "";
 		sampleFrequencyMsec = 1000;
 		concurrentExecution = false;
+	}
+
+	~Context()
+	{
+		delete servers;
+	}
+
+	void AddServer(string serverAddress)
+	{
+		LOG(INFO) << "New Server: " << serverAddress;
+		servers->push_back(serverAddress);
+	}
+
+	void AddServers(vector<string> serverAddresses)
+	{
+		for (int i = 0; i < serverAddresses.size(); i++)
+			AddServer(serverAddresses[i]);
 	}
 };
 

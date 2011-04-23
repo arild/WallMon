@@ -33,11 +33,15 @@ LinuxProcessMonitor:
 
 WallmonMessage:
 	protoc --cpp_out=. *.proto 
-	$(CC) $(CFLAGS) -c -lprotobuf Wallmon.pb.cc
+	$(CC) $(CFLAGS) -lprotobuf Wallmon.pb.cc
 	ar rcs libWallmonMessage.a Wallmon.pb.o
 
 IoLogger:
-	$(CC) $(CFLAGS) -c IoLogger.cpp
+	$(CC) $(CFLAGS) IoLogger.cpp
 	ar cru libIoLogger.a IoLogger.o
 
+WallView: WallView.cpp WallView.h
+	$(CC) $(CFLAGS) WallView.cpp WallView.h
+	ar cru libWallView.a WallView.o
+	
 

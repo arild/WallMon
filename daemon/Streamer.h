@@ -21,13 +21,15 @@ public:
 	void Stream(StreamItem &item);
 
 private:
-	void _StreamForever();
-	int _SendAll(StreamItem &item);
 	boost::thread _thread;
 	bool _running;
 	Queue<StreamItem *> *_queue;
 	ServerMap *_serverMap;
 	IoLogger *_ioLogger;
+	void _StreamForever();
+	void _SendItem(StreamItem &item);
+	int _SendAll(int sockFd, char *message, int len);
+	void _RemoveAndCleanupSockFd(int sockFd);
 };
 
 #endif /* STREAMER_H_ */
