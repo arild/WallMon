@@ -10,14 +10,15 @@ RM := rm -rf
 -include sources.mk
 -include subdir.mk
 -include test/subdir.mk
--include test/Debug/subdir.mk
 -include server/subdir.mk
 -include scripts/subdir.mk
 -include monitors/slowlogger/subdir.mk
+-include monitors/processall/subdir.mk
 -include monitors/process/subdir.mk
 -include monitors/fastlogger/subdir.mk
+-include monitors/boids2d/subdir.mk
+-include lib/stubs/subdir.mk
 -include lib/subdir.mk
--include lib/Debug/subdir.mk
 -include daemon/subdir.mk
 -include daemon/.metadata/.plugins/org.eclipse.cdt.make.core/subdir.mk
 -include objects.mk

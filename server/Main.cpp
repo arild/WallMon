@@ -11,9 +11,11 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "SessionDispatcher.h"
+#include "Config.h"
+#include "System.h"
+#include "IMonitorManager.h"
+#include "MonitorDispatcher.h"
 #include "DataSink.h"
-#include "SharedLibraryWatcher.h"
 
 using namespace std;
 
@@ -32,25 +34,37 @@ int main(int argc, char *argv[])
 	signal(SIGINT, &sigproc); // CTRL+C
 	signal(SIGTERM, &sigproc); // pkill -SIGTERM wallmond
 
-	SessionDispatcher *dispatcher = new SessionDispatcher();
+	for (int c; (c = getopt(argc, argv, "d")) != -1;) {
+		switch (c)
+		{
+		case 'd':
+			LOG(INFO) << "Daemonizing...";
+			System::Daemonize();
+			break;
+		default:
+			;
+		}
+	}
+
 	DataRouter *router = new DataRouter();
 	DataSink *sink = new DataSink(router);
+	IMonitorManager *manager = (IMonitorManager *) router;
+	MonitorDispatcher *dispatcher = new MonitorDispatcher(*manager, SERVER_MULTICAST_LISTEN_PORT);
 
+	dispatcher->Start();
 	router->Start();
 	sink->Start();
-
-	SharedLibraryWatcher *libraryWatcher = new SharedLibraryWatcher(router, dispatcher);
 
 	// Block main thread and wait for termination signal
 	mainThreadCondition.wait(mainThreadMutex);
 
+	dispatcher->Stop();
 	sink->Stop();
 	router->Stop();
 
 	delete dispatcher;
 	delete router;
 	delete sink;
-	delete libraryWatcher;
 
 	LOG(INFO) << "server successfully terminated";
 }

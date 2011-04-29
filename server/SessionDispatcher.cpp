@@ -33,7 +33,7 @@ void SessionDispatcher::Dispatch(string fileName)
 	msg += fileName;
 	try {
 		LOG(INFO) << "Dispatching new session: " << fileName;
-		_socket->sendTo(msg.c_str(), msg.length(), MULITCAST_ADDRESS, MULTICAST_LISTEN_PORT);
+		//_socket->sendTo(msg.c_str(), msg.length(), MULITCAST_ADDRESS, MULTICAST_LISTEN_PORT);
 	} catch (exception &e) {
 		LOG(ERROR) << "failed dispatching on multicast socket: " << e.what();
 	}

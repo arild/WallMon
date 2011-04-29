@@ -1,0 +1,13 @@
+package Wallmon;
+
+message MonitorDispatcherMessage
+{
+	enum Type {
+    	INIT = 0;
+    	STOP = 1;
+    	EVENT = 2;
+  }
+  required Type type = 3;
+  optional string filePath = 4;
+  optional bytes eventData = 5;
+}

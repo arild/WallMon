@@ -2,7 +2,7 @@
 
 include ../Makefile.inc
 
-LIB_LOCAL=-lpthread -lboost_thread -lgtest -lByteBuffer
+LIB_LOCAL=-lpthread -lboost_thread -lgtest -lByteBuffer -lSystem -lWallView -lglog
 EXECUTABLE_NAME=test
 SRC=*.cpp
 

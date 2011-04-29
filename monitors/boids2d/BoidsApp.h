@@ -17,13 +17,18 @@ public:
 	void Stop();
 	void CreateBoid(double startX, double startY, BoidSharedContext *ctx);
 	void RemoveBoid(Boid *boid);
+	void SetView(double x, double y, double width, double height);
 private:
 	boost::thread _thread;
 	bool _running;
-	SDL_Surface* _screen;
+	SDL_Surface *_screen;
+	bool _updateOrtho;
+	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
+
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
 	void _DrawAxis();
+	void _DrawBoidDescription();
 };
 
 #endif /* BOIDS_H_ */

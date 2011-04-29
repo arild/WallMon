@@ -9,7 +9,7 @@
 #define PROCESSCOLLECTOR_H_
 
 #include "Wallmon.h"
-#include "ProcessCollector.pb.h"
+#include "stubs/ProcessCollector.pb.h"
 #include "LinuxProcessMonitor.h"
 #include <list>
 

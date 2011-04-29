@@ -7,21 +7,26 @@
 #include <boost/thread/mutex.hpp>
 #include <ev++.h>
 #include "Wallmon.h"
-#include "Wallmon.pb.h"
+#include "stubs/Wallmon.pb.h"
 #include "Streamer.h"
+#include "IMonitorManager.h"
 
 using namespace std;
 
 typedef list<ev_timer *> TimerContainer;
 
-class Scheduler {
+class Scheduler : IMonitorManager {
 public:
+	static Streamer *streamer;
 	Scheduler(Streamer *streamer);
 	virtual ~Scheduler();
 	void Start();
 	void Stop();
-	void RegisterColllector(IBase &collector, Context *ctx);
-	static Streamer *streamer;
+
+	virtual void Register(IBase &monitor, Context &ctx);
+	virtual void Remove(IBase &monitor);
+	virtual void Event(IBase &monitor, char *msg);
+
 private:
 	boost::thread _thread;
 	bool _running;

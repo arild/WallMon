@@ -12,8 +12,9 @@
 #include <map>
 #include <boost/thread.hpp>
 #include "Queue.h"
-#include "Wallmon.pb.h"
+#include "stubs/Wallmon.pb.h"
 #include "Wallmon.h"
+#include "IMonitorManager.h"
 
 class HandlerEvent {
 public:
@@ -47,13 +48,15 @@ public:
 
 typedef std::map<string, HandlerEvent *> handlerMap;
 
-class DataRouter {
+class DataRouter : IMonitorManager {
 public:
 	DataRouter();
 	virtual ~DataRouter();
 	void Start();
 	void Stop();
-	void RegisterHandler(IBase &handler);
+	virtual void Register(IBase &monitor, Context &ctx);
+	virtual void Remove(IBase &monitor);
+	virtual void Event(IBase &monitor, char *msg);
 	void Route(char *message, int length);
 private:
 	boost::thread _thread;

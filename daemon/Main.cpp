@@ -12,9 +12,12 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "Dispatcher.h"
+#include "IMonitorManager.h"
+#include "MonitorDispatcher.h"
 #include "Streamer.h"
+#include "Scheduler.h"
 #include "System.h"
+#include "Config.h"
 
 boost::condition mainThreadCondition;
 boost::mutex mainThreadMutex;
@@ -58,7 +61,8 @@ int main(int argc, char *argv[])
 	Scheduler *scheduler = new Scheduler(streamer);
 	scheduler->Start();
 
-	Dispatcher *dispatcher = new Dispatcher(scheduler);
+	IMonitorManager *manager = (IMonitorManager *) scheduler;
+	MonitorDispatcher *dispatcher = new MonitorDispatcher(*manager, DAEMON_MULTICAST_LISTEN_PORT);
 	dispatcher->Start();
 
 	// Block main thread and wait for termination signal

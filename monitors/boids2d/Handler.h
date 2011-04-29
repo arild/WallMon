@@ -14,27 +14,41 @@
 #include <sstream>
 
 #include "Wallmon.h"
-#include "Wallmon.pb.h"
-#include "processcollector/ProcessCollector.pb.h"
+#include "stubs/Wallmon.pb.h"
+#include "stubs/ProcessCollector.pb.h"
 #include "BoidsApp.h"
 #include "BoidSharedContext.h"
 
 using namespace std;
 
+
+class BoidsContainer {
+public:
+	BoidSharedContext *cpu;
+	BoidSharedContext *memory;
+	BoidSharedContext *network;
+
+	BoidsContainer()
+	{
+		cpu = new BoidSharedContext();
+		memory = new BoidSharedContext();
+		network = new BoidSharedContext();
+	}
+};
+
 class ProcStat {
 public:
-	string processName;
-	string hostName;
-	int pid;
-	double userCpuLoad;
-	double systemCpuLoad;
-	BoidSharedContext *boidSharedCtx;
+	unsigned int numSamples;
+	double avgCpuUtilization;
+	double totalMemoryUtilization;
+	BoidsContainer *boids;
 
 	ProcStat()
 	{
-		userCpuLoad = 0;
-		systemCpuLoad = 0;
-		boidSharedCtx = NULL;
+		boids = new BoidsContainer();
+		numSamples = 0;
+		avgCpuUtilization = 0;
+		totalMemoryUtilization = 0;
 	}
 };
 typedef map<string, ProcStat *> ProcMap;

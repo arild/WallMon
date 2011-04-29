@@ -19,6 +19,7 @@ public:
 
 private:
 	float _oldDestx, _oldDesty;
+	bool _visible;
 	bool _IsDestinationReached(float destx, float desty);
 	GLUquadricObj *_quadric;
 };

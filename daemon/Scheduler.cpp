@@ -10,7 +10,6 @@
 #include <vector>
 #include <string>
 #include <boost/foreach.hpp>
-#include "Wallmon.pb.h"
 #include "Scheduler.h"
 #include "Streamer.h"
 #include "System.h"
@@ -81,31 +80,6 @@ void Scheduler::Stop()
 }
 
 /**
- * Registers a given collector with an event timer that is
- * inserted into the global event loop.
- */
-void Scheduler::RegisterColllector(IBase &collector, Context *ctx)
-{
-	ev_timer *timer = new ev_timer();
-
-	double scheduleIntervalInSec = ctx->sampleFrequencyMsec / (double) 1000;
-	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, 0.);
-	timer->repeat = scheduleIntervalInSec;
-
-	CollectorEvent *event = new CollectorEvent();
-	event->ctx = ctx;
-	event->collector = dynamic_cast<IDataCollector *> (&collector);
-	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *> (&collector);
-
-	timer->data = (void *) event;
-	ev_timer_again(_loop, timer);
-	_loopCondition.notify_one();
-
-	// Book-keep for cleanup
-	_timers->push_back(timer);
-}
-
-/**
  * Starts the event loop that schedules timer events.
  *
  * The ev_run() call blocks as long as there are one or more timers registered.
@@ -119,6 +93,39 @@ void Scheduler::_ScheduleForever()
 		_loopCondition.wait(_loopMutex);
 		ev_run(_loop, 0);
 	}
+}
+
+/**
+ * Registers a given collector with an event timer that is
+ * inserted into the global event loop.
+ */
+void Scheduler::Register(IBase & monitor, Context & ctx)
+{
+	ev_timer *timer = new ev_timer();
+
+	double scheduleIntervalInSec = ctx.sampleFrequencyMsec / (double) 1000;
+	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, 0.);
+	timer->repeat = scheduleIntervalInSec;
+
+	CollectorEvent *event = new CollectorEvent();
+	event->ctx = &ctx;
+	event->collector = dynamic_cast<IDataCollector *> (&monitor);
+	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *> (&monitor);
+
+	timer->data = (void *) event;
+	ev_timer_again(_loop, timer);
+	_loopCondition.notify_one();
+
+	// Book-keep for cleanup
+	_timers->push_back(timer);
+}
+
+void Scheduler::Event(IBase & monitor, char *msg)
+{
+}
+
+void Scheduler::Remove(IBase & monitor)
+{
 }
 
 /**

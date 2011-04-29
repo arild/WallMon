@@ -47,22 +47,6 @@ void DataRouter::Stop()
 	LOG(INFO) << "DataRouter stopped";
 }
 
-void DataRouter::RegisterHandler(IBase &handler)
-{
-	Context *ctx = new Context();
-	handler.OnInit(ctx);
-
-	// Save and determine type of handler: the dynamic_cast() method
-	// will return NULL if the specified cast type does not match.
-	HandlerEvent *event = new HandlerEvent();
-	event->ctx = ctx;
-	event->handler = dynamic_cast<IDataHandler *>(&handler);
-	event->handlerProtobuf = dynamic_cast<IDataHandlerProtobuf *>(&handler);;
-
-	string key = ctx->key;
-	(*_handlers)[key] = event;
-}
-
 void DataRouter::Route(char *message, int length)
 {
 	if (message == NULL || length == 0) {
@@ -72,6 +56,27 @@ void DataRouter::Route(char *message, int length)
 	RouterItem *item = new RouterItem(length);
 	memcpy(item->message, message, length);
 	_queue->Push(item);
+}
+
+void DataRouter::Register(IBase & monitor, Context & ctx)
+{
+	// Save and determine type of handler: the dynamic_cast() method
+	// will return NULL if the specified cast type does not match.
+	HandlerEvent *event = new HandlerEvent();
+	event->ctx = &ctx;
+	event->handler = dynamic_cast<IDataHandler *>(&monitor);
+	event->handlerProtobuf = dynamic_cast<IDataHandlerProtobuf *>(&monitor);
+
+	string key = ctx.key;
+	(*_handlers)[key] = event;
+}
+
+void DataRouter::Remove(IBase & monitor)
+{
+}
+
+void DataRouter::Event(IBase & monitor, char *msg)
+{
 }
 
 void DataRouter::_RouteForever()

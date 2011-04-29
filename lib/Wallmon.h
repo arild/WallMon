@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include <glog/logging.h>
-#include "Wallmon.pb.h"
+#include "stubs/Wallmon.pb.h"
 
 using namespace std;
 

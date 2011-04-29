@@ -24,9 +24,9 @@ void Collector::OnInit(Context *ctx)
 	ctx->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	_ctx = ctx;
 	// Create a process monitor for each pid on system
-	std::list<int> *pids = System::GetAllPids();
-	_monitors = new std::list<LinuxProcessMonitor *>();
-	for (list<int>::iterator it = pids->begin(); it != pids->end(); it++) {
+	std::vector<int> *pids = System::GetAllPids();
+	_monitors = new std::vector	<LinuxProcessMonitor *>();
+	for (vector<int>::iterator it = pids->begin(); it != pids->end(); it++) {
 		int pid = *it;
 		LinuxProcessMonitor *monitor = new LinuxProcessMonitor();
 		if (monitor->open(pid) == false) {

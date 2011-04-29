@@ -1,7 +1,7 @@
 CC = g++
-CFLAGS_COMMON = -rdynamic -fno-stack-protector -Wall
+CFLAGS_COMMON = -rdynamic -fno-stack-protector
 
-LIB_COMMON=-lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger #-lprofiler
+LIB_COMMON=-lMonitorDispatcher -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
 
 WALLMON=/home/arild/WallMon
 SYSTEM=/home/arild

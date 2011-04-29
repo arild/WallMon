@@ -201,6 +201,15 @@ vector<string> System::HostnameToIpAddress(string hostname)
 	return result;
 }
 
+void System::ExportDisplayToLocalhost()
+{
+	string cmd = "export DISPLAY=localhost:0";
+	char buf[1024];
+	_RunCommand(cmd, buf, 1024);
+}
+
+
+
 
 
 

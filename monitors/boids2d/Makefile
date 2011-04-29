@@ -2,19 +2,19 @@ include ../Makefile.inc
 include ../../Makefile.inc
 
 LIB_GRAPHIC=-lGLU -lGL -lfreetype -lz -lftgl -lglut -lSDL
-LIB=-lSystem -lProcessCollector -lpthread -lboost_thread -lglog $(LIB_GRAPHIC)
+LIB=-lSystem -lWallView -lProcessCollector -lpthread -lboost_thread -lglog $(LIB_GRAPHIC)
 SRC=*.cpp *.h
 
 # Do not compile with graphics on rocksvv 
 HOSTNAME = $(shell hostname)
-ifneq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
-	GRAPHICS += -D GRAPHICS
+ifeq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
+ROCKSVV += -D ROCKSVV
 endif
 
 all: $(SRC)
-	$(CC) $(GRAPHICS) $(CFLAGS_SO_PREPARE) $(INC_PATH) -I/home/arild/include/freetype2 $(SRC)
-	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o libboids2d.so *.o $(LIB)
-	cp *.so ../bin
+	$(CC) -g $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -I/home/arild/include/freetype2 $(SRC)
+	$(CC) -g $(CFLAGS_SO_CREATE) -L/home/local/lib $(LIB_PATH) -o libboids2d.so *.o $(LIB)
+	mv *.so ../bin
 			
 clean:
 	rm -f *.o

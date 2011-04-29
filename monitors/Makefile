@@ -1,4 +1,5 @@
-DIRS = 	processall
+DIRS = 	boids2d
+		#processall
 		#fastlogger \
 		#slowlogger
 		#process 

@@ -2,11 +2,12 @@
 - *.a
 - *.so
 - *.c
-- *.py
 - *.d
 - *.mk
 - .*
 - **/Debug/
-- /server/wallmons
-- /daemon/wallmond
-- /test/test
+- **/server/wallmons
+- **/daemon/wallmond
+- **/test/test
+- *.gch
+- *.orig

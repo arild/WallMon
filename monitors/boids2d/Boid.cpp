@@ -14,6 +14,7 @@ Boid::Boid()
 	_oldDesty = -1;
 	width = 2;
 	height = 2;
+	_visible = false;
 	_quadric = gluNewQuadric();
 }
 
@@ -28,20 +29,25 @@ void Boid::OnLoop()
 
 	// Get boid destination via thread-safe API
 	ctx->GetDestination(&destx, &desty);
+	if (destx < 0 || desty < 0) {
+		_visible = false;
+		return;
+	}
+	_visible = true;
 
 	if (destx > 100)
 		destx = 100;
 	if (desty > 100)
 		desty = 100;
 
-	if (destx > maxX) {
-		LOG(INFO) << "X=" << destx;
-		maxX = destx;
-	}
-	if (desty > maxY) {
-		LOG(INFO) << "Y=" << desty;
-		maxY = desty;
-	}
+//	if (destx > maxX) {
+//		LOG(INFO) << "X=" << destx;
+//		maxX = destx;
+//	}
+//	if (desty > maxY) {
+//		LOG(INFO) << "Y=" << desty;
+//		maxY = desty;
+//	}
 
 	if (_IsDestinationReached(destx, desty)) {
 		speedx = 0.;
@@ -75,20 +81,36 @@ void Boid::OnLoop()
 
 void Boid::OnRender(SDL_Surface *screen)
 {
-	// all gl stuff
-	glBegin(GL_QUADS);
+	if (_visible == false)
+		return;
+
 	glColor3ub(ctx->red, ctx->green, ctx->blue);
-
-//	glTranslatef(tx, ty, 0);
-//	gluQuadricDrawStyle(_quadric, GLU_FILL );
-//	gluSphere(_quadric, 2, 100, 100);
-
-	glVertex2f(tx, ty);
-	glVertex2f(tx, ty - height);
-	glVertex2f(tx + width, ty - height);
-	glVertex2f(tx + width, ty);
-
-	glEnd();
+	switch (ctx->shape)
+	{
+	case QUAD:
+		glBegin(GL_QUADS);
+		glVertex2f(tx - (width / 2), ty - (height / 2));
+		glVertex2f(tx + (width / 2), ty - (height / 2));
+		glVertex2f(tx + (width / 2), ty + (height / 2));
+		glVertex2f(tx - (width / 2), ty + (height / 2));
+		glEnd();
+		break;
+	case TRIANGLE:
+		glBegin(GL_TRIANGLES);
+		glVertex2f(tx - (width / 2), ty - (height / 2));
+		glVertex2f(tx + (width / 2), ty - (height / 2));
+		glVertex2f(tx, ty + (height / 2));
+		glEnd();
+		break;
+	case DIAMOND:
+		glBegin(GL_QUADS);
+		glVertex2f(tx - (width / 2), ty);
+		glVertex2f(tx, ty - (height / 2));
+		glVertex2f(tx + (width / 2), ty);
+		glVertex2f(tx, ty + (height / 2));
+		glEnd();
+		break;
+	}
 }
 
 void Boid::OnCleanup()

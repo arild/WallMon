@@ -26,6 +26,7 @@ public:
 	static bool HasSupportForProcPidIo();
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
+	static void ExportDisplayToLocalhost();
 };
 
 #endif /* SYSTEM_H_ */
