@@ -157,6 +157,14 @@ int System::GetNumCores()
 	return atoi(buf);
 }
 
+int System::GetNumCoresExcludeHyperThreading()
+{
+	char buf[128];
+	string cmd = "cat /proc/cpuinfo | grep -m 1 'cpu cores' | awk '{print $4}'";
+	_RunCommand(cmd, buf, 128);
+	return atoi(buf);
+}
+
 int System::GetTotalMemory()
 {
 	char buf[4096];
@@ -167,15 +175,22 @@ int System::GetTotalMemory()
 
 bool System::HasSupportForProcPidIo()
 {
+	if (System::IsRocksvvCluster())
+		return false;
+	return true;
+}
+
+bool System::IsRocksvvCluster()
+{
 	char buf[4096];
 	string cmd = "hostname";
 	_RunCommand(cmd, buf, 4096);
 	string rocks = "rocksvv.cs.uit.no";
 	if (strncmp(buf, rocks.c_str(), rocks.length()) == 0)
-		return false;
+		return true;
 	if (strncmp(buf, "tile-", 5) == 0)
-		return false;
-	return true;
+		return true;
+	return false;
 }
 
 bool System::IsValidIpAddress(string ipAddress)
@@ -207,8 +222,6 @@ void System::ExportDisplayToLocalhost()
 	char buf[1024];
 	_RunCommand(cmd, buf, 1024);
 }
-
-
 
 
 

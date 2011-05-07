@@ -1,5 +1,5 @@
 #!/bin/bash
 WMON=/home/arild/WallMon
-CMD="cd ${WMON}/../apps/mad_worm && ./mad_worm"
+CMD="cd ${WMON}/../apps/madworm && python madworm.py $@"
 
 cluster-fork --bg ${CMD}

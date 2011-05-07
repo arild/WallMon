@@ -8,12 +8,6 @@
 #include "System.h"
 #include "WallView.h"
 
-#define WALL_WIDHT		7
-#define WALL_HEIGHT		4
-
-#define SCREEN_WIDTH	1024
-#define SCREEN_HEIGHT	768
-
 #include <iostream>
 using namespace std;
 
@@ -33,19 +27,25 @@ WallView::WallView(int x, int y, int width, int height)
 	_hostname = System::GetHostname();
 
 	// Traverse row-wise
-	for (int i = 0; i < _y + _h && i < WALL_HEIGHT; i++) {
-		for (int j = 0; j < _x + _w && j < WALL_WIDHT; j++) {
+	for (int i = _y; i < _y + _h && i < WALL_HEIGHT; i++) {
+		for (int j = _x; j < _x + _w && j < WALL_WIDHT; j++) {
 			string tileHostname = HOSTNAMES[j + (i * WALL_WIDHT)];
 			_grid.push_back(tileHostname);
 		}
 	}
 }
 
+/**
+ * Returns the 1D bottom-up row-wise array of tile names generated in the constructor
+ */
 vector<string> WallView::Get()
 {
 	return _grid;
 }
 
+/**
+ * Determines if a tile is within the grid defined in the constructor
+ */
 bool WallView::IsWithin()
 {
 	if (_GetIndex(_hostname) == -1)
@@ -53,23 +53,27 @@ bool WallView::IsWithin()
 	return true;
 }
 
-void WallView::GetOrientation(double *x, double *y, double *width, double *height)
-{
-	GetOrientation(x, y, width, height, _hostname);
-}
-
+/**
+ * Calculates the display area for the given tile
+ *
+ * The display area is based on the grid defined in the constructor and (always)
+ * the resolution of the entire display wall, 7168x3072. This method is intended
+ * for unit-testing due to the host name parameter, otherwise use the one without.
+ */
 void WallView::GetOrientation(double *x, double *y, double *width, double *height, string hostname)
 {
 	int posx, posy, index;
 	index = _GetIndex(hostname);
-	cout << "Idx: " << index << endl;
 	_IndexToCoordinates(index, &posx, &posy);
-	cout << "Posx: " << posx << endl;
-	cout << "Posy: " << posy << endl;
-	*x = (posx / (double)_w) * 100.;
-	*y = (posy / (double)_h) * 100.;
-	*width = (1 / (double)_w) * 100.;
-	*height = (1 / (double)_h) * 100.;
+	*x = (posx / (double)_w) * (double)WALL_SCREEN_WIDTH;
+	*y = (posy / (double)_h) * (double)WALL_SCREEN_HEIGHT;
+	*width = (1 / (double)_w) * (double)WALL_SCREEN_WIDTH;
+	*height = (1 / (double)_h) * (double)WALL_SCREEN_HEIGHT;
+}
+
+void WallView::GetOrientation(double *x, double *y, double *width, double *height)
+{
+	GetOrientation(x, y, width, height, _hostname);
 }
 
 int WallView::_GetIndex(string hostname)

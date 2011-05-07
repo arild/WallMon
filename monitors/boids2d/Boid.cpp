@@ -68,18 +68,7 @@ void Boid::OnLoop()
 	}
 }
 
-//void Circle(float x, float y, float r, const Color& vColor)
-//{
-//	glBegin(GL_TRIANGLE_FAN);
-//	glVertex2f(x, y);
-//	for( float t, int n = 0; n <= 90; ++n, t = (float)n/90.f ) // increment by a fraction of the maximum
-//	{
-//		glVertex2f( x + sin( t * 2 * M_PI ) * r, y + cos( t * 2 * M_PI ) * r );
-//	}
-//	glEnd();
-//}
-
-void Boid::OnRender(SDL_Surface *screen)
+void Boid::OnRender()
 {
 	if (_visible == false)
 		return;
@@ -126,4 +115,12 @@ bool Boid::_IsDestinationReached(float destx, float desty)
 		return true;
 	return false;
 }
+
+void Boid::_DrawAxis()
+{
+}
+
+
+
+
 

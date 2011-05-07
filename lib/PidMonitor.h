@@ -8,6 +8,7 @@
 #ifndef PIDMONITOR_H_
 #define PIDMONITOR_H_
 
+#include <vector>
 #include <set>
 #include "System.h"
 
@@ -18,12 +19,18 @@ class PidMonitor {
 public:
 	PidMonitor();
 	virtual ~PidMonitor();
+	void Update(vector<int> &pids);
 	void Update();
-	set<int> GetDiff();
+	vector<int> GetUnion();
+	vector<int> GetIntersection();
+	vector<int> GetDifference();
 	void Ignore(int pid);
 
 private:
-	set<int> *_pids;
+	vector<int> *_new;
+	vector<int> *_old;
+	set<int> *_ignored;
+	void _RemoveIgnored(vector<int> &pids);
 };
 
 #endif /* PIDMONITOR_H_ */

@@ -1,2 +1,2 @@
-NAME="mad_worm"
+NAME="madworm"
 cluster-fork  --bg pkill -9 -f $NAME

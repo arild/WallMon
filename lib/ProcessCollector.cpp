@@ -34,25 +34,13 @@ void ProcessCollector::OnInit(Context *ctx)
 	delete context;
 	context = ctx;
 
-	_numCores = System::GetNumCores();
+	_numCores = System::GetNumCoresExcludeHyperThreading();
 	_totalMemoryMb = (double)System::GetTotalMemory() / 1024.;
 
 	// Create a process monitor for each pid on system
-	std::vector<int> *pids = System::GetAllPids();
-	_monitors = new std::vector<LinuxProcessMonitor *>();
-	for (vector<int>::iterator it = pids->begin(); it != pids->end(); it++) {
-		int pid = *it;
-		LinuxProcessMonitor *monitor = new LinuxProcessMonitor();
-		if (monitor->open(pid) == false) {
-			delete monitor;
-			continue;
-		}
-		if (System::HasSupportForProcPidIo())
-			monitor->OpenIo(pid);
-		monitor->update();
-		_monitors->push_back(monitor);
-		//LOG(INFO) << pid;
-	}
+	_monitors = new vector<LinuxProcessMonitor *>();
+	_pidMonitor = new PidMonitor;
+	_AddProcesses();
 	LOG(INFO) << "Num processes being monitored: " << _monitors->size();
 	_buffer = new char[MESSAGE_BUF_SIZE];
 	memset(_buffer, 0, MESSAGE_BUF_SIZE);
@@ -68,7 +56,9 @@ double maxIn = 0, maxOut = 0;
 
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
+	_AddProcesses();
 	ProcessesMessage processesMsg;
+	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (vector<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitor *monitor = (*it);
 		monitor->update();
@@ -125,3 +115,27 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		LOG(ERROR) << "Protocol buffer serialization failed";
 	msg->set_data(_buffer, processesMsg.ByteSize());
 }
+
+void ProcessCollector::_AddProcesses()
+{
+	_pidMonitor->Update();
+	vector<int> pids = _pidMonitor->GetDifference();
+	BOOST_FOREACH(int pid, pids)
+		_AddProcess(pid);
+}
+
+void ProcessCollector::_AddProcess(int pid)
+{
+	LinuxProcessMonitor *monitor = new LinuxProcessMonitor();
+	if (monitor->open(pid) == false) {
+		delete monitor;
+		_pidMonitor->Ignore(pid);
+		return;
+	}
+	if (System::HasSupportForProcPidIo())
+		monitor->OpenIo(pid);
+	monitor->update();
+	_monitors->push_back(monitor);
+}
+
+

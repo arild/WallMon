@@ -4,15 +4,15 @@
 #include "System.h"
 #include "WallView.h"
 
-#define KEY		"PROCESS_ALL_MON"
-#define SAMPLE_FREQUENCY_MSEC 	1000
+#define KEY		"BOIDS"
+#define SAMPLE_FREQUENCY_MSEC 	200
 
 extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 #ifdef ROCKSVV
-	vector<string> s = WallView(0, 0, 3, 4).Get();
+	vector<string> s = WallView(1, 1, 2, 2).Get();
 	p->context->AddServers(s);
 #else
 	p->context->AddServer("129.242.19.57");

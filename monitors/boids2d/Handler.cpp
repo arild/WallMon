@@ -14,14 +14,12 @@
 #include "unistd.h"
 #include "WallView.h"
 
-#define KEY						"PROCESS_ALL_MON"
-#define MESSAGE_BUF_SIZE		1024 * 1000
-#define SAMPLE_FREQUENCY_MSEC 	1000
-#define FRAMES_PER_SEC			2
+#define KEY							"BOIDS"
+#define MESSAGE_BUF_SIZE			1024 * 1000
+#define SAMPLE_FREQUENCY_MSEC 		1000
+#define FRAMES_PER_SEC				2
 #define NUM_PROCESSES_TO_DISPLAY	8
 
-unsigned long _FnvHash(string key);
-void _ProcessNameToRgbColor(string name, int *r, int *g, int *b);
 
 void Handler::OnInit(Context *ctx)
 {
@@ -31,19 +29,19 @@ void Handler::OnInit(Context *ctx)
 	_procMap = new ProcMap();
 
 #ifdef ROCKSVV
-	WallView w(0, 0, 3, 4);
+	WallView w(1, 1, 2, 2);
 	if (w.IsWithin()) {
 		double x, y, width, height;
 		w.GetOrientation(&x, &y, &width, &height);
-		_boidsApp = new BoidsApp();
-		_boidsApp->SetView(x, y, width, height);
+		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT);
+		_boidsApp->SetDisplayArea(x, y, width, height);
+		_nameTagList = _boidsApp->CreateNameTagList();
 		_boidsApp->Start();
 	}
 #else
-	_boidsApp = new BoidsApp();
-//	_boidsApp->SetView(20, 50, 80, 50);
-	//_boidsApp->SetView(0, 50, 100, 50);
-	_boidsApp->SetView(0, 0, 100, 100);
+	_boidsApp = new BoidsApp(1600, 768);
+	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
+	_nameTagList = _boidsApp->CreateNameTagList();
 	_boidsApp->Start();
 #endif
 }
@@ -54,12 +52,10 @@ void Handler::OnStop()
 		_boidsApp->Stop();
 		delete _boidsApp;
 	}
-
 	delete _message;
 	delete _procMap;
 }
 
-double maxUtil = 0;
 void Handler::Handle(WallmonMessage *msg)
 {
 	if (_boidsApp == NULL)
@@ -75,7 +71,7 @@ void Handler::Handle(WallmonMessage *msg)
 		ProcStat *procStat = NULL;
 		string hostname = msg->hostname();
 		int pid = processMessage->pid();
-		string procMapKey = Handler::_CreateProcMapKey(hostname, pid);
+		string procMapKey = _CreateProcMapKey(hostname, pid);
 
 		if (_procMap->count(procMapKey) == 0) {
 			procStat = new ProcStat();
@@ -98,12 +94,12 @@ void Handler::Handle(WallmonMessage *msg)
 					&ctx->blue);
 			ctx->shape = DIAMOND;
 			_boidsApp->CreateBoid(0, 0, ctx);
-
-
 		} else {
 			procStat = (*_procMap)[procMapKey];
 		}
 		procStat->numSamples += 1;
+
+		double utilFilterFactor = 1.0;
 
 		// CPU
 		double user = processMessage->usercpuutilization();//processMessage->usercpuload();
@@ -112,33 +108,33 @@ void Handler::Handle(WallmonMessage *msg)
 		double userCpuRelativeShare = 50;
 		if (totalCpuUtilization > 0)
 			userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
-		if (totalCpuUtilization < 0.5)
+		if (totalCpuUtilization < utilFilterFactor)
 			procStat->boids->cpu->SetDestination(-1, -1);
-		else
-			procStat->boids->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+		else {
+			BoidSharedContext *b = procStat->boids->cpu;
+			b->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+			NameTag tag(processMessage->processname(), b->red, b->green, b->blue);
+			_nameTagList->Add(tag);
+		}
 
-		 // Memory
-		procStat->totalMemoryUtilization += (double)processMessage->memoryutilization();
+		// Memory
+		procStat->totalMemoryUtilization += (double) processMessage->memoryutilization();
 		double avgMemoryUtilization = procStat->totalMemoryUtilization
 				/ (double) procStat->numSamples;
-		if (processMessage->memoryutilization() < 0.5)
+		if (processMessage->memoryutilization() < utilFilterFactor)
 			procStat->boids->memory->SetDestination(-1, -1);
 		else
 			procStat->boids->memory->SetDestination(processMessage->memoryutilization(),
-				avgMemoryUtilization);
+					avgMemoryUtilization);
 
 		// Network
 		double in = processMessage->networkinutilization();
 		double out = processMessage->networkoututilization();
 		double networkUtilization = in + out;
-		if (networkUtilization > maxUtil) {
-			maxUtil = networkUtilization;
-			LOG(INFO) << "Network util: " << networkUtilization;
-		}
 		double outNetworkRelativeShare = 50;
 		if (networkUtilization > 0)
 			outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
-		if (networkUtilization < 0.5)
+		if (networkUtilization < utilFilterFactor)
 			procStat->boids->network->SetDestination(-1, -1);
 		else
 			procStat->boids->network->SetDestination(networkUtilization, outNetworkRelativeShare);
@@ -156,6 +152,46 @@ string Handler::_CreateProcMapKey(string hostName, int pid)
 	return ss.str();
 }
 
+void Handler::_ProcessNameToRgbColor(string name, int *r, int *g, int *b)
+{
+	unsigned long hash = _OatHash(name);
+	*r = hash & 0xFF;
+	*g = (hash >> 8) & 0xFF;
+	*b = (hash >> 16) & 0xFF;
+	// Make sure color does not become too dark
+	if (*r < 20)
+		*r = 20;
+	if (*g < 20)
+		*g = 20;
+	if (*b < 20)
+		*b = 20;
+}
+
+/**
+ * One-at-a-time hash by Bob Jenkins: http://en.wikipedia.org/wiki/Jenkins_hash_function
+ *
+ * This hash function appears to have sufficient avalanch effect, especially compared
+ * to the hash function found in boost (<boost/functional/hash.hpp>).
+ */
+unsigned long Handler::_OatHash(string key)
+{
+	unsigned char *p = (unsigned char *)key.c_str();
+	unsigned long h = 0;
+	int i;
+
+	for (i = 0; i < key.length(); i++) {
+		h += p[i];
+		h += (h << 10);
+		h ^= (h >> 6);
+	}
+
+	h += (h << 3);
+	h ^= (h >> 11);
+	h += (h << 15);
+
+	return h;
+}
+
 // class factories - needed to bootstrap object orientation with dlfcn.h
 extern "C" Handler *create_handler()
 {
@@ -165,27 +201,4 @@ extern "C" Handler *create_handler()
 extern "C" void destroy_handler(Handler *p)
 {
 	delete p;
-}
-
-unsigned long _FnvHash(string key)
-{
-	unsigned char *p = (unsigned char *) key.c_str();
-	unsigned long h = 2166136261UL;
-	for (int i = 0; i < key.length(); i++)
-		h = (h * 16777619) ^ p[i];
-	return h;
-}
-
-void _ProcessNameToRgbColor(string name, int *r, int *g, int *b)
-{
-	unsigned long hash = _FnvHash(name);
-	*r = hash & 0xFF;
-	*g = (hash >> 8) & 0xFF;
-	*b = (hash >> 16) & 0xFF;
-	if (*r < 20)
-		*r = 20;
-	if (*g < 20)
-		*g = 20;
-	if (*b < 20)
-		*b = 20;
 }

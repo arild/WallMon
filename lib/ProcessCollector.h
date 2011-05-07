@@ -9,9 +9,10 @@
 #define PROCESSCOLLECTOR_H_
 
 #include "Wallmon.h"
+#include <list>
 #include "stubs/ProcessCollector.pb.h"
 #include "LinuxProcessMonitor.h"
-#include <list>
+#include "PidMonitor.h"
 
 using namespace std;
 
@@ -28,9 +29,12 @@ public:
 	virtual void Sample(WallmonMessage *msg);
 private:
 	vector<LinuxProcessMonitor *> *_monitors;
+	PidMonitor *_pidMonitor;
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
+	void _AddProcesses();
+	void _AddProcess(int pid);
 };
 
 #endif /* PROCESSCOLLECTOR_H_ */

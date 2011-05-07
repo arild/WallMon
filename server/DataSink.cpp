@@ -35,10 +35,17 @@ DataSink::DataSink(DataRouter *router)
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(STREAMER_ENTRY_PORT);
 	addr.sin_addr.s_addr = INADDR_ANY;
+
 	int sockfd = socket(PF_INET, SOCK_STREAM, 0);
 	LOG_IF(FATAL, sockfd < 0) << "failed creating socket";
-	int ret = ::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
+
+	unsigned int reuse = 1;
+	int ret = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+	LOG_IF(FATAL, ret < 0) << "failed setting so_reuseaddr";
+
+	ret = ::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
 	LOG_IF(FATAL, ret != 0) << "failed binding socket";
+
 	ret = listen(sockfd, 2);
 	LOG_IF(FATAL, ret < 0) << "failed listening on socket";
 
@@ -70,7 +77,7 @@ void DataSink::Stop()
 	set<ev::io *>::iterator it;
 	for (it = _watcherSet->begin(); it != _watcherSet->end(); it++)
 		_DeleteAndCleanupWatcher(*(*it));
-	//ev_break(_loop, EVBREAK_ALL);
+	ev_break(_loop, EVBREAK_ALL);
 	//_thread.join(); // Can take up to several seconds
 	LOG(INFO) << "DataSink stopped";
 }
@@ -159,9 +166,9 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 
 void DataSink::_DeleteAndCleanupWatcher(ev::io &watcher)
 {
+	watcher.stop(); // Make watcher inactive
 	close(watcher.fd); // Close associated socket
 	_watcherSet->erase(&watcher);
-	watcher.stop(); // Make watcher inactive
 	delete &watcher; // Release memory
 }
 

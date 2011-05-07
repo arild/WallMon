@@ -14,14 +14,15 @@ public:
 	Boid();
 	virtual ~Boid();
 	virtual void OnLoop();
-	virtual void OnRender(SDL_Surface *screen);
+	virtual void OnRender();
 	virtual void OnCleanup();
 
 private:
 	float _oldDestx, _oldDesty;
 	bool _visible;
-	bool _IsDestinationReached(float destx, float desty);
 	GLUquadricObj *_quadric;
+	bool _IsDestinationReached(float destx, float desty);
+	void _DrawAxis();
 };
 
 #endif /* BOID_H_ */

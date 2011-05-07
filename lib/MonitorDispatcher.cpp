@@ -33,7 +33,6 @@ MonitorDispatcher::MonitorDispatcher(IMonitorManager &manager, int multicastList
 
 MonitorDispatcher::~MonitorDispatcher()
 {
-	delete _socket;
 }
 
 void MonitorDispatcher::Start()
@@ -109,5 +108,7 @@ void MonitorDispatcher::_ListenForever()
 			break;
 		}
 	}
+	_socket->leaveGroup(MULITCAST_ADDRESS);
 	_socket->disconnect();
+	delete _socket; // calls close() on socket
 }

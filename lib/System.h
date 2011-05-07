@@ -22,8 +22,10 @@ public:
 	static double GetTimeInMsec();
 	static string &GetHostname();
 	static int GetNumCores();
+	static int GetNumCoresExcludeHyperThreading();
 	static int GetTotalMemory();
 	static bool HasSupportForProcPidIo();
+	static bool IsRocksvvCluster();
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
 	static void ExportDisplayToLocalhost();

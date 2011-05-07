@@ -3,7 +3,7 @@ include ../Makefile.inc
 CFLAGS = -O2 -c
 DIRS = stubs 
 
-all: SubDirs PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor IoLogger WallView MonitorDispatcher ProcessCollector
+all: SubDirs PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList
 	
 clean: 	
 	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE} clean) ; done
@@ -41,6 +41,10 @@ WallView: WallView.h WallView.cpp
 	$(CC) $(CFLAGS) $?
 	ar cru lib$@.a $@.o
 
+PidMonitor: PidMonitor.h PidMonitor.cpp
+	$(CC) $(CFLAGS) $(INC_PATH) $?
+	ar cru lib$@.a $@.o
+
 # Note that the protobuf stub (MonitorDispatcher.pb.o) is included
 MonitorDispatcher: MonitorDispatcher.h MonitorDispatcher.cpp IMonitorManager.h
 	$(CC) $(CFLAGS) $(INC_PATH) $(LIB_PATH) -lPracticalSocket -lClassLoader $?
@@ -49,4 +53,10 @@ MonitorDispatcher: MonitorDispatcher.h MonitorDispatcher.cpp IMonitorManager.h
 # Note that the protobuf stub (ProcessCollector.pb.o) is included
 ProcessCollector: ProcessCollector.h ProcessCollector.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
-	ar rcs lib$@.a $@.o LinuxProcessMonitor.o System.o stubs/ProcessCollector.pb.o
+	ar rcs lib$@.a $@.o LinuxProcessMonitor.o PidMonitor.o System.o stubs/ProcessCollector.pb.o
+
+NameTagList: NameTagList.h NameTagList.cpp
+	$(CC) $(CFLAGS) $(INC_PATH) $?
+	ar cru lib$@.a $@.o
+	
+	

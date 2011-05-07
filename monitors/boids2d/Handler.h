@@ -62,7 +62,10 @@ private:
 	ProcessesMessage *_message;
 	BoidsApp *_boidsApp;
 	ProcMap *_procMap;
-	static string _CreateProcMapKey(string hostName, int pid);
+	NameTagList *_nameTagList;
+	string _CreateProcMapKey(string hostName, int pid);
+	unsigned long _OatHash(string key);
+	void _ProcessNameToRgbColor(string name, int *r, int *g, int *b);
 };
 
 #endif /* HANDLER_H_ */
