@@ -12,7 +12,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iostream>
-#include <glog/logging.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -63,7 +62,7 @@ void System::Daemonize()
 	/* Redirect standard files to /dev/null */
 	if (!freopen("/dev/null", "r", stdin) || !freopen("/dev/null", "w", stdout) || freopen(
 			"/dev/null", "w", stderr))
-		LOG(ERROR) << "freopen failed";
+		exit(EXIT_FAILURE);
 }
 
 int System::GetPid(string processName)
@@ -72,7 +71,6 @@ int System::GetPid(string processName)
 	string cmd = "pgrep " + processName;
 	FILE *fp = popen(cmd.c_str(), "r");
 	if (fp == NULL) {
-		LOG(ERROR) << "failed to run command";
 		return -1;
 	}
 	void *res = fgets(buf, 100, fp);
@@ -115,9 +113,8 @@ vector<int> *System::System::GetAllPids()
 {
 	string cmd = "ps ax | awk '{print $1}'";
 	FILE *fp = popen(cmd.c_str(), "r");
-	if (fp == NULL) {
-		LOG(ERROR) << "failed to run command: " << cmd;
-	}
+	if (fp == NULL)
+		return NULL;
 	vector<int> *v = new vector<int> ;
 	_TokenizeFile(fp, v);
 	pclose(fp);

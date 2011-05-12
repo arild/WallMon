@@ -5,13 +5,21 @@
 #include "Scene.h"
 #include "NameDrawer.h"
 #include <iostream>
-#include "WallView.h"
+#include "BoidAxis.h"
+
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
 	_boidScene = new Scene(1024, 200, (6 * 1024) - 200, (4 * 768) - 400, 100, 100);
 	_nameDrawerScene = new Scene(0, 0, 1024, 4 * 768, 1024, 4 * 768);
+
+	_scenes.push_back(_boidScene);
+	_scenes.push_back(_nameDrawerScene);
+
+	BoidAxis *axis = new BoidAxis();
+	axis->Set(0, 100, 25);
+	_boidScene->entityList.push_back((Entity *)axis);
 
 	_font = new FTGLTextureFont(FONT_PATH);
 	if (_font->Error())
@@ -85,10 +93,9 @@ void BoidsApp::CreateBoid(double startX, double startY, BoidSharedContext *ctx)
 {
 	Boid *boid = new Boid();
 	boid->ctx = ctx;
-	((Entity *) boid)->scene = _boidScene;
 	((Entity *) boid)->tx = startX;
 	((Entity *) boid)->ty = startY;
-	Entity::entityList.push_back((Entity *) boid);
+	_boidScene->entityList.push_back((Entity *) boid);
 }
 
 void BoidsApp::RemoveBoid(Boid *Boid)
@@ -99,8 +106,7 @@ NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
 	NameDrawer *nameDrawer = new NameDrawer(_nameTagList, new FTGLTextureFont(FONT_PATH));
-	((Entity *) nameDrawer)->scene = _nameDrawerScene;
-	Entity::entityList.push_back((Entity *) nameDrawer);
+	_nameDrawerScene->entityList.push_back((Entity *) nameDrawer);
 	return _nameTagList;
 }
 
@@ -148,16 +154,9 @@ void BoidsApp::_RenderForever()
 
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		for (int i = 0; i < Entity::entityList.size(); i++)
-			Entity::entityList[i]->OnLoop();
-		for (int i = 0; i < Entity::entityList.size(); i++) {
-			Entity::entityList[i]->scene->Load();
-			Entity::entityList[i]->OnRender();
-			Entity::entityList[i]->scene->Unload();
-		}
-		_DrawAxis();
-
+		for (int i = 0; i < _scenes.size(); i++)
+			_scenes[i]->Run();
+		//_DrawAxis();
 		SDL_GL_SwapBuffers();
 
 		Fps::fpsControl.OnLoop();
@@ -166,54 +165,6 @@ void BoidsApp::_RenderForever()
 				Entity::entityList.size());
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
-}
-
-void BoidsApp::_DrawAxis()
-{
-	_boidScene->Load();
-	glColor3ub(0, 255, 0);
-
-	float w = 0.3;
-	float l = -1 - w;
-	float r = 100 + 1 + w;
-	float b = -1 - w;
-	float t = 100 + 1 + w;
-
-	// Left
-	glBegin(GL_QUADS);
-	glVertex2f(l - w, b - w);
-	glVertex2f(l, b - w);
-	glVertex2f(l, t + w);
-	glVertex2f(l - w, t + w);
-	glEnd();
-
-	// Right
-	glBegin(GL_QUADS);
-	glVertex2f(r, b - w);
-	glVertex2f(r + w, b - w);
-	glVertex2f(r + w, t + w);
-	glVertex2f(r, t + w);
-	glEnd();
-
-	// Bottom
-	glBegin(GL_QUADS);
-	glVertex2f(l - w, b - w);
-	glVertex2f(r + w, b - w);
-	glVertex2f(r + w, b);
-	glVertex2f(l - w, b);
-	glEnd();
-	//	_font->FaceSize(12, 200);
-	//	_font->Render("Utilization");
-
-	// Top
-	glBegin(GL_QUADS);
-	glVertex2f(l - w, t);
-	glVertex2f(r + w, t);
-	glVertex2f(r + w, t + w);
-	glVertex2f(l - w, t + w);
-	glEnd();
-
-	_boidScene->Unload();
 }
 
 void BoidsApp::_DrawBoidDescription()

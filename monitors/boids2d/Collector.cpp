@@ -5,7 +5,7 @@
 #include "WallView.h"
 
 #define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	200
+#define SAMPLE_FREQUENCY_MSEC 	1000
 
 extern "C" ProcessCollector *create_collector()
 {

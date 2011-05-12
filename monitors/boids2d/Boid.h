@@ -18,6 +18,7 @@ public:
 	virtual void OnCleanup();
 
 private:
+	float speedx, speedy;
 	float _oldDestx, _oldDesty;
 	bool _visible;
 	GLUquadricObj *_quadric;

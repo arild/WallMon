@@ -3,16 +3,13 @@
 
 #include <SDL/SDL.h>
 #include <vector>
-#include "Scene.h"
 
 using namespace std;
 
 class Entity {
 public:
 	static vector<Entity *> entityList;
-	Scene *scene;
 	float tx, ty;
-	float speedx, speedy;
 	float width, height;
 
 	virtual ~Entity() {}

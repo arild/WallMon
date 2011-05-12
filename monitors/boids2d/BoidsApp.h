@@ -6,6 +6,8 @@
 #include <GL/glu.h>
 #include <FTGL/ftgl.h>
 #include <boost/thread.hpp>
+#include <vector>
+#include "Scene.h"
 #include "Boid.h"
 #include "NameTagList.h"
 
@@ -29,6 +31,7 @@ private:
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_nameDrawerScene;
+	vector<Scene *> _scenes;
 	FTFont *_font;
 	NameTagList *_nameTagList;
 	void _InitSdlAndOpenGl();

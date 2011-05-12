@@ -9,13 +9,10 @@
 #include "Scene.h"
 #include <algorithm>
 
+Scene *Scene::current;
 
-Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virtualH_)// : x(x_), y(y_), w(w_), h(h_)
+Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virtualH_) : x(x_), y(y_), w(w_), h(h_)
 {
-	x = x_;
-	y = y_;
-	w = w_;
-	h = h_;
 	float scaleX = w_ / (float)virtualW_;
 	float scaleY = h_ / (float) virtualH_;
 	scale = std::min(scaleX, scaleY);
@@ -27,6 +24,7 @@ Scene::~Scene()
 
 void Scene::Load()
 {
+	current = this;
 	glPushMatrix();
 	glTranslatef(x, y, 0);
 	glScalef(scale, scale, 1);
@@ -36,6 +34,20 @@ void Scene::Unload()
 {
 	glPopMatrix();
 }
+
+void Scene::Run()
+{
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnLoop();
+
+	Load();
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnRender();
+	Unload();
+
+}
+
+
 
 //void Scene::ScreenToSceneCoords(float screenX, float screenY, float *sceneX, float *sceneY)
 //{
