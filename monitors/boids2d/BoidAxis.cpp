@@ -6,17 +6,18 @@
  */
 
 #include <GL/gl.h>
+#include <sstream>
+#include "Config.h"
 #include "BoidAxis.h"
+#include "Scene.h"
 
 BoidAxis::BoidAxis()
 {
-	// TODO Auto-generated constructor stub
-
+	_font = new Font();
 }
 
 BoidAxis::~BoidAxis()
 {
-	// TODO Auto-generated destructor stub
 }
 
 void BoidAxis::Set(int start, int stop, int tickSize)
@@ -42,44 +43,64 @@ void BoidAxis::OnRender()
 {
 	glColor3ub(0, 255, 0);
 
-	float w = 0.3;
-	float l = -1 - w;
-	float r = 100 + 1 + w;
-	float b = -1 - w;
-	float t = 100 + 1 + w;
+	float s = 0.3; // width and height of axises
+	float x = -1 - s;
+	float y = -1 - s;
+	float w = 102 + s;
+	float h = 102 + s;
+
+	int numTicks = (_stop - _start) / _tickSize;
+	float tw = 0.7;
+	float th = 2.0;
 
 	// Left
 	glBegin(GL_QUADS);
-	glVertex2f(l - w, b - w);
-	glVertex2f(l, b - w);
-	glVertex2f(l, t + w);
-	glVertex2f(l - w, t + w);
+	glVertex2f(x, y);
+	glVertex2f(x+s, y);
+	glVertex2f(x+s, y+h+s);
+	glVertex2f(x, y+h+s);
 	glEnd();
 
 	// Right
 	glBegin(GL_QUADS);
-	glVertex2f(r, b - w);
-	glVertex2f(r + w, b - w);
-	glVertex2f(r + w, t + w);
-	glVertex2f(r, t + w);
+	glVertex2f(x+w, y);
+	glVertex2f(x+w+s, y);
+	glVertex2f(x+w+s, y+h+s);
+	glVertex2f(x+w, y+h+s);
 	glEnd();
 
 	// Bottom
 	glBegin(GL_QUADS);
-	glVertex2f(l - w, b - w);
-	glVertex2f(r + w, b - w);
-	glVertex2f(r + w, b);
-	glVertex2f(l - w, b);
+	glVertex2f(x, y);
+	glVertex2f(x+w+s, y);
+	glVertex2f(x+w+s, y+s);
+	glVertex2f(x, y+s);
 	glEnd();
-	//	_font->FaceSize(12, 200);
-	//	_font->Render("Utilization");
+
+	for (int i = 0; i <= numTicks; i++) {
+		float tx = (i * _tickSize) - tw/2;
+		glBegin(GL_QUADS);
+		glVertex2f(tx, y-th);
+		glVertex2f(tx+tw, y-th);
+		glVertex2f(tx+tw, y);
+		glVertex2f(tx, y);
+		glEnd();
+
+		glColor3f(1, 0, 0);
+		stringstream ss;
+		ss << i * _tickSize;
+		_font->RenderText(ss.str(), 4, tx + tw/(float)2, -9, true);
+		glColor3f(0, 1, 0);
+	}
+
+	_font->RenderText("Utilization", 4, 50, -15, true);
 
 	// Top
 	glBegin(GL_QUADS);
-	glVertex2f(l - w, t);
-	glVertex2f(r + w, t);
-	glVertex2f(r + w, t + w);
-	glVertex2f(l - w, t + w);
+	glVertex2f(x, y+h);
+	glVertex2f(x+w+s, y+h);
+	glVertex2f(x+w+s, y+h+s);
+	glVertex2f(x, y+h+s);
 	glEnd();
 }
 

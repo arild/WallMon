@@ -11,7 +11,7 @@
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
-	_boidScene = new Scene(1024, 200, (6 * 1024) - 200, (4 * 768) - 400, 100, 100);
+	_boidScene = new Scene(1024, 500, (6 * 1024) - 200, (4 * 768) - 1000, 100, 100);
 	_nameDrawerScene = new Scene(0, 0, 1024, 4 * 768, 1024, 4 * 768);
 
 	_scenes.push_back(_boidScene);

@@ -8,7 +8,9 @@
 #ifndef AXIS_H_
 #define AXIS_H_
 
+#include "FTGL/ftgl.h"
 #include "Entity.h"
+#include "Font.h"
 
 class BoidAxis : Entity {
 public:
@@ -24,7 +26,7 @@ public:
 
 private:
 	int _start, _stop, _tickSize;
-
+	Font *_font;
 };
 
 #endif /* AXIS_H_ */

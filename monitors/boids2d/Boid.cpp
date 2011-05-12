@@ -4,9 +4,8 @@
 
 #include "Boid.h"
 #include "Fps.h"
-using namespace std;
 
-float maxX = 0, maxY = 0;
+using namespace std;
 
 Boid::Boid()
 {
