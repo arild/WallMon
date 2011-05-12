@@ -40,9 +40,9 @@ void Handler::OnInit(Context *ctx)
 	}
 #else
 	_boidsApp = new BoidsApp(1600, 768);
-	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 	_nameTagList = _boidsApp->CreateNameTagList();
 	_boidsApp->Start();
+	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif
 }
 

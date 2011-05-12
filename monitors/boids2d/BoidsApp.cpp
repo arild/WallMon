@@ -58,14 +58,6 @@ void BoidsApp::_InitSdlAndOpenGl()
 	}
 	glClearColor(0, 0, 0, 0);
 	glViewport(0, 0, _screenWidth, _screenHeight);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	LOG(INFO) << _orthoLeft << " | " << _orthoRight << " | " << _orthoBottom << " | "
-			<< _orthoTop;
-	glOrtho(0, 100, 0, 100, 0, 100);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 }
 
 /**
@@ -125,27 +117,16 @@ void BoidsApp::_RenderForever()
 	srand(SDL_GetTicks());
 	SDL_Event event;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(_orthoLeft, _orthoRight, _orthoBottom, _orthoTop, 0, 100);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	//	glEnable(GL_SCISSOR_TEST);
-	//	glScissor((BOID_X / (double) R) * SCREEN_WIDTH, (BOID_Y / (double) R) * SCREEN_HEIGHT,
-	//			SCREEN_WIDTH, SCREEN_HEIGHT);
-
 	LOG(INFO) << "BoidsApp entering infinite loop";
 	while (_running) {
-		//		if (_updateOrtho) {
-		//			LOG(INFO) << "NEW ORTHO";
-		//			glMatrixMode(GL_PROJECTION);
-		//			glLoadIdentity();
-		//			glOrtho(_orthoLeft, _orthoRight, _orthoBottom, _orthoTop, 0, R);
-		//			glMatrixMode(GL_MODELVIEW);
-		//			glLoadIdentity();
-		//			_updateOrtho = false;
-		//		}
+		if (_updateOrtho) {
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(_orthoLeft, _orthoRight, _orthoBottom, _orthoTop, 0, 100);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			_updateOrtho = false;
+		}
 
 		// Check for ctrl-c
 		SDL_PumpEvents(); // Let SDL look for external input
@@ -156,7 +137,6 @@ void BoidsApp::_RenderForever()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (int i = 0; i < _scenes.size(); i++)
 			_scenes[i]->Run();
-		//_DrawAxis();
 		SDL_GL_SwapBuffers();
 
 		Fps::fpsControl.OnLoop();
