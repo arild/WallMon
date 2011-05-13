@@ -1,5 +1,5 @@
-#ifndef BOIDS_H_
-#define BOIDS_H_
+#ifndef BOIDSAPP_H_
+#define BOIDSAPP_H_
 
 #include <SDL/SDL.h>
 #include <GL/gl.h>
@@ -40,4 +40,4 @@ private:
 	void _DrawBoidDescription();
 };
 
-#endif /* BOIDS_H_ */
+#endif /* BOIDSAPP_H_ */

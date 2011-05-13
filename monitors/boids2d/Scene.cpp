@@ -1,8 +1,6 @@
-/*
- * Scene.cpp
- *
- *  Created on: Apr 30, 2011
- *      Author: arild
+/**
+ * Implements a scene abstraction that allows entities to work and
+ * operate on their own coordinate system.
  */
 
 #include <GL/gl.h>

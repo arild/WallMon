@@ -1,10 +1,3 @@
-/*
- * Scene.h
- *
- *  Created on: Apr 30, 2011
- *      Author: arild
- */
-
 #ifndef SCENE_H_
 #define SCENE_H_
 

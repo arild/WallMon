@@ -1,3 +1,12 @@
+/**
+ * @file   Network.cpp
+ * @Author Arild Nilsen
+ * @date   March, 2011
+ *
+ * Encapsulate timers for controlling the FPS of the main loop
+ */
+
+
 #include "Fps.h"
 #include <iostream>
 using namespace std;

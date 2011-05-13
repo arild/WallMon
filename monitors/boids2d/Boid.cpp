@@ -1,3 +1,10 @@
+/**
+ * @Author Arild Nilsen
+ * @date   April, 2011
+ *
+ * Implements the boids in the animation.
+ */
+
 #include <iostream>
 #include <boost/thread/mutex.hpp>
 #include <glog/logging.h>

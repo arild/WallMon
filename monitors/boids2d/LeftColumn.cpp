@@ -1,42 +1,45 @@
-/*
- * NameDrawer.cpp
+/**
+ * @file   LeftColumn.cpp
+ * @Author Arild Nilsen
+ * @date   May, 2011
  *
- *  Created on: May 1, 2011
- *      Author: arild
+ * Entity that draws all information on the left side of the screen,
+ * including the name tag list
  */
+
 #include <glog/logging.h>
-#include "NameDrawer.h"
+#include "LeftColumn.h"
 
 #define W	1024
 #define H 768*4
 
-NameDrawer::NameDrawer(NameTagList *nameTagList, FTFont *font)
+LeftColumn::LeftColumn(NameTagList *nameTagList, FTFont *font)
 {
 	_nameTagList = nameTagList;
 	_font = font;
 	_font->FaceSize(100);
 }
 
-NameDrawer::~NameDrawer()
+LeftColumn::~LeftColumn()
 {
 }
 
-void NameDrawer::OnLoop()
+void LeftColumn::OnLoop()
 {
 }
 
-void NameDrawer::OnRender()
+void LeftColumn::OnRender()
 {
 	_ResetPos();
 	_DrawSymbolDescription();
 	_DrawProcessNames();
 }
 
-void NameDrawer::OnCleanup()
+void LeftColumn::OnCleanup()
 {
 }
 
-void NameDrawer::_DrawSymbolDescription()
+void LeftColumn::_DrawSymbolDescription()
 {
 	_MovePosLarge();
 	//_DrawHeading("Symbol Description");
@@ -61,7 +64,7 @@ void NameDrawer::_DrawSymbolDescription()
 //	glPopMatrix();
 }
 
-void NameDrawer::_DrawProcessNames()
+void LeftColumn::_DrawProcessNames()
 {
 	vector<NameTag> v = _nameTagList->GetList();
 
@@ -89,28 +92,28 @@ void NameDrawer::_DrawProcessNames()
 	}
 }
 
-float NameDrawer::_GetPos()
+float LeftColumn::_GetPos()
 {
 	return _pos;
 }
 
-void NameDrawer::_MovePos()
+void LeftColumn::_MovePos()
 {
 	_pos -= 100;
 }
 
-void NameDrawer::_MovePosLarge()
+void LeftColumn::_MovePosLarge()
 {
 	_pos -= 150;
 }
 
-void NameDrawer::_ResetPos()
+void LeftColumn::_ResetPos()
 {
 	_pos = H - 50;
 }
 
 
-void NameDrawer::_DrawHeading(string text)
+void LeftColumn::_DrawHeading(string text)
 {
 	float y = _GetPos();
 	glPushMatrix();

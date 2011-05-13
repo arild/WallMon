@@ -1,10 +1,3 @@
-/*
- * Font.h
- *
- *  Created on: May 12, 2011
- *      Author: arild
- */
-
 #ifndef FONT_H_
 #define FONT_H_
 

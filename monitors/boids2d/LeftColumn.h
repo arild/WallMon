@@ -1,10 +1,3 @@
-/*
- * NameDrawer.h
- *
- *  Created on: May 1, 2011
- *      Author: arild
- */
-
 #ifndef NAMEDRAWER_H_
 #define NAMEDRAWER_H_
 
@@ -13,10 +6,10 @@
 #include "Entity.h"
 #include "NameTagList.h"
 
-class NameDrawer : Entity {
+class LeftColumn : Entity {
 public:
-	NameDrawer(NameTagList *nameTagList, FTFont *font);
-	virtual ~NameDrawer();
+	LeftColumn(NameTagList *nameTagList, FTFont *font);
+	virtual ~LeftColumn();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

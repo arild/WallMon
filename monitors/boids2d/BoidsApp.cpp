@@ -1,9 +1,20 @@
+/**
+ * @file   BoidsApp.cpp
+ * @Author Arild Nilsen
+ * @date   April, 2011
+ *
+ * Main class of the boids animation.
+ *
+ * This class encapsulates the thread that runs the main loop,
+ * and offers most of the API.
+ */
+
 #include <glog/logging.h>
 #include "Config.h" // FONT_PATH
 #include "BoidsApp.h"
 #include "Fps.h"
 #include "Scene.h"
-#include "NameDrawer.h"
+#include "LeftColumn.h"
 #include <iostream>
 #include "BoidAxis.h"
 
@@ -97,7 +108,7 @@ void BoidsApp::RemoveBoid(Boid *Boid)
 NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
-	NameDrawer *nameDrawer = new NameDrawer(_nameTagList, new FTGLTextureFont(FONT_PATH));
+	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(FONT_PATH));
 	_nameDrawerScene->entityList.push_back((Entity *) nameDrawer);
 	return _nameTagList;
 }

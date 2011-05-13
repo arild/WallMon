@@ -1,8 +1,9 @@
-/*
- * Axis.cpp
+/**
+ * @file   BoidAxis.cpp
+ * @Author Arild Nilsen
+ * @date   May, 2011
  *
- *  Created on: May 11, 2011
- *      Author: arild
+ * Entity that that draws the axes in the boid scene
  */
 
 #include <GL/gl.h>

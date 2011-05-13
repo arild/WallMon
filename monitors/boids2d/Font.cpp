@@ -1,8 +1,10 @@
-/*
- * Font.cpp
+/**
+ * @file   Font.cpp
+ * @Author Arild Nilsen
+ * @date   May, 2011
  *
- *  Created on: May 12, 2011
- *      Author: arild
+ * Provides a font render API that uses FTGL and takes the resolution of
+ * the current scene into account in order to scale FTGL fonts correctly.
  */
 
 #include <GL/gl.h>

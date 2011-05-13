@@ -1,8 +1,9 @@
-/*
- * BoidSharedContext.cpp
+/**
+ * @file   BoidSharedContext.cpp
+ * @Author Arild Nilsen
+ * @date   April, 2011
  *
- *  Created on: Apr 10, 2011
- *      Author: arild
+ * Simple encapsulation for sharing the coordinates of a boid
  */
 
 #include "BoidSharedContext.h"
