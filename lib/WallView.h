@@ -25,10 +25,11 @@ using namespace std;
 class WallView {
 public:
 	WallView(int x, int y, int width, int height);
-	vector<string> Get();
-	bool IsWithin();
-	void GetOrientation(double *x, double *y, double *width, double *height, string hostname);
-	void GetOrientation(double *x, double *y, double *width, double *height);
+	vector<string> GetGrid();
+	bool IsTileWithin();
+	bool IsCordsWithin(float x, float y);
+	void GetDisplayArea(double *x, double *y, double *width, double *height, string hostname);
+	void GetDisplayArea(double *x, double *y, double *width, double *height);
 private:
 	int _x, _y, _w, _h;
 	string _hostname;

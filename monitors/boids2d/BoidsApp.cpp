@@ -19,6 +19,7 @@
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
+#include "ShoutMaster.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
@@ -125,6 +126,10 @@ void BoidsApp::_RenderForever()
 	srand(SDL_GetTicks());
 	SDL_Event event;
 
+	ShoutMaster shoutMaster;
+	Queue<TouchEvent> *touchEventQueue = shoutMaster.GetOutputQueue();
+	shoutMaster.Start();
+
 	LOG(INFO) << "BoidsApp entering infinite loop";
 	while (_running) {
 		if (_updateOrtho) {
@@ -143,8 +148,14 @@ void BoidsApp::_RenderForever()
 
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		for (int i = 0; i < _scenes.size(); i++)
-			_scenes[i]->Run();
+		for (int i = 0; i < Scene::scenes.size(); i++)
+			Scene::scenes[i]->Run();
+
+		while (touchEventQueue->GetSize() > 0) {
+			touchEventQueue->Pop();
+			LOG(INFO) << "Shout event removed";
+		}
+
 		SDL_GL_SwapBuffers();
 
 		Fps::fpsControl.OnLoop();
@@ -164,9 +175,9 @@ void BoidsApp::_SetupScenes()
 	_boidScene = new Scene(w * 2, h / 2, w * 2, (h * 4) - h, 100, 100);
 	_controlPanelScene = new Scene(w * 5, h, w * 2, h * 2, 100, 100);
 
-	_scenes.push_back(_leftColumnScene);
-	_scenes.push_back(_boidScene);
-	_scenes.push_back(_controlPanelScene);
+	Scene::scenes.push_back(_leftColumnScene);
+	Scene::scenes.push_back(_boidScene);
+	Scene::scenes.push_back(_controlPanelScene);
 }
 
 //void BoidsApp::_DrawBoidDescription()

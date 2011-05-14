@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "Scene.h"
 
+vector<Scene *> Scene::scenes;
 Scene *Scene::current;
 
 Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virtualH_) : x(x_), y(y_), w(w_), h(h_)

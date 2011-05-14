@@ -38,7 +38,7 @@ WallView::WallView(int x, int y, int width, int height)
 /**
  * Returns the 1D bottom-up row-wise array of tile names generated in the constructor
  */
-vector<string> WallView::Get()
+vector<string> WallView::GetGrid()
 {
 	return _grid;
 }
@@ -46,7 +46,7 @@ vector<string> WallView::Get()
 /**
  * Determines if a tile is within the grid defined in the constructor
  */
-bool WallView::IsWithin()
+bool WallView::IsTileWithin()
 {
 	if (_GetIndex(_hostname) == -1)
 		return false;
@@ -60,7 +60,7 @@ bool WallView::IsWithin()
  * the resolution of the entire display wall, 7168x3072. This method is intended
  * for unit-testing due to the host name parameter, otherwise use the one without.
  */
-void WallView::GetOrientation(double *x, double *y, double *width, double *height, string hostname)
+void WallView::GetDisplayArea(double *x, double *y, double *width, double *height, string hostname)
 {
 	int posx, posy, index;
 	index = _GetIndex(hostname);
@@ -71,9 +71,9 @@ void WallView::GetOrientation(double *x, double *y, double *width, double *heigh
 	*height = (1 / (double)_h) * (double)WALL_SCREEN_HEIGHT;
 }
 
-void WallView::GetOrientation(double *x, double *y, double *width, double *height)
+void WallView::GetDisplayArea(double *x, double *y, double *width, double *height)
 {
-	GetOrientation(x, y, width, height, _hostname);
+	GetDisplayArea(x, y, width, height, _hostname);
 }
 
 int WallView::_GetIndex(string hostname)

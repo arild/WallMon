@@ -9,7 +9,9 @@ using namespace std;
 
 class Scene {
 public:
+	static vector<Scene *> scenes;
 	static Scene *current;
+
 	float x, y, w, h, scale;
 	float scaleX, scaleY;
 	vector<IEntity *> entityList;

@@ -30,7 +30,6 @@ private:
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
-	vector<Scene *> _scenes;
 	NameTagList *_nameTagList;
 	void _InitSdlAndOpenGl();
 	void _RenderForever();

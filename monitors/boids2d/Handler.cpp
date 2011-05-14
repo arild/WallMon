@@ -30,9 +30,9 @@ void Handler::OnInit(Context *ctx)
 
 #ifdef ROCKSVV
 	WallView w(1, 1, 2, 2);
-	if (w.IsWithin()) {
+	if (w.IsTileWithinthin()) {
 		double x, y, width, height;
-		w.GetOrientation(&x, &y, &width, &height);
+		w.GetDisplayArea(&x, &y, &width, &height);
 		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT);
 		_boidsApp->SetDisplayArea(x, y, width, height);
 		_nameTagList = _boidsApp->CreateNameTagList();

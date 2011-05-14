@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include "System.h"
 #include <boost/algorithm/string.hpp>
+#include <glog/logging.h>
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
@@ -34,13 +35,12 @@ void System::Daemonize()
 
 	/* Fork off the parent process */
 	pid = fork();
-	if (pid < 0) {
-		exit(EXIT_FAILURE);
-	}
+	if (pid < 0)
+		LOG(FATAL) << "fork failed";
+
 	/* If we got a good PID, then we can exit the parent process. */
-	if (pid > 0) {
+	if (pid > 0)
 		exit(EXIT_SUCCESS);
-	}
 
 	/* At this point we are executing as the child process */
 
@@ -49,20 +49,18 @@ void System::Daemonize()
 
 	/* Create a new SID for the child process */
 	sid = setsid();
-	if (sid < 0) {
-		exit(EXIT_FAILURE);
-	}
+	if (sid < 0)
+		LOG(FATAL) << "setting sid failed";
 
 	/* Change the current working directory.  This prevents the current
 	 directory from being locked; hence not being able to remove it. */
-	if ((chdir("/")) < 0) {
-		exit(EXIT_FAILURE);
-	}
+	if ((chdir("/")) < 0)
+		LOG(FATAL) << "failed changing directory";
 
 	/* Redirect standard files to /dev/null */
 	if (!freopen("/dev/null", "r", stdin) || !freopen("/dev/null", "w", stdout) || freopen(
 			"/dev/null", "w", stderr))
-		exit(EXIT_FAILURE);
+		LOG(WARNING) << "failed redirecting std out and/or std in";
 }
 
 int System::GetPid(string processName)
