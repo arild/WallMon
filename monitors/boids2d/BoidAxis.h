@@ -9,10 +9,10 @@
 #define AXIS_H_
 
 #include "FTGL/ftgl.h"
-#include "Entity.h"
+#include "IEntity.h"
 #include "Font.h"
 
-class BoidAxis : Entity {
+class BoidAxis : IEntity {
 public:
 	BoidAxis();
 	virtual ~BoidAxis();

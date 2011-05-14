@@ -4,7 +4,6 @@
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <FTGL/ftgl.h>
 #include <boost/thread.hpp>
 #include <vector>
 #include "Scene.h"
@@ -30,14 +29,12 @@ private:
 	int _screenWidth, _screenHeight;
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
-	Scene *_boidScene, *_nameDrawerScene;
+	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
 	vector<Scene *> _scenes;
-	FTFont *_font;
 	NameTagList *_nameTagList;
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
-	void _DrawAxis();
-	void _DrawBoidDescription();
+	void _SetupScenes();
 };
 
 #endif /* BOIDSAPP_H_ */

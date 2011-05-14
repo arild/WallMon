@@ -1,14 +1,14 @@
 #ifndef BOID_H_
 #define BOID_H_
 
-#include "Entity.h"
+#include "IEntity.h"
 #include "BoidSharedContext.h"
 
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-class Boid: Entity {
+class Boid: IEntity {
 public:
 	BoidSharedContext *ctx;
 	Boid();

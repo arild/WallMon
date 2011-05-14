@@ -17,24 +17,21 @@
 #include "LeftColumn.h"
 #include <iostream>
 #include "BoidAxis.h"
-
+#include "ControlPanel.h"
+#include "WallView.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
-	_boidScene = new Scene(1024, 500, (6 * 1024) - 200, (4 * 768) - 1000, 100, 100);
-	_nameDrawerScene = new Scene(0, 0, 1024, 4 * 768, 1024, 4 * 768);
-
-	_scenes.push_back(_boidScene);
-	_scenes.push_back(_nameDrawerScene);
+	_SetupScenes();
 
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
-	_boidScene->entityList.push_back((Entity *)axis);
+	_boidScene->entityList.push_back((IEntity *) axis);
 
-	_font = new FTGLTextureFont(FONT_PATH);
-	if (_font->Error())
-		LOG(INFO) << "Font failed";
+	ControlPanel *panel = new ControlPanel();
+	_controlPanelScene->entityList.push_back((IEntity *) panel);
+
 	_nameTagList = NULL;
 }
 
@@ -96,9 +93,9 @@ void BoidsApp::CreateBoid(double startX, double startY, BoidSharedContext *ctx)
 {
 	Boid *boid = new Boid();
 	boid->ctx = ctx;
-	((Entity *) boid)->tx = startX;
-	((Entity *) boid)->ty = startY;
-	_boidScene->entityList.push_back((Entity *) boid);
+	((IEntity *) boid)->tx = startX;
+	((IEntity *) boid)->ty = startY;
+	_boidScene->entityList.push_back((IEntity *) boid);
 }
 
 void BoidsApp::RemoveBoid(Boid *Boid)
@@ -109,7 +106,7 @@ NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
 	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(FONT_PATH));
-	_nameDrawerScene->entityList.push_back((Entity *) nameDrawer);
+	_leftColumnScene->entityList.push_back((IEntity *) nameDrawer);
 	return _nameTagList;
 }
 
@@ -153,21 +150,35 @@ void BoidsApp::_RenderForever()
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
 		sprintf(Buffer, "FPS: %d  |  Num Boids: %d", Fps::fpsControl.GetFPS(),
-				Entity::entityList.size());
+				_boidScene->entityList.size() - 1);
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
 }
 
-void BoidsApp::_DrawBoidDescription()
+void BoidsApp::_SetupScenes()
 {
-	//	FTGLPixmapFont font(FONT_PATH);
-	//	//FTPoint point(R, BOID_Y/2);
-	//	FTPoint point(900, 400);
-	//	//font.CharMap(ft_encoding_latin_1);
-	//	if (font.Error())
-	//		LOG(INFO) << "Font failed";
-	//	font.FaceSize(25);
-	//	string text = "Utilization";
-	//	font.Render(text.c_str(), text.length(), point);
+	float w = TILE_SCREEN_HEIGHT;
+	float h = TILE_SCREEN_HEIGHT;
+
+	_leftColumnScene = new Scene(0, 0, (w * 2), h * 4, w * 2, h * 4);
+	_boidScene = new Scene(w * 2, h / 2, w * 2, (h * 4) - h, 100, 100);
+	_controlPanelScene = new Scene(w * 5, h, w * 2, h * 2, 100, 100);
+
+	_scenes.push_back(_leftColumnScene);
+	_scenes.push_back(_boidScene);
+	_scenes.push_back(_controlPanelScene);
 }
+
+//void BoidsApp::_DrawBoidDescription()
+//{
+//	FTGLPixmapFont font(FONT_PATH);
+//	//FTPoint point(R, BOID_Y/2);
+//	FTPoint point(900, 400);
+//	//font.CharMap(ft_encoding_latin_1);
+//	if (font.Error())
+//		LOG(INFO) << "Font failed";
+//	font.FaceSize(25);
+//	string text = "Utilization";
+//	font.Render(text.c_str(), text.length(), point);
+//}
 

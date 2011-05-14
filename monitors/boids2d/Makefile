@@ -2,7 +2,7 @@ include ../Makefile.inc
 include ../../Makefile.inc
 
 LIB_GRAPHIC=-lGLU -lGL -lfreetype -lz -lftgl -lglut -lSDL
-LIB=-lSystem -Wl,-Bstatic -lNameTagList -Wl,-Bdynamic -lWallView -lProcessCollector -lpthread -lboost_thread -lglog $(LIB_GRAPHIC)
+LIB=-lm -lSystem -Wl,-Bstatic -lNameTagList -Wl,-Bdynamic -lWallView -lProcessCollector -lpthread -lboost_thread -lglog $(LIB_GRAPHIC)
 SRC=*.cpp *.h
 
 # Do not compile with graphics on rocksvv 

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "Entity.h"
+#include "IEntity.h"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ public:
 	static Scene *current;
 	float x, y, w, h, scale;
 	float scaleX, scaleY;
-	vector<Entity *> entityList;
+	vector<IEntity *> entityList;
 
 	Scene(float x_, float y_, float w_, float h_, float virtualW, float virtualH);
 	virtual ~Scene();

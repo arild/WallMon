@@ -192,7 +192,9 @@ unsigned long Handler::_OatHash(string key)
 	return h;
 }
 
-// class factories - needed to bootstrap object orientation with dlfcn.h
+/**
+ * class factories - needed to bootstrap object orientation with dlfcn.h
+ */
 extern "C" Handler *create_handler()
 {
 	return new Handler;
