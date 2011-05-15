@@ -14,8 +14,8 @@
 #define TILE_SCREEN_WIDTH		1024
 #define TILE_SCREEN_HEIGHT		768
 
-#define WALL_WIDHT		7
-#define WALL_HEIGHT		4
+#define WALL_WIDHT				7
+#define WALL_HEIGHT				4
 
 #define WALL_SCREEN_WIDTH		7168
 #define WALL_SCREEN_HEIGHT		3072
@@ -28,6 +28,7 @@ public:
 	vector<string> GetGrid();
 	bool IsTileWithin();
 	bool IsCordsWithin(float x, float y);
+	void GlobalToGridCoords(float *x, float *y);
 	void GetDisplayArea(double *x, double *y, double *width, double *height, string hostname);
 	void GetDisplayArea(double *x, double *y, double *width, double *height);
 private:

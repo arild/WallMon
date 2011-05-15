@@ -54,6 +54,32 @@ bool WallView::IsTileWithin()
 }
 
 /**
+ * Determines if given global coordinates are within the defined grid
+ */
+bool WallView::IsCordsWithin(float x, float y)
+{
+	if (x >= _x * TILE_SCREEN_WIDTH && x <= (_x + _w) * TILE_SCREEN_WIDTH && y >= _y
+			* TILE_SCREEN_HEIGHT && y <= (_y + _h) * TILE_SCREEN_HEIGHT)
+		return true;
+	return false;
+}
+
+/**
+ * Translate given global coordinates to 'global coordinates' within given grid
+ *
+ * This method is target for systems that internally operate on a coordinate system
+ * that exactly matches the  resolution of the display wall. This kind of abstraction
+ * is often convenient when developing for the display wall.
+ */
+void WallView::GlobalToGridCoords(float *x, float *y)
+{
+	float localX = (TILE_SCREEN_WIDTH * (_x + _w)) - *x;
+	float localY = (TILE_SCREEN_HEIGHT * (_y + _h)) - *y;
+	*x = localX * (WALL_WIDHT / _w);
+	*y = localY * (WALL_HEIGHT / _h);
+}
+
+/**
  * Calculates the display area for the given tile
  *
  * The display area is based on the grid defined in the constructor and (always)
@@ -65,10 +91,10 @@ void WallView::GetDisplayArea(double *x, double *y, double *width, double *heigh
 	int posx, posy, index;
 	index = _GetIndex(hostname);
 	_IndexToCoordinates(index, &posx, &posy);
-	*x = (posx / (double)_w) * (double)WALL_SCREEN_WIDTH;
-	*y = (posy / (double)_h) * (double)WALL_SCREEN_HEIGHT;
-	*width = (1 / (double)_w) * (double)WALL_SCREEN_WIDTH;
-	*height = (1 / (double)_h) * (double)WALL_SCREEN_HEIGHT;
+	*x = (posx / (double) _w) * (double) WALL_SCREEN_WIDTH;
+	*y = (posy / (double) _h) * (double) WALL_SCREEN_HEIGHT;
+	*width = (1 / (double) _w) * (double) WALL_SCREEN_WIDTH;
+	*height = (1 / (double) _h) * (double) WALL_SCREEN_HEIGHT;
 }
 
 void WallView::GetDisplayArea(double *x, double *y, double *width, double *height)

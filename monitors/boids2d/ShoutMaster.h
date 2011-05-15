@@ -31,10 +31,12 @@ public:
 	void Start();
 	void Stop();
 	Queue<TouchEvent> *GetOutputQueue();
+	void Register(Scene *scene);
 private:
 	boost::thread _thread;
 	bool _running;
 	Queue<TouchEvent> *_outputQueue;
+	vector<Scene *> _register;
 	void _HandleShoutEventsForever();
 	void _ParseShoutEvent(shout_event_t *event);
 	Scene *_GlobalCoordsToScene(float x, float y);

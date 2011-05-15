@@ -12,7 +12,7 @@ extern "C" ProcessCollector *create_collector()
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 #ifdef ROCKSVV
-	vector<string> s = WallView(1, 1, 2, 2).GetGridGrid();
+	vector<string> s = WallView(2, 2, 2, 2).GetGridGrid();
 	p->context->AddServers(s);
 #else
 	p->context->AddServer("129.242.19.57");

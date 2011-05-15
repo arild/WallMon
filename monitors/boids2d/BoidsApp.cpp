@@ -20,6 +20,7 @@
 #include "ControlPanel.h"
 #include "WallView.h"
 #include "ShoutMaster.h"
+#include "IShoutEventHandler.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
@@ -152,7 +153,8 @@ void BoidsApp::_RenderForever()
 			Scene::scenes[i]->Run();
 
 		while (touchEventQueue->GetSize() > 0) {
-			touchEventQueue->Pop();
+			TouchEvent event = touchEventQueue->Pop();
+			//((IShoutEventHandler *)event.scene)->Handle(event);
 			LOG(INFO) << "Shout event removed";
 		}
 

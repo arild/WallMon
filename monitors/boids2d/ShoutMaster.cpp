@@ -12,6 +12,7 @@
 #include <shout/shout.h>
 #include "ShoutMaster.h"
 #include "WallView.h"
+#include "Config.h"
 
 ShoutMaster::ShoutMaster()
 {
@@ -42,6 +43,11 @@ Queue<TouchEvent> *ShoutMaster::GetOutputQueue()
 	return _outputQueue;
 }
 
+void ShoutMaster::Register(Scene *scene)
+{
+        _register.push_back(scene);
+}
+
 void ShoutMaster::_HandleShoutEventsForever()
 {
 	shout_t *shout = shout_connect_default(kClient_type_both, "Boids2D");
@@ -58,9 +64,7 @@ void ShoutMaster::_HandleShoutEventsForever()
 	shout_set_event_filter(shout, sizeof(filter) / 4, filter);
 	while (_running) {
 		//		evt = shout_poll_event(shout);
-		LOG(INFO) << "Waiting for event... ";
 		shout_event_t *e = shout_wait_next_event(shout);
-		LOG(INFO) << "Event received! ";
 		_ParseShoutEvent(e);
 	}
 }
@@ -78,15 +82,26 @@ void ShoutMaster::_ParseShoutEvent(shout_event_t *event)
 		//				printf("  Raw: [ID: %3d] [PT: %.2f %.2f] [R: %5.2f] [Layer: %2d]\n", evt->refcon,
 		//						x, y, radius, layer);
 
-		// Convert y coord: in shout 0,0 is at the top-left corner
+		// Convert y coordinate: in shout 0,0 is at the top-left corner
 		y = WALL_SCREEN_HEIGHT - y;
+
+		LOG(INFO) << "Event : x=" << x << " | y=" << y;
+		// Convert global shout coordinates to
+		WallView w(2, 2, 2, 2);
+		if (w.IsCordsWithin(x, y) == false)
+			return;
+
+		w.GlobalToGridCoords(&x, &y);
+		LOG(INFO) << "Global: x=" << x << " | y=" << y;
 
 		Scene *scene = _GlobalCoordsToScene(x, y);
 		if (scene == NULL) {
+			// Coordinates not within any scene
 			//LOG_EVERY_N(INFO, 100) << "event discarded";
 			LOG(INFO) << "event discarded";
 			return;
 		}
+		LOG(INFO) << "** event accepted **";
 
 		TouchEvent touchEvent(scene, x, y);
 		_outputQueue->Push(touchEvent);

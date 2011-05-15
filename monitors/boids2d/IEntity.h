@@ -1,9 +1,6 @@
 #ifndef IENTITY_H_
 #define IENTITY_H_
 
-#include <SDL/SDL.h>
-#include <vector>
-
 using namespace std;
 
 class IEntity {
