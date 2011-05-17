@@ -12,7 +12,7 @@
 
 class IShoutEventHandler {
 public:
-	virtual ~IEntity() {}
+	virtual ~IShoutEventHandler() {}
 	virtual void Handle(TouchEvent &event);
 };
 

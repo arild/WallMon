@@ -29,7 +29,7 @@ void Handler::OnInit(Context *ctx)
 	_procMap = new ProcMap();
 
 #ifdef ROCKSVV
-	WallView w(2, 2, 2, 2);
+	WallView w(0, 0, 7, 4);
 	if (w.IsTileWithinthin()) {
 		double x, y, width, height;
 		w.GetDisplayArea(&x, &y, &width, &height);

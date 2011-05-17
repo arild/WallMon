@@ -45,7 +45,7 @@ Queue<TouchEvent> *ShoutMaster::GetOutputQueue()
 
 void ShoutMaster::Register(Scene *scene)
 {
-        _register.push_back(scene);
+        _scenes.push_back(scene);
 }
 
 void ShoutMaster::_HandleShoutEventsForever()
@@ -74,40 +74,34 @@ void ShoutMaster::_ParseShoutEvent(shout_event_t *event)
 	uint32_t loc_flags;
 	float x, y, radius;
 	int32_t layer;
-	if (parse_touch_location_event(event, &loc_flags, &x, &y, &radius, &layer) == 0) {
-		//			if (evt->type == kEvt_type_calibrated_touch_location)
-		//				printf("Calib: [ID: %3d] [PT: %.2f %.2f] [R: %5.2f] [Layer: %2d]\n", evt->refcon,
-		//						x, y, radius, layer);
-		//			else if (evt->type == kEvt_type_touch_location)
-		//				printf("  Raw: [ID: %3d] [PT: %.2f %.2f] [R: %5.2f] [Layer: %2d]\n", evt->refcon,
-		//						x, y, radius, layer);
-
-		// Convert y coordinate: in shout 0,0 is at the top-left corner
-		y = WALL_SCREEN_HEIGHT - y;
-
-		LOG(INFO) << "Event : x=" << x << " | y=" << y;
-		// Convert global shout coordinates to
-		WallView w(2, 2, 2, 2);
-		if (w.IsCordsWithin(x, y) == false)
-			return;
-
-		w.GlobalToGridCoords(&x, &y);
-		LOG(INFO) << "Global: x=" << x << " | y=" << y;
-
-		Scene *scene = _GlobalCoordsToScene(x, y);
-		if (scene == NULL) {
-			// Coordinates not within any scene
-			//LOG_EVERY_N(INFO, 100) << "event discarded";
-			LOG(INFO) << "event discarded";
-			return;
-		}
-		LOG(INFO) << "** event accepted **";
-
-		TouchEvent touchEvent(scene, x, y);
-		_outputQueue->Push(touchEvent);
-	}
-		else
+	if (parse_touch_location_event(event, &loc_flags, &x, &y, &radius, &layer) != 0) {
 		LOG(INFO) << "failed parsing raw shout event";
+		return;
+	}
+
+	// Convert y coordinate: in shout 0,0 is at the top-left corner
+	y = WALL_SCREEN_HEIGHT - y;
+
+	WallView w(0, 0, 7, 4);
+	if (w.IsCordsWithin(x, y) == false)
+		return;
+
+	TouchEvent e;
+	e.realX = x;
+	e.realY = y;
+	w.GlobalToGridCoords(&x, &y);
+	e.sceneX = x;
+	e.sceneY = y;
+
+	Scene *scene = _GlobalCoordsToScene(x, y);
+	if (scene == NULL) {
+		// Coordinates not within any scene
+		//LOG_EVERY_N(INFO, 100) << "event discarded";
+		LOG(INFO) << "event discarded";
+		return;
+	}
+	e.scene = scene;
+	_outputQueue->Push(e);
 
 }
 
@@ -120,4 +114,6 @@ Scene *ShoutMaster::_GlobalCoordsToScene(float x, float y)
 	}
 	return NULL;
 }
+
+
 

@@ -19,7 +19,6 @@
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
-#include "ShoutMaster.h"
 #include "IShoutEventHandler.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
@@ -155,7 +154,8 @@ void BoidsApp::_RenderForever()
 		while (touchEventQueue->GetSize() > 0) {
 			TouchEvent event = touchEventQueue->Pop();
 			//((IShoutEventHandler *)event.scene)->Handle(event);
-			LOG(INFO) << "Shout event removed";
+			LOG(INFO) << "Visualizing: x=" << event.realX << " | y=" << event.realY;
+			_VisualizeShoutEvent(event);
 		}
 
 		SDL_GL_SwapBuffers();
@@ -180,6 +180,26 @@ void BoidsApp::_SetupScenes()
 	Scene::scenes.push_back(_leftColumnScene);
 	Scene::scenes.push_back(_boidScene);
 	Scene::scenes.push_back(_controlPanelScene);
+}
+
+void BoidsApp::_VisualizeShoutEvent(TouchEvent &e)
+{
+	float w = 50;
+	float h = 50;
+	float x = e.realX - (w/2);
+	float y = e.realY - (h/2);
+
+	glPushMatrix();
+	glColor3f(255, 255, 0);
+	glBegin(GL_QUADS);
+	glVertex2f(x, y);
+	glVertex2f(x+w, y);
+	glVertex2f(x+w, y+h);
+	glVertex2f(x, y+h);
+	glEnd();
+	glPopMatrix();
+
+	SDL_GL_SwapBuffers();
 }
 
 //void BoidsApp::_DrawBoidDescription()

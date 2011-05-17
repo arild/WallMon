@@ -9,6 +9,7 @@
 #include "Scene.h"
 #include "Boid.h"
 #include "NameTagList.h"
+#include "ShoutMaster.h"
 
 using namespace std;
 
@@ -34,6 +35,7 @@ private:
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
 	void _SetupScenes();
+	void _VisualizeShoutEvent(TouchEvent &e);
 };
 
 #endif /* BOIDSAPP_H_ */
