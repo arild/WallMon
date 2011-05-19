@@ -14,6 +14,9 @@
 #include "unistd.h"
 #include "WallView.h"
 
+#include "ShoutMaster.h"
+#include "SdlMouseEventFetcher.h"
+
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
 #define SAMPLE_FREQUENCY_MSEC 		1000
@@ -29,17 +32,17 @@ void Handler::OnInit(Context *ctx)
 	_procMap = new ProcMap();
 
 #ifdef ROCKSVV
-	WallView w(0, 0, 7, 4);
-	if (w.IsTileWithinthin()) {
+	WallView w(3, 1, 2, 2);
+	if (w.IsTileWithin()) {
 		double x, y, width, height;
 		w.GetDisplayArea(&x, &y, &width, &height);
-		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT);
+		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, new ShoutMaster());
 		_boidsApp->SetDisplayArea(x, y, width, height);
 		_nameTagList = _boidsApp->CreateNameTagList();
 		_boidsApp->Start();
 	}
 #else
-	_boidsApp = new BoidsApp(1600, 768);
+	_boidsApp = new BoidsApp(1600, 768, new SdlMouseEventFetcher());
 	_nameTagList = _boidsApp->CreateNameTagList();
 	_boidsApp->Start();
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);

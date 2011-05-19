@@ -12,8 +12,8 @@ ROCKSVV += -D ROCKSVV
 endif
 
 all: $(SRC)
-	$(CC) -g $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -I/home/arild/include/freetype2 $(SRC)
-	$(CC) -g $(CFLAGS_SO_CREATE) -L/home/local/lib $(LIB_PATH) -o libboids2d.so *.o $(LIB)
+	$(CC) -g -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -I/home/arild/include/freetype2 $(SRC)
+	$(CC) -g -Wno-multichar $(CFLAGS_SO_CREATE) -L/home/local/lib $(LIB_PATH) -o libboids2d.so *.o $(LIB)
 	mv *.so ../bin
 			
 clean:

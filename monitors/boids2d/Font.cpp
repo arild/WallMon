@@ -14,9 +14,11 @@
 #include <glog/logging.h>
 
 
-Font::Font()
+
+Font::Font(int size)
 {
 	_font = new FTGLTextureFont(FONT_PATH);
+	_font->FaceSize((unsigned int)(size * Scene::current->scale));
 }
 
 Font::~Font()
@@ -24,19 +26,16 @@ Font::~Font()
 	delete _font;
 }
 
-void Font::RenderText(string text, int size, float tx, float ty, bool center)
+void Font::RenderText(string text, float tx, float ty, bool center)
 {
 	Scene *s = Scene::current;
 	s->Unload();
 	s->LoadReal();
-	glPushMatrix();
-	_font->FaceSize(size * s->scale);
 	float centerAlignment = 0;
 	if (center)
 		centerAlignment = _font->Advance(text.c_str()) / (float)2;
 	glTranslatef(tx * s->scale - centerAlignment, ty * s->scale, 0);
 	_font->Render(text.c_str());
-	glPopMatrix();
 	s->Unload();
 	s->LoadVirtual();
 }

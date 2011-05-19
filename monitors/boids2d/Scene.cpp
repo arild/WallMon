@@ -15,7 +15,7 @@ Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virt
 	scaleX = w_ / (float)virtualW_;
 	scaleY = h_ / (float) virtualH_;
 	scale = std::min(scaleX, scaleY);
-	current = NULL;
+	current = this;
 }
 
 Scene::~Scene()
@@ -41,17 +41,63 @@ void Scene::Unload()
 	glPopMatrix();
 }
 
+/**
+ * Draws a blue bounding box around the scene
+ */
+void Scene::Visualize()
+{
+	LoadReal();
+	float s = 5;
+
+	glColor3f(0, 0, 1);
+
+	// Left
+	glBegin(GL_QUADS);
+	glVertex2f(0, 0);
+	glVertex2f(s, 0);
+	glVertex2f(s, h);
+	glVertex2f(0, h);
+	glEnd();
+
+	// Right
+	glBegin(GL_QUADS);
+	glVertex2f(w-s, 0);
+	glVertex2f(w, 0);
+	glVertex2f(w, h);
+	glVertex2f(w-s, h);
+	glEnd();
+
+	// Bottom
+	glBegin(GL_QUADS);
+	glVertex2f(0, 0);
+	glVertex2f(w, 0);
+	glVertex2f(w, s);
+	glVertex2f(0, s);
+	glEnd();
+
+	// Top
+	glBegin(GL_QUADS);
+	glVertex2f(0, h-s);
+	glVertex2f(w, h-s);
+	glVertex2f(w, h);
+	glVertex2f(s, h);
+	glEnd();
+
+	Unload();
+}
+
 void Scene::Run()
 {
 	current = this;
 	for (int i = 0; i < entityList.size(); i++)
 		entityList[i]->OnLoop();
-
 	LoadVirtual();
 	for (int i = 0; i < entityList.size(); i++)
 		entityList[i]->OnRender();
 	Unload();
+	Visualize();
 }
+
 
 
 

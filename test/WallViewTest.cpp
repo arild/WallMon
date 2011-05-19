@@ -35,22 +35,22 @@ protected:
 
 TEST_F(WallViewTest, NotMemberOfDisplayWall)
 {
-	ASSERT_FALSE(WallView(0, 0, 7, 4).IsTileWithinthin());
+	ASSERT_FALSE(WallView(0, 0, 7, 4).IsTileWithin());
 }
 
 TEST_F(WallViewTest, OutOfBounds)
 {
 	WallView w = WallView(0, 0, 99, 77);
-	ASSERT_FALSIsTileWithinleWithin());
+	ASSERT_FALSE(w.IsTileWithin());
 
 	w = WallView(1, 3, 99, 77);
-	ASSERT_IsTileWithinIsTileWithin());
+	ASSERT_FALSE(w.IsTileWithin());
 }
 
 TEST_F(WallViewTest, CorrectTileNames)
 {
 	WallView w = WallView(0, 0, 2, 2);
-	vector<string> v = w.GetGridGrid();
+	vector<string> v = w.GetGrid();
 	ASSERT_EQ(v.size(), 4);
 	ASSERT_EQ(0, v[0].compare("tile-0-0"));
 	ASSERT_EQ(0, v[1].compare("tile-1-0"));
@@ -61,7 +61,7 @@ TEST_F(WallViewTest, CorrectTileNames)
 TEST_F(WallViewTest, Orientation)
 {
 	WallView view = WallView(0, 0, 4, 2);
-	vector<string> v = vGetGrid.GetGrid();
+	vector<string> v = view.GetGrid();
 	ASSERT_EQ(8, v.size());
 	double x, y, w, h;
 
@@ -94,5 +94,16 @@ TEST_F(WallViewTest, Orientation)
 
 }
 
+TEST_F(WallViewTest, GlobalToGridCoords)
+{
+	WallView w = WallView(0, 0, 1, 1);
+	float x, y;
+
+	x = 0;
+	y = 0;
+	w.GlobalToGridCoords(&x, &y);
+	ASSERT_EQ(0, x);
+	ASSERT_EQ(0, y);
+}
 
 

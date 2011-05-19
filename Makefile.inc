@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS_COMMON = -rdynamic -fno-stack-protector
+CFLAGS_COMMON = -Wno-multichar -rdynamic -fno-stack-protector
 
 LIB_COMMON=-lMonitorDispatcher -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
 

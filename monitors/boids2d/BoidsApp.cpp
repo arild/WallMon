@@ -20,19 +20,12 @@
 #include "ControlPanel.h"
 #include "WallView.h"
 #include "IShoutEventHandler.h"
+#include "SdlMouseEventFetcher.h"
 
-BoidsApp::BoidsApp(int screenWidth, int screenHeight) :
-	_screenWidth(screenWidth), _screenHeight(screenHeight)
+BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventHandlerBase *eventHandler) :
+	_screenWidth(screenWidth), _screenHeight(screenHeight), _eventHandler(eventHandler)
 {
 	_SetupScenes();
-
-	BoidAxis *axis = new BoidAxis();
-	axis->Set(0, 100, 25);
-	_boidScene->entityList.push_back((IEntity *) axis);
-
-	ControlPanel *panel = new ControlPanel();
-	_controlPanelScene->entityList.push_back((IEntity *) panel);
-
 	_nameTagList = NULL;
 }
 
@@ -126,9 +119,11 @@ void BoidsApp::_RenderForever()
 	srand(SDL_GetTicks());
 	SDL_Event event;
 
-	ShoutMaster shoutMaster;
-	Queue<TouchEvent> *touchEventQueue = shoutMaster.GetOutputQueue();
-	shoutMaster.Start();
+	Queue<TouchEvent> *touchEventQueue = NULL;
+	if (_eventHandler != NULL) {
+		touchEventQueue = _eventHandler->GetOutputQueue();
+		_eventHandler->Start();
+	}
 
 	LOG(INFO) << "BoidsApp entering infinite loop";
 	while (_running) {
@@ -140,22 +135,19 @@ void BoidsApp::_RenderForever()
 			glLoadIdentity();
 			_updateOrtho = false;
 		}
-
-		// Check for ctrl-c
-		SDL_PumpEvents(); // Let SDL look for external input
-		if (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_QUITMASK) == 1)
-			break;
-
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (int i = 0; i < Scene::scenes.size(); i++)
 			Scene::scenes[i]->Run();
 
-		while (touchEventQueue->GetSize() > 0) {
-			TouchEvent event = touchEventQueue->Pop();
-			//((IShoutEventHandler *)event.scene)->Handle(event);
-			LOG(INFO) << "Visualizing: x=" << event.realX << " | y=" << event.realY;
-			_VisualizeShoutEvent(event);
+		if (_eventHandler != NULL) {
+			_eventHandler->PollEvents();
+			while (touchEventQueue->GetSize() > 0) {
+				TouchEvent event = touchEventQueue->Pop();
+				//((IShoutEventHandler *)event.scene)->Handle(event);
+				LOG(INFO) << "Visualizing: x=" << event.realX << " | y=" << event.realY;
+				_VisualizeShoutEvent(event);
+			}
 		}
 
 		SDL_GL_SwapBuffers();
@@ -172,14 +164,24 @@ void BoidsApp::_SetupScenes()
 {
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
+	float s = 100;
 
 	_leftColumnScene = new Scene(0, 0, (w * 2), h * 4, w * 2, h * 4);
-	_boidScene = new Scene(w * 2, h / 2, w * 2, (h * 4) - h, 100, 100);
-	_controlPanelScene = new Scene(w * 5, h, w * 2, h * 2, 100, 100);
+	_boidScene = new Scene(w * 2, h/2, w*3 + w/2 , (h * 3), 100, 100);
+	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 2, 100, 100);
 
 	Scene::scenes.push_back(_leftColumnScene);
 	Scene::scenes.push_back(_boidScene);
 	Scene::scenes.push_back(_controlPanelScene);
+
+	Scene::current = _boidScene;
+	BoidAxis *axis = new BoidAxis();
+	axis->Set(0, 100, 25);
+	_boidScene->entityList.push_back((IEntity *) axis);
+
+	Scene::current = _controlPanelScene;
+	ControlPanel *panel = new ControlPanel();
+	_controlPanelScene->entityList.push_back((IEntity *) panel);
 }
 
 void BoidsApp::_VisualizeShoutEvent(TouchEvent &e)
@@ -190,7 +192,11 @@ void BoidsApp::_VisualizeShoutEvent(TouchEvent &e)
 	float y = e.realY - (h/2);
 
 	glPushMatrix();
+
+	glTranslatef(0, 0, 0);
+	glScalef(1, 1, 1);
 	glColor3f(255, 255, 0);
+
 	glBegin(GL_QUADS);
 	glVertex2f(x, y);
 	glVertex2f(x+w, y);

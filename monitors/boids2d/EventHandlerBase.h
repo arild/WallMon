@@ -27,21 +27,25 @@ public:
 
 class EventHandlerBase {
 public:
-	EventHandlerBase();
-	virtual ~EventHandlerBase();
-	virtual TouchEvent _WaitNextEvent(float *x, float *y) = 0;
-protected:
-	Queue<TouchEvent> *GetOutputQueue();
-	void Register(Scene *scene);
 	boost::thread _thread;
 	bool _running;
 	Queue<TouchEvent> *_outputQueue;
 	vector<Scene *> _scenes;
-	void Start();
-	void Stop();
+
+	EventHandlerBase();
+	virtual ~EventHandlerBase();
+	virtual void _InitEventSystem() = 0;
+	virtual void _WaitNextEvent(float *x, float *y) = 0;
+	virtual void PollEvents() = 0;
+
+
 	void _HandleEventsForever();
 	void _FilterAndRouteEvent(float x, float y);
 	Scene *_GlobalCoordsToScene(float x, float y);
+	void Start();
+	void Stop();
+	Queue<TouchEvent> *GetOutputQueue();
+	void Register(Scene *scene);
 };
 
 

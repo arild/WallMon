@@ -9,9 +9,9 @@ using namespace std;
 
 class Font {
 public:
-	Font();
+	Font(int size);
 	virtual ~Font();
-	void RenderText(string text, int size, float tx, float ty, bool center=false);
+	void RenderText(string text, float tx, float ty, bool center=false);
 
 private:
 	FTFont *_font;

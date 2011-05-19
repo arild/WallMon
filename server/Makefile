@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-LIB_LOCAL=-lByteBuffer -lMonitorDispatcher
+LIB_LOCAL=-lprofiler -lByteBuffer -lMonitorDispatcher
 EXECUTABLE_NAME=wallmons
 SRC=*.cpp *.h
 

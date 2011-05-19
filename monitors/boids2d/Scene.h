@@ -21,6 +21,7 @@ public:
 	void LoadVirtual();
 	void LoadReal();
 	void Unload();
+	void Visualize();
 	void Run();
 };
 #endif /* SCENE_H_ */

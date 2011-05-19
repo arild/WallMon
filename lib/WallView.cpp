@@ -73,10 +73,10 @@ bool WallView::IsCordsWithin(float x, float y)
  */
 void WallView::GlobalToGridCoords(float *x, float *y)
 {
-	float localX = (TILE_SCREEN_WIDTH * (_x + _w)) - *x;
-	float localY = (TILE_SCREEN_HEIGHT * (_y + _h)) - *y;
-	*x = localX * (WALL_WIDHT / _w);
-	*y = localY * (WALL_HEIGHT / _h);
+	float localX = *x - (TILE_SCREEN_WIDTH * _x);
+	float localY = *y - (TILE_SCREEN_HEIGHT * _y);
+	*x = localX * (WALL_WIDHT / (float)_w);
+	*y = localY * (WALL_HEIGHT / (float)_h);
 }
 
 /**
