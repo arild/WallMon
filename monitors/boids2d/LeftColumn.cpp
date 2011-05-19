@@ -129,7 +129,3 @@ void LeftColumn::_DrawHeading(string text)
 	glPopMatrix();
 }
 
-
-
-
-

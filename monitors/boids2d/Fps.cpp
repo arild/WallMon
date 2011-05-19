@@ -30,7 +30,7 @@ void Fps::OnLoop()
 		_numFrames = _frames;
 		_frames = 0;
 	}
-	unsigned int intendedTimeSpent = 1000 / FPS;
+	unsigned int intendedTimeSpent = (unsigned int)(1000 / FPS);
 	unsigned int actualTimeSpent = currentTime - _lastTime;
 	if (intendedTimeSpent > actualTimeSpent) {
 		// Only wait if we are ahead

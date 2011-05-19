@@ -3,7 +3,7 @@
 
 #include <SDL/SDL.h>
 
-#define FPS 	20.f
+#define FPS 	35.f
 
 class Fps {
 public:

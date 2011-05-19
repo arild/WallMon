@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <boost/thread/mutex.hpp>
+#include <boost/foreach.hpp>
 #include <glog/logging.h>
 
 #include "Boid.h"
@@ -22,6 +23,7 @@ Boid::Boid()
 	height = 2;
 	_visible = false;
 	_quadric = gluNewQuadric();
+	_maxTailLength = 75;
 }
 
 Boid::~Boid()
@@ -46,15 +48,6 @@ void Boid::OnLoop()
 	if (desty > 100)
 		desty = 100;
 
-//	if (destx > maxX) {
-//		LOG(INFO) << "X=" << destx;
-//		maxX = destx;
-//	}
-//	if (desty > maxY) {
-//		LOG(INFO) << "Y=" << desty;
-//		maxY = desty;
-//	}
-
 	if (_IsDestinationReached(destx, desty)) {
 		speedx = 0.;
 		speedy = 0.;
@@ -72,6 +65,10 @@ void Boid::OnLoop()
 		tx += speedx;
 		ty += speedy;
 	}
+
+	if (_tail.size() == _maxTailLength)
+		_tail.pop_back();
+	_tail.push_front(make_tuple(tx, ty));
 }
 
 void Boid::OnRender()
@@ -80,6 +77,26 @@ void Boid::OnRender()
 		return;
 
 	glColor3ub(ctx->red, ctx->green, ctx->blue);
+	_DrawBoid();
+	_DrawTail();
+}
+
+void Boid::OnCleanup()
+{
+
+}
+
+bool Boid::_IsDestinationReached(float destx, float desty)
+{
+	float dx = abs(tx - (float) destx);
+	float dy = abs(ty - (float) desty);
+	if (dx < 0.5 && dy < 0.5)
+		return true;
+	return false;
+}
+
+void Boid::_DrawBoid()
+{
 	switch (ctx->shape)
 	{
 	case QUAD:
@@ -108,23 +125,26 @@ void Boid::OnRender()
 	}
 }
 
-void Boid::OnCleanup()
+void Boid::_DrawTail()
 {
-
+	glLineWidth(2);
+	glBegin(GL_LINE_STRIP);
+	BOOST_FOREACH(TailTupleType t, _tail)
+	{
+		float x = t.get<0>();
+		float y = t.get<1>();
+		glVertex3f(x, y, 0);
+	}
+	glEnd();
 }
 
-bool Boid::_IsDestinationReached(float destx, float desty)
-{
-	float dx = abs(tx - (float) destx);
-	float dy = abs(ty - (float) desty);
-	if (dx < 1. && dy < 1.)
-		return true;
-	return false;
-}
 
-void Boid::_DrawAxis()
-{
-}
+
+
+
+
+
+
 
 
 
