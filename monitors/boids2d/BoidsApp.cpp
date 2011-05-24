@@ -10,17 +10,20 @@
  */
 
 #include <glog/logging.h>
+#include <iostream>
+#include "boost/foreach.hpp"
 #include "Config.h" // FONT_PATH
 #include "BoidsApp.h"
 #include "Fps.h"
 #include "Scene.h"
 #include "LeftColumn.h"
-#include <iostream>
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
-#include "IShoutEventHandler.h"
+#include "IInteractive.h"
 #include "SdlMouseEventFetcher.h"
+#include "TouchEvent.h"
+#include "Button.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventHandlerBase *eventHandler) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight), _eventHandler(eventHandler)
@@ -119,7 +122,7 @@ void BoidsApp::_RenderForever()
 	srand(SDL_GetTicks());
 	SDL_Event event;
 
-	Queue<TouchEvent> *touchEventQueue = NULL;
+	Queue<EventQueueItem> *touchEventQueue = NULL;
 	if (_eventHandler != NULL) {
 		touchEventQueue = _eventHandler->GetOutputQueue();
 		_eventHandler->Start();
@@ -135,27 +138,34 @@ void BoidsApp::_RenderForever()
 			glLoadIdentity();
 			_updateOrtho = false;
 		}
-		//glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (int i = 0; i < Scene::scenes.size(); i++)
 			Scene::scenes[i]->Run();
 
 		if (_eventHandler != NULL) {
-			_eventHandler->PollEvents();
+			//_eventHandler->PollEvents();
 			while (touchEventQueue->GetSize() > 0) {
-				TouchEvent event = touchEventQueue->Pop();
-				//((IShoutEventHandler *)event.scene)->Handle(event);
-				LOG(INFO) << "Visualizing: x=" << event.realX << " | y=" << event.realY;
-				_VisualizeShoutEvent(event);
+				EventQueueItem item = touchEventQueue->Pop();
+				Scene *scene = item.get<0>();
+				TouchEvent event = item.get<1>();
+				if (event.visualizeOnly)
+					_VisualizeShoutEvent(event.realX, event.realY);
+				else {
+					vector<IEntity *> entities = scene->TestForEntityHits(event.x, event.y);
+					LOG(INFO) << "Num entity hits: " << entities.size();
+					if (entities.size() == 0)
+						// No entity hits within scene
+						continue;
+					LOG(INFO) << "Entity Hit";
+					entities[0]->HandleHit(event);
+				}
 			}
 		}
-
 		SDL_GL_SwapBuffers();
 
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
-		sprintf(Buffer, "FPS: %d  |  Num Boids: %d", Fps::fpsControl.GetFPS(),
-				_boidScene->entityList.size() - 1);
+		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), _CountNumObjects());
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
 }
@@ -166,30 +176,39 @@ void BoidsApp::_SetupScenes()
 	float h = TILE_SCREEN_HEIGHT;
 	float s = 100;
 
+	// Create scenes
 	_leftColumnScene = new Scene(0, 0, (w * 2), h * 4, w * 2, h * 4);
-	_boidScene = new Scene(w * 2, h/2, w*3 + w/2 , (h * 3), 100, 100);
+	_boidScene = new Scene(w * 2, h / 2, w * 3 + w / 2, (h * 3), 100, 100);
 	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 2, 100, 100);
 
+	// Save scenes
 	Scene::scenes.push_back(_leftColumnScene);
 	Scene::scenes.push_back(_boidScene);
 	Scene::scenes.push_back(_controlPanelScene);
 
+	// Populate scenes with various entities
 	Scene::current = _boidScene;
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
 	_boidScene->entityList.push_back((IEntity *) axis);
 
 	Scene::current = _controlPanelScene;
-	ControlPanel *panel = new ControlPanel();
-	_controlPanelScene->entityList.push_back((IEntity *) panel);
+	Button *button = new Button(10, 10, 20, 20);
+	_controlPanelScene->entityList.push_back((IEntity *)button);
+
+	button = new Button(40, 10, 20, 20);
+	_controlPanelScene->entityList.push_back((IEntity *)button);
+
+	button = new Button(70, 10, 20, 20);
+	_controlPanelScene->entityList.push_back((IEntity *)button);
 }
 
-void BoidsApp::_VisualizeShoutEvent(TouchEvent &e)
+void BoidsApp::_VisualizeShoutEvent(float x, float y)
 {
 	float w = 50;
 	float h = 50;
-	float x = e.realX - (w/2);
-	float y = e.realY - (h/2);
+	x -= (w / 2);
+	y -= (h / 2);
 
 	glPushMatrix();
 
@@ -199,13 +218,23 @@ void BoidsApp::_VisualizeShoutEvent(TouchEvent &e)
 
 	glBegin(GL_QUADS);
 	glVertex2f(x, y);
-	glVertex2f(x+w, y);
-	glVertex2f(x+w, y+h);
-	glVertex2f(x, y+h);
+	glVertex2f(x + w, y);
+	glVertex2f(x + w, y + h);
+	glVertex2f(x, y + h);
 	glEnd();
 	glPopMatrix();
 
 	SDL_GL_SwapBuffers();
+}
+
+int BoidsApp::_CountNumObjects()
+{
+	int numObjects = 0;
+	BOOST_FOREACH(Scene *s, Scene::scenes)
+	{
+		numObjects += s->entityList.size();
+	}
+	return numObjects;
 }
 
 //void BoidsApp::_DrawBoidDescription()

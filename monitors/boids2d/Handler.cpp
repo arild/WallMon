@@ -15,6 +15,7 @@
 #include "WallView.h"
 
 #include "ShoutMaster.h"
+#include "EventHandlerBase.h"
 #include "SdlMouseEventFetcher.h"
 
 #define KEY							"BOIDS"
@@ -36,13 +37,13 @@ void Handler::OnInit(Context *ctx)
 	if (w.IsTileWithin()) {
 		double x, y, width, height;
 		w.GetDisplayArea(&x, &y, &width, &height);
-		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, new ShoutMaster());
+		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, new EventHandlerBase());
 		_boidsApp->SetDisplayArea(x, y, width, height);
 		_nameTagList = _boidsApp->CreateNameTagList();
 		_boidsApp->Start();
 	}
 #else
-	_boidsApp = new BoidsApp(1600, 768, new SdlMouseEventFetcher());
+	_boidsApp = new BoidsApp(1600, 768, new EventHandlerBase());
 	_nameTagList = _boidsApp->CreateNameTagList();
 	_boidsApp->Start();
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);

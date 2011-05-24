@@ -4,6 +4,7 @@
  */
 
 #include <GL/gl.h>
+#include <boost/foreach.hpp>
 #include <algorithm>
 #include "Scene.h"
 
@@ -39,6 +40,14 @@ void Scene::LoadReal()
 void Scene::Unload()
 {
 	glPopMatrix();
+}
+
+void Scene::RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY)
+{
+	float localX = realX - x;
+	float localY = realY - y;
+	*virtX = localX * (1 / (float)scale);
+	*virtY = localY * (1 / (float)scale);
 }
 
 /**
@@ -86,6 +95,35 @@ void Scene::Visualize()
 	Unload();
 }
 
+/**
+ * Takes coordinates according to scene coordinate system and returns all
+ * entities within the scene that overlaps with given coordinates
+ */
+vector<IEntity *> Scene::TestForEntityHits(float x, float y)
+{
+	LoadVirtual();
+	vector<IEntity *> v;
+	for (int i = 0; i < entityList.size(); i++)
+		if (entityList[i]->IsHit(x, y))
+			v.push_back(entityList[i]);
+	Unload();
+	return v;
+}
+
+/**
+ * Takes coordinates according to global coordinate system and returns
+ * at maximum one scene that overlaps with given coordinates
+ */
+Scene *Scene::TestForSceneHit(float x, float y)
+{
+	BOOST_FOREACH(Scene *s, Scene::scenes)
+	{
+		if (x >= s->x && x <= s->x + s->w && y >= s->y && y <= s->y + s->h)
+			return s;
+	}
+	return NULL;
+}
+
 void Scene::Run()
 {
 	current = this;
@@ -97,9 +135,6 @@ void Scene::Run()
 	Unload();
 	Visualize();
 }
-
-
-
 
 //void Scene::ScreenToSceneCoords(float screenX, float screenY, float *sceneX, float *sceneY)
 //{

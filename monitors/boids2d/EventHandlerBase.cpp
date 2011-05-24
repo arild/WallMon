@@ -12,9 +12,28 @@
 #include "Config.h"
 #include "EventHandlerBase.h"
 
+
+typedef void (EventHandlerBase::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
+
 EventHandlerBase::EventHandlerBase()
 {
-	_outputQueue = new Queue<TouchEvent> (10000);
+	_shout = shout_connect_default(kClient_type_both, "Boids2D");
+	if (!_shout)
+		_shout = shout_connect(kClient_type_both, "rocksvv.cs.uit.no", kShout_default_port,
+				"Boids2D");
+	if (!_shout) {
+		LOG(WARNING) << "no shout server available, touch will not work.";
+		;
+		return;
+	}
+
+	uint32_t filter[] = { kEvt_type_calibrated_touch_location, kEvt_type_touch_remove };
+	shout_set_event_filter(_shout, sizeof(filter) / 4, filter);
+
+	_outputQueue = new Queue<EventQueueItem> (10000);
+	HandleTouchesPtr handle = &EventHandlerBase::HandleTouches;
+	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
+	_touchManager = new STouchManager(this, callback);
 }
 
 EventHandlerBase::~EventHandlerBase()
@@ -36,65 +55,79 @@ void EventHandlerBase::Stop()
 	LOG(INFO) << "EventHandlerBase stopped";
 }
 
-Queue<TouchEvent> *EventHandlerBase::GetOutputQueue()
+Queue<EventQueueItem> *EventHandlerBase::GetOutputQueue()
 {
 	return _outputQueue;
 }
 
-void EventHandlerBase::Register(Scene *scene)
+void EventHandlerBase::HandleTouches(touchVector_t & down, touchVector_t & up)
 {
-	_scenes.push_back(scene);
+	for (int i = 0; i < down.size(); i++) {
+		TT_touch_state_t *obj = down[i];
+		if (obj->wasUpdated)
+			_FilterEvent(obj, true);
+	}
+	for (int i = 0; i < up.size(); i++) {
+		TT_touch_state_t *obj = up[i];
+		if (obj->wasUpdated)
+			_FilterEvent(obj, false);
+	}
 }
 
 void EventHandlerBase::_HandleEventsForever()
 {
-	float x, y;
-	_InitEventSystem();
 	while (_running) {
-		_WaitNextEvent(&x, &y);
-		_FilterAndRouteEvent(x, y);
+		shout_event_t *event = shout_wait_next_event(_shout);
+		_touchManager->handleEvent(event);
 	}
 }
 
-void EventHandlerBase::_FilterAndRouteEvent(float x, float y)
+void EventHandlerBase::_FilterEvent(TT_touch_state_t *obj, bool isDown)
 {
+	float x = (float)obj->loc.x;
+	float y = (float)obj->loc.y;
+
 	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
 	y = WALL_SCREEN_HEIGHT - y;
 
+	LOG(INFO) << "Checking grid";
 	WallView w(3, 1, 2, 2);
 	if (w.IsCordsWithin(x, y) == false)
 		return;
 
 	LOG(INFO) << "Event: x=" << x << " | y=" << y;
-	TouchEvent event;
+
+	// Transform the global display wall coordinates from shout into global
+	// coordinates within the application, which uses the same coordinate system,
+	// however, might be (significantly) smaller in physical screen size (.e.g 2x2 tiles)
 	w.GlobalToGridCoords(&x, &y);
+
+	TouchEvent event;
+	event.isDown = isDown;
 	event.realX = x;
 	event.realY = y;
-	event.sceneX = x;
-	event.sceneY = y;
-
 	LOG(INFO) << "Maps to: x=" << x << " | y=" << y;
 
-	event.scene = _GlobalCoordsToScene(event.realX, event.realY);
-	if (event.scene == NULL) {
+
+	Scene *scene = Scene::TestForSceneHit(event.realX, event.realY);
+	if (scene == NULL)
 		// Coordinates not within any scene
-		//LOG_EVERY_N(INFO, 100) << "event discarded";
-		LOG(INFO) << "event discarded";
 		return;
-	}
+	EventQueueItem item;
+	event.visualizeOnly = true;
+	item = make_tuple((Scene *)NULL, event);
+	_outputQueue->Push(item);
+	event.visualizeOnly = false;
 
-	_outputQueue->Push(event);
+	LOG(INFO) << "Scene Hit: x=" << scene->x << " | y=" << scene->y;
+
+	// Transform global coordinates within the application to match coordinate
+	// system used within the relevant scene, which could be anything
+	scene->RealToVirtualCoords(event.realX, event.realY, &event.x, &event.y);
+
+	LOG(INFO) << "Maps to virt: x=" << event.x << " | y=" << event.y;
+
+	item = make_tuple(scene, event);
+	_outputQueue->Push(item);
 }
-
-Scene *EventHandlerBase::_GlobalCoordsToScene(float x, float y)
-{
-	BOOST_FOREACH(Scene *s, Scene::scenes)
-	{
-		if (x >= s->x && x <= s->x + s->w && y >= s->y && y <= s->y + s->h)
-			return s;
-	}
-	return NULL;
-}
-
-
 

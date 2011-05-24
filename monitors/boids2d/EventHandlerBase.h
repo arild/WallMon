@@ -10,43 +10,42 @@
 
 #include <vector>
 #include <boost/thread.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <shout/event-types/touch-events.h>
+#include "touchmanager/STouchManager.h"
+#include "TouchEvent.h"
 #include "Queue.h"
 #include "Scene.h"
+#include "IEntity.h"
 
 using namespace std;
+using namespace boost::tuples;
 
-class TouchEvent {
-public:
-	Scene *scene;
-	float sceneX, sceneY, realX, realY;
-	TouchEvent() {}
-	virtual ~TouchEvent() {}
 
-};
+typedef tuple<Scene *, TouchEvent> EventQueueItem;
 
 class EventHandlerBase {
 public:
 	boost::thread _thread;
 	bool _running;
-	Queue<TouchEvent> *_outputQueue;
+	Queue<EventQueueItem> *_outputQueue;
 	vector<Scene *> _scenes;
 
 	EventHandlerBase();
 	virtual ~EventHandlerBase();
-	virtual void _InitEventSystem() = 0;
-	virtual void _WaitNextEvent(float *x, float *y) = 0;
-	virtual void PollEvents() = 0;
-
-
-	void _HandleEventsForever();
-	void _FilterAndRouteEvent(float x, float y);
-	Scene *_GlobalCoordsToScene(float x, float y);
 	void Start();
 	void Stop();
-	Queue<TouchEvent> *GetOutputQueue();
-	void Register(Scene *scene);
-};
+	Queue<EventQueueItem> *GetOutputQueue();
+	void HandleTouches(touchVector_t & down, touchVector_t & up);
 
+private:
+	shout_t *_shout;
+	STouchManager *_touchManager;
+	void _HandleEventsForever();
+	void _FilterEvent(TT_touch_state_t *obj, bool isDown);
+	Scene *_GlobalCoordsToScene(float x, float y);
+	void _VisualizeShoutEvent(float x, float y);
+
+};
 
 #endif /* EVENTHANDLERBASE_H_ */

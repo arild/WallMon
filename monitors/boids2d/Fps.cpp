@@ -30,7 +30,7 @@ void Fps::OnLoop()
 		_numFrames = _frames;
 		_frames = 0;
 	}
-	unsigned int intendedTimeSpent = (unsigned int)(1000 / FPS);
+	unsigned int intendedTimeSpent = (unsigned int)(1000 / MAX_FPS);
 	unsigned int actualTimeSpent = currentTime - _lastTime;
 	if (intendedTimeSpent > actualTimeSpent) {
 		// Only wait if we are ahead
@@ -41,12 +41,12 @@ void Fps::OnLoop()
 	}
 
 	// If we were ahead of time, this will calculate closely to 1.0
-	_speedFactor = (actualTimeSpent / 1000.0f) * FPS;
+	_speedFactor = (actualTimeSpent / 1000.0f) * MAX_FPS;
 	_lastTime = currentTime;
 	_frames++;
 }
 
-int Fps::GetFPS()
+int Fps::GetFps()
 {
 	return _numFrames;
 }

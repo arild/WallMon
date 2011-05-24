@@ -1,17 +1,19 @@
 include ../Makefile.inc
 
 CFLAGS = -O2 -c
-DIRS = stubs 
+DIRS_PRE = stubs 
+DIRS_POST = touchmanager
 
-all: SubDirs PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList
+all: SubDirsPre PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList SubDirsPost 
 	
 clean: 	
-	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE} clean) ; done
+	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE} clean) ; done
 	rm -f *.o
 	rm -f *.a
+	@ for dir in ${DIRS_POST}; do (cd $${dir}; ${MAKE} clean) ; done
 	
-SubDirs:
-	@ for dir in ${DIRS}; do (cd $${dir}; ${MAKE}) ; done
+SubDirsPre:
+	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE}) ; done
 
 PracticalSocket: PracticalSocket.h PracticalSocket.cpp
 	$(CC) $(CFLAGS) $?
@@ -59,4 +61,6 @@ NameTagList: NameTagList.h NameTagList.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 	
+SubDirsPost:
+	@ for dir in ${DIRS_POST}; do (cd $${dir}; ${MAKE}) ; done
 	

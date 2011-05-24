@@ -21,7 +21,13 @@ public:
 	void LoadVirtual();
 	void LoadReal();
 	void Unload();
+	void RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY);
 	void Visualize();
+
+	// Assumes that coordinates are within scene of the intantiated object
+	vector<IEntity *> TestForEntityHits(float x, float y);
+	static Scene *TestForSceneHit(float x, float y);
+
 	void Run();
 };
 #endif /* SCENE_H_ */

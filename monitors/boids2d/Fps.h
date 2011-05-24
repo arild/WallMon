@@ -3,14 +3,14 @@
 
 #include <SDL/SDL.h>
 
-#define FPS 	35.f
+#define MAX_FPS 	35.f
 
 class Fps {
 public:
 	static Fps fpsControl;
 	Fps();
 	void OnLoop();
-	int GetFPS();
+	int GetFps();
 	float GetSpeedFactor();
 
 private:

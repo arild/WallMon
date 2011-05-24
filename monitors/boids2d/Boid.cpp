@@ -58,8 +58,8 @@ void Boid::OnLoop()
 			_oldDesty = desty;
 			float dx = destx - tx;
 			float dy = desty - ty;
-			speedx = dx / FPS;
-			speedy = dy / FPS;
+			speedx = dx / MAX_FPS;
+			speedy = dy / MAX_FPS;
 		}
 		// Physically move the boid
 		tx += speedx;
@@ -123,6 +123,13 @@ void Boid::_DrawBoid()
 		glEnd();
 		break;
 	}
+}
+
+void Boid::HandleHit(TouchEvent & event)
+{
+	ctx->red = 255;
+	ctx->green = 255;
+	ctx->blue = 255;
 }
 
 void Boid::_DrawTail()

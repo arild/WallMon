@@ -36,7 +36,8 @@ private:
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
 	void _SetupScenes();
-	void _VisualizeShoutEvent(TouchEvent &e);
+	void _VisualizeShoutEvent(float x, float y);
+	int _CountNumObjects();
 };
 
 #endif /* BOIDSAPP_H_ */
