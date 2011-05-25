@@ -20,7 +20,6 @@
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
-#include "IInteractive.h"
 #include "SdlMouseEventFetcher.h"
 #include "TouchEvent.h"
 #include "Button.h"

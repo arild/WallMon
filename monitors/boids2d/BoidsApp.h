@@ -9,7 +9,7 @@
 #include "Scene.h"
 #include "Boid.h"
 #include "NameTagList.h"
-#include "ShoutMaster.h"
+#include "EventHandlerBase.h"
 
 using namespace std;
 

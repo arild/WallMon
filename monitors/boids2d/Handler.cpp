@@ -14,7 +14,6 @@
 #include "unistd.h"
 #include "WallView.h"
 
-#include "ShoutMaster.h"
 #include "EventHandlerBase.h"
 #include "SdlMouseEventFetcher.h"
 
