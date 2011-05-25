@@ -20,15 +20,15 @@
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
-#include "SdlMouseEventFetcher.h"
 #include "TouchEvent.h"
 #include "Button.h"
 
-BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventHandlerBase *eventHandler) :
-	_screenWidth(screenWidth), _screenHeight(screenHeight), _eventHandler(eventHandler)
+BoidsApp::BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue) :
+	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
 	_SetupScenes();
 	_nameTagList = NULL;
+	_touchEventQueue = touchEventQueue;
 }
 
 BoidsApp::~BoidsApp()
@@ -121,12 +121,6 @@ void BoidsApp::_RenderForever()
 	srand(SDL_GetTicks());
 	SDL_Event event;
 
-	Queue<EventQueueItem> *touchEventQueue = NULL;
-	if (_eventHandler != NULL) {
-		touchEventQueue = _eventHandler->GetOutputQueue();
-		_eventHandler->Start();
-	}
-
 	LOG(INFO) << "BoidsApp entering infinite loop";
 	while (_running) {
 		if (_updateOrtho) {
@@ -141,30 +135,13 @@ void BoidsApp::_RenderForever()
 		for (int i = 0; i < Scene::scenes.size(); i++)
 			Scene::scenes[i]->Run();
 
-		if (_eventHandler != NULL) {
-			//_eventHandler->PollEvents();
-			while (touchEventQueue->GetSize() > 0) {
-				EventQueueItem item = touchEventQueue->Pop();
-				Scene *scene = item.get<0>();
-				TouchEvent event = item.get<1>();
-				if (event.visualizeOnly)
-					_VisualizeShoutEvent(event.realX, event.realY);
-				else {
-					vector<Entity *> entities = scene->TestForEntityHits(event.x, event.y);
-					LOG(INFO) << "Num entity hits: " << entities.size();
-					if (entities.size() == 0)
-						// No entity hits within scene
-						continue;
-					LOG(INFO) << "Entity Hit";
-					entities[0]->HandleHit(event);
-				}
-			}
-		}
-		SDL_GL_SwapBuffers();
+		_HandleTouchEvents();
 
+		SDL_GL_SwapBuffers();
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
-		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), _CountNumObjects());
+		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(),
+				_CountTotalNumObjects());
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
 }
@@ -193,13 +170,33 @@ void BoidsApp::_SetupScenes()
 
 	Scene::current = _controlPanelScene;
 	Button *button = new Button(10, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((Entity *)button);
+	_controlPanelScene->entityList.push_back((Entity *) button);
 
 	button = new Button(40, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((Entity *)button);
+	_controlPanelScene->entityList.push_back((Entity *) button);
 
 	button = new Button(70, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((Entity *)button);
+	_controlPanelScene->entityList.push_back((Entity *) button);
+}
+
+void BoidsApp::_HandleTouchEvents()
+{
+	while (_touchEventQueue->GetSize() > 0) {
+		TouchEventQueueItem item = _touchEventQueue->Pop();
+		Scene *scene = item.get<0> ();
+		TouchEvent event = item.get<1> ();
+		if (event.visualizeOnly)
+			_VisualizeShoutEvent(event.realX, event.realY);
+		else {
+			vector<Entity *> entities = scene->TestForEntityHits(event.x, event.y);
+			LOG(INFO) << "Num entity hits: " << entities.size();
+			if (entities.size() == 0)
+				// No entity hits within scene
+				continue;
+			LOG(INFO) << "Entity Hit";
+			entities[0]->HandleHit(event);
+		}
+	}
 }
 
 void BoidsApp::_VisualizeShoutEvent(float x, float y)
@@ -226,7 +223,7 @@ void BoidsApp::_VisualizeShoutEvent(float x, float y)
 	SDL_GL_SwapBuffers();
 }
 
-int BoidsApp::_CountNumObjects()
+int BoidsApp::_CountTotalNumObjects()
 {
 	int numObjects = 0;
 	BOOST_FOREACH(Scene *s, Scene::scenes)
@@ -235,17 +232,4 @@ int BoidsApp::_CountNumObjects()
 	}
 	return numObjects;
 }
-
-//void BoidsApp::_DrawBoidDescription()
-//{
-//	FTGLPixmapFont font(FONT_PATH);
-//	//FTPoint point(R, BOID_Y/2);
-//	FTPoint point(900, 400);
-//	//font.CharMap(ft_encoding_latin_1);
-//	if (font.Error())
-//		LOG(INFO) << "Font failed";
-//	font.FaceSize(25);
-//	string text = "Utilization";
-//	font.Render(text.c_str(), text.length(), point);
-//}
 

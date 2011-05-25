@@ -18,6 +18,7 @@
 #include "stubs/ProcessCollector.pb.h"
 #include "BoidsApp.h"
 #include "BoidSharedContext.h"
+#include "EventHandlerBase.h"
 
 using namespace std;
 
@@ -63,6 +64,8 @@ private:
 	BoidsApp *_boidsApp;
 	ProcMap *_procMap;
 	NameTagList *_nameTagList;
+	EventHandlerBase *_eventHandler;
+
 	string _CreateProcMapKey(string hostName, int pid);
 	unsigned long _OatHash(string key);
 	void _ProcessNameToRgbColor(string name, int *r, int *g, int *b);

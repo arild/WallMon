@@ -30,7 +30,7 @@ EventHandlerBase::EventHandlerBase()
 	uint32_t filter[] = { kEvt_type_calibrated_touch_location, kEvt_type_touch_remove };
 	shout_set_event_filter(_shout, sizeof(filter) / 4, filter);
 
-	_outputQueue = new Queue<EventQueueItem> (10000);
+	_outputQueue = new Queue<TouchEventQueueItem> (10000);
 	HandleTouchesPtr handle = &EventHandlerBase::HandleTouches;
 	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
 	_touchManager = new STouchManager(this, callback);
@@ -55,7 +55,7 @@ void EventHandlerBase::Stop()
 	LOG(INFO) << "EventHandlerBase stopped";
 }
 
-Queue<EventQueueItem> *EventHandlerBase::GetOutputQueue()
+Queue<TouchEventQueueItem> *EventHandlerBase::GetOutputQueue()
 {
 	return _outputQueue;
 }
@@ -113,7 +113,7 @@ void EventHandlerBase::_FilterEvent(TT_touch_state_t *obj, bool isDown)
 	if (scene == NULL)
 		// Coordinates not within any scene
 		return;
-	EventQueueItem item;
+	TouchEventQueueItem item;
 	event.visualizeOnly = true;
 	item = make_tuple((Scene *)NULL, event);
 	_outputQueue->Push(item);

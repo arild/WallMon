@@ -8,7 +8,6 @@
 #ifndef TOUCHEVENT_H_
 #define TOUCHEVENT_H_
 
-
 class TouchEvent {
 public:
 	int touchId;

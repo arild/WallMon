@@ -13,8 +13,6 @@
 #include "System.h"
 #include "unistd.h"
 #include "WallView.h"
-
-#include "EventHandlerBase.h"
 #include "SdlMouseEventFetcher.h"
 
 #define KEY							"BOIDS"
@@ -31,18 +29,22 @@ void Handler::OnInit(Context *ctx)
 	_message = new ProcessesMessage();
 	_procMap = new ProcMap();
 
+	_eventHandler = new EventHandlerBase();
+	Queue<TouchEventQueueItem> *touchEventQueue = _eventHandler->GetOutputQueue();
+	_eventHandler->Start();
+
 #ifdef ROCKSVV
 	WallView w(3, 1, 2, 2);
 	if (w.IsTileWithin()) {
 		double x, y, width, height;
 		w.GetDisplayArea(&x, &y, &width, &height);
-		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, new EventHandlerBase());
+		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, touchEventQueue);
 		_boidsApp->SetDisplayArea(x, y, width, height);
 		_nameTagList = _boidsApp->CreateNameTagList();
 		_boidsApp->Start();
 	}
 #else
-	_boidsApp = new BoidsApp(1600, 768, new EventHandlerBase());
+	_boidsApp = new BoidsApp(1600, 768, touchEventQueue);
 	_nameTagList = _boidsApp->CreateNameTagList();
 	_boidsApp->Start();
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
@@ -51,6 +53,7 @@ void Handler::OnInit(Context *ctx)
 
 void Handler::OnStop()
 {
+	_eventHandler->Stop();
 	if (_boidsApp != NULL) {
 		_boidsApp->Stop();
 		delete _boidsApp;

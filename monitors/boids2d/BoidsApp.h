@@ -10,12 +10,13 @@
 #include "Boid.h"
 #include "NameTagList.h"
 #include "EventHandlerBase.h"
+#include "TouchEvent.h"
 
 using namespace std;
 
 class BoidsApp {
 public:
-	BoidsApp(int screenWidth, int screenHeight, EventHandlerBase *eventHandler);
+	BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue);
 	virtual ~BoidsApp();
 	void Start();
 	void Stop();
@@ -32,12 +33,14 @@ private:
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
 	NameTagList *_nameTagList;
-	EventHandlerBase *_eventHandler;
+	Queue<TouchEventQueueItem> *_touchEventQueue;
+
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
 	void _SetupScenes();
+	void _HandleTouchEvents();
 	void _VisualizeShoutEvent(float x, float y);
-	int _CountNumObjects();
+	int _CountTotalNumObjects();
 };
 
 #endif /* BOIDSAPP_H_ */

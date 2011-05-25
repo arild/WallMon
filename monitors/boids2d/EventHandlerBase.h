@@ -13,29 +13,28 @@
 #include <boost/tuple/tuple.hpp>
 #include <shout/event-types/touch-events.h>
 #include "touchmanager/STouchManager.h"
-#include "TouchEvent.h"
 #include "Queue.h"
-#include "Scene.h"
+#include "TouchEvent.h"
 #include "Entity.h"
+#include "Scene.h"
 
 using namespace std;
 using namespace boost::tuples;
+typedef tuple<Scene *, TouchEvent> TouchEventQueueItem;
 
-
-typedef tuple<Scene *, TouchEvent> EventQueueItem;
 
 class EventHandlerBase {
 public:
 	boost::thread _thread;
 	bool _running;
-	Queue<EventQueueItem> *_outputQueue;
+	Queue<TouchEventQueueItem> *_outputQueue;
 	vector<Scene *> _scenes;
 
 	EventHandlerBase();
 	virtual ~EventHandlerBase();
 	void Start();
 	void Stop();
-	Queue<EventQueueItem> *GetOutputQueue();
+	Queue<TouchEventQueueItem> *GetOutputQueue();
 	void HandleTouches(touchVector_t & down, touchVector_t & up);
 
 private:
