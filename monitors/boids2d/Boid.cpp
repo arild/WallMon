@@ -23,7 +23,6 @@ Boid::Boid()
 	height = 2;
 	_visible = false;
 	_quadric = gluNewQuadric();
-	_maxTailLength = 75;
 }
 
 Boid::~Boid()
@@ -66,7 +65,12 @@ void Boid::OnLoop()
 		ty += speedy;
 	}
 
-	if (_tail.size() == _maxTailLength)
+	int tailLength = ctx->tailLength;
+	if (tailLength == 0) {
+		_tail.clear();
+		return;
+	}
+	if (_tail.size() == tailLength)
 		_tail.pop_back();
 	_tail.push_front(make_tuple(tx, ty));
 }

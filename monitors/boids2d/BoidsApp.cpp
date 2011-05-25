@@ -170,6 +170,7 @@ void BoidsApp::_SetupScenes()
 
 	Scene::current = _controlPanelScene;
 	Button *button = new Button(10, 10, 20, 20);
+	button->SetCallback(&ButtonCallbacks::BoidTailCallback);
 	_controlPanelScene->entityList.push_back((Entity *) button);
 
 	button = new Button(40, 10, 20, 20);
@@ -232,4 +233,16 @@ int BoidsApp::_CountTotalNumObjects()
 	}
 	return numObjects;
 }
+
+void ButtonCallbacks::BoidTailCallback()
+{
+	if (BoidSharedContext::tailLength == 0)
+		BoidSharedContext::tailLength = 75;
+	else
+		BoidSharedContext::tailLength = 0;
+}
+
+
+
+
 

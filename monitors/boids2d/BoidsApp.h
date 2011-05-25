@@ -43,4 +43,9 @@ private:
 	int _CountTotalNumObjects();
 };
 
+class ButtonCallbacks {
+public:
+	static void BoidTailCallback();
+};
+
 #endif /* BOIDSAPP_H_ */

@@ -91,7 +91,7 @@ void EventHandlerBase::_FilterEvent(TT_touch_state_t *obj, bool isDown)
 	y = WALL_SCREEN_HEIGHT - y;
 
 	LOG(INFO) << "Checking grid";
-	WallView w(3, 1, 2, 2);
+	WallView w(2, 1, 3, 3);
 	if (w.IsCordsWithin(x, y) == false)
 		return;
 

@@ -34,7 +34,7 @@ void Handler::OnInit(Context *ctx)
 	_eventHandler->Start();
 
 #ifdef ROCKSVV
-	WallView w(3, 1, 2, 2);
+	WallView w(2, 1, 3, 3);
 	if (w.IsTileWithin()) {
 		double x, y, width, height;
 		w.GetDisplayArea(&x, &y, &width, &height);

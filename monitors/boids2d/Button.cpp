@@ -22,6 +22,11 @@ Button::~Button()
 {
 }
 
+void Button::SetCallback(void(*callback)())
+{
+	_callback = callback;
+}
+
 void Button::OnLoop()
 {
 }
@@ -50,9 +55,13 @@ void Button::HandleHit(TouchEvent &event)
 	if (event.isDown == true)
 		return;
 
-	if (_isActivated)
+	if (_isActivated) {
 		_isActivated = false;
-	else
+		_callback();
+	}
+	else {
 		_isActivated = true;
+		_callback();
+	}
 }
 

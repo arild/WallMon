@@ -8,11 +8,15 @@
 
 #include "BoidSharedContext.h"
 
+int BoidSharedContext::tailLength;
+
 void BoidSharedContext::SetDestination(float x, float y)
 {
 	scoped_lock lock(_mutex);
 	_destx = x;
 	_desty = y;
+	_tailLength = 0;
+	tailLength = 75;
 }
 
 void BoidSharedContext::GetDestination(float *x, float *y)
@@ -21,3 +25,19 @@ void BoidSharedContext::GetDestination(float *x, float *y)
 	*x = _destx;
 	*y = _desty;
 }
+
+void BoidSharedContext::SetTailLength(int length)
+{
+	scoped_lock lock(_mutex);
+	_tailLength = length;
+}
+
+int BoidSharedContext::GetTailLength()
+{
+	scoped_lock lock(_mutex);
+	return _tailLength;
+}
+
+
+
+

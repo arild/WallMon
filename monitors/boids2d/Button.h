@@ -14,6 +14,7 @@ class Button : Entity {
 public:
 	Button(float x, float y, float w, float h);
 	virtual ~Button();
+	void SetCallback(void (*callback)());
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
@@ -21,6 +22,7 @@ public:
 
 private:
 	bool _isActivated;
+	void (*_callback)();
 };
 
 #endif /* BUTTON_H_ */
