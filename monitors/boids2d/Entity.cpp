@@ -1,15 +1,15 @@
 
-#include "IEntity.h"
+#include "Entity.h"
 
 
-bool IEntity::IsHit(float x, float y)
+bool Entity::IsHit(float x, float y)
 {
 	if (x >= tx && x <= tx + width && y >= ty && y <= ty + height)
 		return true;
 	return false;
 }
 
-void IEntity::HandleHit(TouchEvent &event)
+void Entity::HandleHit(TouchEvent &event)
 {
 
 }

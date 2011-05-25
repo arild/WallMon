@@ -5,13 +5,13 @@ using namespace std;
 
 #include "TouchEvent.h"
 
-class IEntity {
+class Entity {
 public:
 	float tx, ty;
 	float width, height;
 	bool supportsTouch;
 
-	virtual ~IEntity() {}
+	virtual ~Entity() {}
 	virtual void OnLoop() = 0;
 	virtual void OnRender() = 0;
 	virtual void OnCleanup() = 0;

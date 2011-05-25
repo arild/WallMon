@@ -8,9 +8,9 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-#include "IEntity.h"
+#include "Entity.h"
 
-class Button : IEntity {
+class Button : Entity {
 public:
 	Button(float x, float y, float w, float h);
 	virtual ~Button();

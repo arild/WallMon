@@ -89,9 +89,9 @@ void BoidsApp::CreateBoid(double startX, double startY, BoidSharedContext *ctx)
 {
 	Boid *boid = new Boid();
 	boid->ctx = ctx;
-	((IEntity *) boid)->tx = startX;
-	((IEntity *) boid)->ty = startY;
-	_boidScene->entityList.push_back((IEntity *) boid);
+	((Entity *) boid)->tx = startX;
+	((Entity *) boid)->ty = startY;
+	_boidScene->entityList.push_back((Entity *) boid);
 }
 
 void BoidsApp::RemoveBoid(Boid *Boid)
@@ -102,7 +102,7 @@ NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
 	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(FONT_PATH));
-	_leftColumnScene->entityList.push_back((IEntity *) nameDrawer);
+	_leftColumnScene->entityList.push_back((Entity *) nameDrawer);
 	return _nameTagList;
 }
 
@@ -150,7 +150,7 @@ void BoidsApp::_RenderForever()
 				if (event.visualizeOnly)
 					_VisualizeShoutEvent(event.realX, event.realY);
 				else {
-					vector<IEntity *> entities = scene->TestForEntityHits(event.x, event.y);
+					vector<Entity *> entities = scene->TestForEntityHits(event.x, event.y);
 					LOG(INFO) << "Num entity hits: " << entities.size();
 					if (entities.size() == 0)
 						// No entity hits within scene
@@ -189,17 +189,17 @@ void BoidsApp::_SetupScenes()
 	Scene::current = _boidScene;
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
-	_boidScene->entityList.push_back((IEntity *) axis);
+	_boidScene->entityList.push_back((Entity *) axis);
 
 	Scene::current = _controlPanelScene;
 	Button *button = new Button(10, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((IEntity *)button);
+	_controlPanelScene->entityList.push_back((Entity *)button);
 
 	button = new Button(40, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((IEntity *)button);
+	_controlPanelScene->entityList.push_back((Entity *)button);
 
 	button = new Button(70, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((IEntity *)button);
+	_controlPanelScene->entityList.push_back((Entity *)button);
 }
 
 void BoidsApp::_VisualizeShoutEvent(float x, float y)

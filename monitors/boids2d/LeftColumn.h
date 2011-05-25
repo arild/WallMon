@@ -3,10 +3,10 @@
 
 #include <GL/gl.h>
 #include <FTGL/ftgl.h>
-#include "IEntity.h"
+#include "Entity.h"
 #include "NameTagList.h"
 
-class LeftColumn : IEntity {
+class LeftColumn : Entity {
 public:
 	LeftColumn(NameTagList *nameTagList, FTFont *font);
 	virtual ~LeftColumn();

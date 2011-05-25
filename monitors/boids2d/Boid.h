@@ -6,14 +6,14 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <boost/tuple/tuple.hpp>
-#include "IEntity.h"
+#include "Entity.h"
 #include "BoidSharedContext.h"
 
 using namespace boost::tuples;
 typedef tuple<float, float> TailTupleType;
 
 
-class Boid: IEntity {
+class Boid: Entity {
 public:
 	BoidSharedContext *ctx;
 	Boid();

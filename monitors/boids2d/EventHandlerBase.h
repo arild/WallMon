@@ -16,7 +16,7 @@
 #include "TouchEvent.h"
 #include "Queue.h"
 #include "Scene.h"
-#include "IEntity.h"
+#include "Entity.h"
 
 using namespace std;
 using namespace boost::tuples;

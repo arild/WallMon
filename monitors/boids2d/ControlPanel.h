@@ -8,14 +8,14 @@
 #ifndef CONTROLPANEL_H_
 #define CONTROLPANEL_H_
 
-#include "IEntity.h"
+#include "Entity.h"
 
 enum Buttons {
    Tail,
    Pause
 };
 
-class ControlPanel : IEntity {
+class ControlPanel : Entity {
 public:
 	ControlPanel();
 	virtual ~ControlPanel();

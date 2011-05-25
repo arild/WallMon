@@ -99,10 +99,10 @@ void Scene::Visualize()
  * Takes coordinates according to scene coordinate system and returns all
  * entities within the scene that overlaps with given coordinates
  */
-vector<IEntity *> Scene::TestForEntityHits(float x, float y)
+vector<Entity *> Scene::TestForEntityHits(float x, float y)
 {
 	LoadVirtual();
-	vector<IEntity *> v;
+	vector<Entity *> v;
 	for (int i = 0; i < entityList.size(); i++)
 		if (entityList[i]->IsHit(x, y))
 			v.push_back(entityList[i]);
