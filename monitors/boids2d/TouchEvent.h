@@ -14,6 +14,7 @@ public:
 	bool isDown;
 	bool visualizeOnly;
 	float x, y, realX, realY;
+	float timestampSec, timestampPreviousSec;
 	virtual ~TouchEvent() {}
 };
 

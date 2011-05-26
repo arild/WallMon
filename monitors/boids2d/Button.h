@@ -12,6 +12,7 @@
 
 class Button : Entity {
 public:
+	bool slowActivationApproach;
 	Button(float x, float y, float w, float h);
 	virtual ~Button();
 	void SetCallback(void (*callback)());
@@ -21,8 +22,13 @@ public:
 	void HandleHit(TouchEvent &event);
 
 private:
+	double _timestampSec;
+	bool _animationOn;
+	float _offset;
+	float _stepSize;
 	bool _isActivated;
 	void (*_callback)();
+	void _ButtonClick();
 };
 
 #endif /* BUTTON_H_ */

@@ -107,7 +107,8 @@ void EventHandlerBase::_FilterEvent(TT_touch_state_t *obj, bool isDown)
 	event.realX = x;
 	event.realY = y;
 	LOG(INFO) << "Maps to: x=" << x << " | y=" << y;
-
+	event.timestampSec = obj->time;
+	event.timestampPreviousSec = (float)obj->lastUpdated;
 
 	Scene *scene = Scene::TestForSceneHit(event.realX, event.realY);
 	if (scene == NULL)

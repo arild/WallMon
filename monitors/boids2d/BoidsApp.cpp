@@ -170,10 +170,13 @@ void BoidsApp::_SetupScenes()
 
 	Scene::current = _controlPanelScene;
 	Button *button = new Button(10, 10, 20, 20);
+	button->slowActivationApproach = false;
 	button->SetCallback(&ButtonCallbacks::BoidTailCallback);
 	_controlPanelScene->entityList.push_back((Entity *) button);
 
 	button = new Button(40, 10, 20, 20);
+	button->slowActivationApproach = true;
+	button->SetCallback(&ButtonCallbacks::BoidTailCallback);
 	_controlPanelScene->entityList.push_back((Entity *) button);
 
 	button = new Button(70, 10, 20, 20);
