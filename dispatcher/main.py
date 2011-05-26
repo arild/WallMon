@@ -1,14 +1,18 @@
 import socket
 import os
 import sys
+import getpass
 import MonitorDispatcher_pb2
+
+def tilde_to_full_path(path):
+    return path.replace('~', '/home/' + getpass.getuser() , 1)
 
 STREAMER_ENTRY_PORT = 5577
 MULITCAST_ADDRESS = "224.0.0.127"
 DAEMON_MULTICAST_LISTEN_PORT = 9955
 SERVER_MULTICAST_LISTEN_PORT = 9956
-MONITORS_PATH = "/home/arild/WallMon/monitors/bin/"
-STUBS_DIR = "/home/arild/WallMon/lib/stubs"
+MONITORS_PATH = tilde_to_full_path("~/WallMon/monitors/bin/")
+STUBS_DIR = tilde_to_full_path("~/WallMon/lib/stubs")
 
 def multicast_monitor_message(msg):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)

@@ -29,6 +29,9 @@ public:
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
 	static void ExportDisplayToLocalhost();
+	static string GetCurrentUser();
+	static string RunCommand(string cmd);
+	static string RunCommand(char *cmd);
 };
 
 #endif /* SYSTEM_H_ */

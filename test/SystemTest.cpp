@@ -35,3 +35,8 @@ TEST_F(SystemTest, NumCores)
 {
 	ASSERT_EQ(4, System::GetNumCores());
 }
+
+TEST_F(SystemTest, CurrentUser)
+{
+	ASSERT_EQ("arild", System::GetCurrentUser());
+}

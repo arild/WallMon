@@ -218,6 +218,37 @@ void System::ExportDisplayToLocalhost()
 	_RunCommand(cmd, buf, 1024);
 }
 
+string System::GetCurrentUser()
+{
+	return RunCommand("whoami");
+}
+
+string System::RunCommand(string cmd)
+{
+	char buf[4096];
+
+	FILE *fp = popen(cmd.c_str(), "r");
+	if (fp == NULL)
+		return NULL;
+	void *res = fgets(buf, 4096, fp);
+	pclose(fp);
+	if (res == NULL)
+		return NULL;
+
+	// Remove '\n' before returning result
+	string retval = (string)buf;
+	return retval.erase(retval.length() - 1, 1);
+}
+
+string System::RunCommand(char *cmd)
+{
+	return RunCommand((string)cmd);
+}
+
+
+
+
+
 
 
 

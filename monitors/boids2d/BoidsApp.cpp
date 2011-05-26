@@ -101,7 +101,8 @@ void BoidsApp::RemoveBoid(Boid *Boid)
 NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
-	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(FONT_PATH));
+	string fontPath = Config::GetFontPath();
+	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(fontPath.c_str()));
 	_leftColumnScene->entityList.push_back((Entity *) nameDrawer);
 	return _nameTagList;
 }

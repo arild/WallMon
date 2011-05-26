@@ -17,7 +17,8 @@
 
 Font::Font(int size)
 {
-	_font = new FTGLTextureFont(FONT_PATH);
+	string fontPath = Config::GetFontPath();
+	_font = new FTGLTextureFont(fontPath.c_str());
 	_font->FaceSize((unsigned int)(size * Scene::current->scale));
 }
 
