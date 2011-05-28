@@ -4,7 +4,7 @@ CFLAGS = -O2 -c
 DIRS_PRE = stubs 
 DIRS_POST = touchmanager
 
-all: SubDirsPre Config PracticalSocket ClassLoader System ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList SubDirsPost 
+all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList SubDirsPost 
 	
 clean: 	
 	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE} clean) ; done
@@ -15,6 +15,10 @@ clean:
 SubDirsPre:
 	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE}) ; done
 
+System: System.h System.cpp 
+	$(CC) $(CFLAGS) $(INC_PATH) $?
+	ar cru lib$@.a $@.o
+
 Config: Config.h Config.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
@@ -24,10 +28,6 @@ PracticalSocket: PracticalSocket.h PracticalSocket.cpp
 	ar cru lib$@.a $@.o
 
 ClassLoader: ClassLoader.h ClassLoader.cpp
-	$(CC) $(CFLAGS) $(INC_PATH) $?
-	ar cru lib$@.a $@.o
-
-System: System.h System.cpp 
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 

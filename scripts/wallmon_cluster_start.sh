@@ -1,8 +1,8 @@
 #!/bin/bash
-DAEMON_DIR=/home/arild/WallMon/daemon
+DAEMON_DIR=~/WallMon/daemon
 DAEMON_EXECUTE="./wallmond -d"
 
-SERVER_DIR=/home/arild/WallMon/server
+SERVER_DIR=~/WallMon/server
 SERVER_EXECUTE="./wallmons -d"
 
 DISPLAY="DISPLAY=localhost:0"

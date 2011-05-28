@@ -23,14 +23,12 @@ ProcessCollector::ProcessCollector()
 
 void ProcessCollector::OnInit(Context *ctx)
 {
-	ctx->server = context->server;
+	// The framework injects its own mutable instance of Context, therefore
+	// the context instance that the user has been modifying must be copied
 	ctx->key = context->key;
 	ctx->sampleFrequencyMsec = context->sampleFrequencyMsec;
-	LOG(INFO) << "Copy, num servers: " << context->servers->size();
-	BOOST_FOREACH(string server, *context->servers)
-		ctx->servers->push_back(server);
+	ctx->servers = context->servers;
 
-	LOG(INFO) << "Done copy";
 	delete context;
 	context = ctx;
 

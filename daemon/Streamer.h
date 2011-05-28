@@ -17,7 +17,7 @@ public:
 	virtual ~Streamer();
 	void Start();
 	void Stop();
-	int SetupStream(string serverAddress);
+	int SetupStream(string serverAddress, int serverPort);
 	void Stream(StreamItem &item);
 
 private:

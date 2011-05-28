@@ -1,8 +1,14 @@
 #!/bin/bash
-DAEMON_DIR=/home/arild/WallMon/daemon
+DAEMON_DIR=~/WallMon/daemon
 DAEMON_EXECUTE="./wallmond -d"
+FORK_CMD="cluster-fork --bg"
 
-cluster-fork --bg "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
+# Escaping how-to: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html
+if ["`$HOSTNAME`" == "`ice.cs.uit.no`"];
+then
+FORK_CMD="rocks run host"
+fi
+
+${FORK_CMD} "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
 cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
-
 

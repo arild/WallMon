@@ -11,22 +11,22 @@
 #include <string>
 #include <vector>
 #include <glog/logging.h>
+#include <boost/tuple/tuple.hpp>
+#include "Config.h"
 #include "stubs/Wallmon.pb.h"
 
 using namespace std;
+using namespace boost::tuples;
 
 class Context {
 public:
-	string server;
-	vector<string> *servers;
 	string key;
+	vector< tuple<string, int> > servers;
 	int sampleFrequencyMsec;
 	bool concurrentExecution;
 
 	Context()
 	{
-		server = "";
-		servers = new vector<string>();
 		key = "";
 		sampleFrequencyMsec = 1000;
 		concurrentExecution = false;
@@ -34,20 +34,36 @@ public:
 
 	~Context()
 	{
-		delete servers;
+	}
+
+	void AddServer(string serverAddress, int port)
+	{
+		servers.push_back(make_tuple(serverAddress, port));
 	}
 
 	void AddServer(string serverAddress)
 	{
-		LOG(INFO) << "New Server: " << serverAddress;
-		servers->push_back(serverAddress);
+		AddServer(serverAddress, STREAMER_ENTRY_PORT);
+	}
+
+	void AddServer(tuple<string, int> serverAddress)
+	{
+		servers.push_back(serverAddress);
+	}
+
+	void AddServers(vector< tuple<string, int> > serverAddresses)
+	{
+		for (int i = 0; i < serverAddresses.size(); i++)
+			AddServer(serverAddresses[i]);
 	}
 
 	void AddServers(vector<string> serverAddresses)
 	{
 		for (int i = 0; i < serverAddresses.size(); i++)
-			AddServer(serverAddresses[i]);
+			AddServer(serverAddresses[i], STREAMER_ENTRY_PORT);
 	}
+
+
 };
 
 class IBase {

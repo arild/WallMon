@@ -85,7 +85,7 @@ void MonitorDispatcher::_ListenForever()
 				try {
 					// Adhere to interface contract
 					monitor->OnInit(ctx);
-					if (_multicastListenPort == DAEMON_MULTICAST_LISTEN_PORT && ctx->servers->size() == 0)
+					if (_multicastListenPort == DAEMON_MULTICAST_LISTEN_PORT && ctx->servers.size() == 0)
 						// Server not defined, use source
 						ctx->AddServer(sourceAddress);
 				} catch (exception &e) {

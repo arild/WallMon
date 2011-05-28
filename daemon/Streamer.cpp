@@ -61,7 +61,7 @@ void Streamer::Stop()
  * @param serverAddress  Either an IP address or hostname
  * @return File descriptor of socket connected to specified server address
  */
-int Streamer::SetupStream(string serverAddress)
+int Streamer::SetupStream(string serverAddress, int serverPort)
 {
 	// Check if address already is associated with a file descriptor
 	if (_serverMap->count(serverAddress) > 0)
@@ -86,7 +86,7 @@ int Streamer::SetupStream(string serverAddress)
 	bzero(&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = inet_addr(serverIpAddress.c_str());
-	addr.sin_port = htons(STREAMER_ENTRY_PORT);
+	addr.sin_port = htons(serverPort);
 
 	int fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (fd < 0) {
