@@ -30,6 +30,8 @@ public:
 	static vector<string> HostnameToIpAddress(string hostname);
 	static void ExportDisplayToLocalhost();
 	static string GetCurrentUser();
+	static bool IsRocksvvClusterRootNode();
+	static bool IsIceClusterRootNode();
 	static string RunCommand(string cmd);
 	static string RunCommand(char *cmd);
 };

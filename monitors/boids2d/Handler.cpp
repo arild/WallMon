@@ -105,7 +105,7 @@ void Handler::Handle(WallmonMessage *msg)
 		}
 		procStat->numSamples += 1;
 
-		double utilFilterFactor = 3.0;
+		double utilFilterFactor = 0.0;
 
 		// CPU
 		double user = processMessage->usercpuutilization();//processMessage->usercpuload();

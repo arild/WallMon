@@ -36,19 +36,20 @@ public:
 	{
 	}
 
+	void AddServer(tuple<string, int> serverAddress)
+	{
+		LOG(INFO) << "Adding server: " << serverAddress.get<0>() << " | " << serverAddress.get<1>();
+		servers.push_back(serverAddress);
+	}
+
 	void AddServer(string serverAddress, int port)
 	{
-		servers.push_back(make_tuple(serverAddress, port));
+		AddServer(make_tuple(serverAddress, port));
 	}
 
 	void AddServer(string serverAddress)
 	{
 		AddServer(serverAddress, STREAMER_ENTRY_PORT);
-	}
-
-	void AddServer(tuple<string, int> serverAddress)
-	{
-		servers.push_back(serverAddress);
 	}
 
 	void AddServers(vector< tuple<string, int> > serverAddresses)

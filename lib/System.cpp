@@ -223,6 +223,20 @@ string System::GetCurrentUser()
 	return RunCommand("whoami");
 }
 
+bool System::IsRocksvvClusterRootNode()
+{
+	if (GetHostname().compare("rocksvv.cs.uit.no") == 0)
+		return true;
+	return false;
+}
+
+bool System::IsIceClusterRootNode()
+{
+	if (GetHostname().compare("ice.cs.uit.no") == 0)
+		return true;
+	return false;
+}
+
 string System::RunCommand(string cmd)
 {
 	char buf[4096];
@@ -244,6 +258,8 @@ string System::RunCommand(char *cmd)
 {
 	return RunCommand((string)cmd);
 }
+
+
 
 
 
