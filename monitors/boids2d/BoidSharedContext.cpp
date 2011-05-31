@@ -9,6 +9,10 @@
 #include "BoidSharedContext.h"
 
 int BoidSharedContext::tailLength = 0;
+bool BoidSharedContext::showCpuBoid = true;
+bool BoidSharedContext::showMemoryBoid = true;
+bool BoidSharedContext::showNetworkBoid = true;
+bool BoidSharedContext::showStorageBoid = true;
 
 void BoidSharedContext::SetDestination(float x, float y)
 {

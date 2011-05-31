@@ -44,7 +44,7 @@ bool LinuxProcessMonitor::OpenIo(int pid)
 	sio << "/proc/" << pid << "/io";
 	_procio = fopen(sio.str().c_str(), "r");
 	if (!_procio) {
-		cout << "Error opening files..." << endl;
+		cout << "Error opening io files..." << endl;
 		return false;
 	}
 	return true;

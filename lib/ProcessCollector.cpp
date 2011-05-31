@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #define MESSAGE_BUF_SIZE				(1024 * 1000) * 5
-const double NETWORK_MAX_IN_AND_OUT_BYTES = (1024 * 1024 * 100) * 2;
+const double NETWORK_MAX_IN_AND_OUT_BYTES = (1024 * 1024 * 10) * 2;
 
 ProcessCollector::ProcessCollector()
 {
@@ -130,8 +130,8 @@ void ProcessCollector::_AddProcess(int pid)
 		_pidMonitor->Ignore(pid);
 		return;
 	}
-	if (System::HasSupportForProcPidIo())
-		monitor->OpenIo(pid);
+	//if (System::HasSupportForProcPidIo())
+	//	monitor->OpenIo(pid);
 	monitor->update();
 	_monitors->push_back(monitor);
 }

@@ -4,7 +4,6 @@
 #include <list>
 #include <SDL/SDL.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <boost/tuple/tuple.hpp>
 #include "Entity.h"
 #include "BoidSharedContext.h"
@@ -13,10 +12,10 @@ using namespace boost::tuples;
 typedef tuple<float, float> TailTupleType;
 
 
-class Boid: Entity {
+class Boid: virtual Entity, EntityShape {
 public:
 	BoidSharedContext *ctx;
-	Boid();
+	Boid(BoidSharedContext *ctx_);
 	virtual ~Boid();
 	virtual void OnLoop();
 	virtual void OnRender();
@@ -29,7 +28,6 @@ private:
 	list<TailTupleType> _tail;
 
 	bool _visible;
-	GLUquadricObj *_quadric;
 	bool _IsDestinationReached(float destx, float desty);
 	void _DrawBoid();
 	void _DrawTail();

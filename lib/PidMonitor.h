@@ -21,8 +21,6 @@ public:
 	virtual ~PidMonitor();
 	void Update(vector<int> &pids);
 	void Update();
-	vector<int> GetUnion();
-	vector<int> GetIntersection();
 	vector<int> GetDifference();
 	void Ignore(int pid);
 

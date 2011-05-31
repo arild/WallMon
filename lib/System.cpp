@@ -11,7 +11,7 @@
 #include <sys/time.h> // gettimeofday()
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <iostream>
+#include <fstream> // ifstream()
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -170,8 +170,10 @@ int System::GetTotalMemory()
 
 bool System::HasSupportForProcPidIo()
 {
-	if (System::IsRocksvvCluster())
-		return false;
+	ifstream file("/proc/1/io");
+//	if (!file)
+//		return false;
+//	file.close();
 	return true;
 }
 

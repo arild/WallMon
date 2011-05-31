@@ -20,7 +20,7 @@ public:
 	virtual ~BoidsApp();
 	void Start();
 	void Stop();
-	void CreateBoid(double startX, double startY, BoidSharedContext *ctx);
+	void CreateBoid(BoidSharedContext *ctx);
 	void RemoveBoid(Boid *boid);
 	NameTagList *CreateNameTagList();
 	void SetDisplayArea(double x, double y, double width, double height);

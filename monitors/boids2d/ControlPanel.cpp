@@ -7,7 +7,6 @@
 
 #include "ControlPanel.h"
 #include <GL/gl.h>
-#include <GL/glut.h>
 #include <math.h>
 
 float tailButton[] = {0, 0, 40, 40};

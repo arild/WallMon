@@ -22,6 +22,7 @@
 #include "WallView.h"
 #include "TouchEvent.h"
 #include "Button.h"
+#include "BoidDescription.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
@@ -85,12 +86,9 @@ void BoidsApp::Stop()
 	LOG(INFO) << "BoidsApp stopped";
 }
 
-void BoidsApp::CreateBoid(double startX, double startY, BoidSharedContext *ctx)
+void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 {
-	Boid *boid = new Boid();
-	boid->ctx = ctx;
-	((Entity *) boid)->tx = startX;
-	((Entity *) boid)->ty = startY;
+	Boid *boid = new Boid(ctx);
 	_boidScene->entityList.push_back((Entity *) boid);
 }
 
@@ -156,7 +154,7 @@ void BoidsApp::_SetupScenes()
 	// Create scenes
 	_leftColumnScene = new Scene(0, 0, (w * 2), h * 4, w * 2, h * 4);
 	_boidScene = new Scene(w * 2, h / 2, w * 3 + w / 2, (h * 3), 100, 100);
-	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 2, 100, 100);
+	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 3, 100, 100);
 
 	// Save scenes
 	Scene::scenes.push_back(_leftColumnScene);
@@ -170,18 +168,27 @@ void BoidsApp::_SetupScenes()
 	_boidScene->entityList.push_back((Entity *) axis);
 
 	Scene::current = _controlPanelScene;
-	Button *button = new Button(10, 10, 20, 20);
-	button->slowActivationApproach = false;
-	button->SetCallback(&ButtonCallbacks::BoidTailCallback);
-	_controlPanelScene->entityList.push_back((Entity *) button);
+	BoidDescription *boidDescription = new BoidDescription();
+	_controlPanelScene->entityList.push_back((Entity *) boidDescription);
 
-	button = new Button(40, 10, 20, 20);
-	button->slowActivationApproach = true;
-	button->SetCallback(&ButtonCallbacks::BoidTailCallback);
-	_controlPanelScene->entityList.push_back((Entity *) button);
 
-	button = new Button(70, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((Entity *) button);
+	Button *b = new Button(10, 50, 20, 20);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
+	_controlPanelScene->entityList.push_back((Entity *) b);
+
+	b = new Button(10, 10, 20, 20);
+	b->slowActivationApproach = false;
+	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
+	_controlPanelScene->entityList.push_back((Entity *) b);
+
+	b = new Button(40, 10, 20, 20);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
+	_controlPanelScene->entityList.push_back((Entity *) b);
+
+	b = new Button(70, 10, 20, 20);
+	_controlPanelScene->entityList.push_back((Entity *) b);
 }
 
 void BoidsApp::_HandleTouchEvents()
@@ -198,7 +205,6 @@ void BoidsApp::_HandleTouchEvents()
 			if (entities.size() == 0)
 				// No entity hits within scene
 				continue;
-			LOG(INFO) << "Entity Hit";
 			entities[0]->HandleHit(event);
 		}
 	}
@@ -240,13 +246,7 @@ int BoidsApp::_CountTotalNumObjects()
 
 void ButtonCallbacks::BoidTailCallback()
 {
-	if (BoidSharedContext::tailLength == 0)
-		BoidSharedContext::tailLength = 75;
-	else
-		BoidSharedContext::tailLength = 0;
+	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength == 75
+			: BoidSharedContext::tailLength == 0;
 }
-
-
-
-
 

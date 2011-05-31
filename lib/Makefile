@@ -1,10 +1,10 @@
 include ../Makefile.inc
 
-CFLAGS = -O2 -c
+CFLAGS = -O2 -c -fPIC
 DIRS_PRE = stubs 
 DIRS_POST = touchmanager
 
-all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector NameTagList SubDirsPost 
+all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor NameTagList MonitorDispatcher ProcessCollector SubDirsPost 
 	
 clean: 	
 	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE} clean) ; done
@@ -36,7 +36,7 @@ ByteBuffer: ByteBuffer.h ByteBuffer.cpp
 	ar cru lib$@.a $@.o
 
 LinuxProcessMonitor: LinuxProcessMonitor.h LinuxProcessMonitor.cpp 
-	$(CC) -c $?
+	$(CC) $(CFLAGS) $?
 	ar rcs lib$@.a $@.o
 
 IoLogger: IoLogger.h IoLogger.cpp
@@ -51,19 +51,19 @@ PidMonitor: PidMonitor.h PidMonitor.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 
-# Note that the protobuf stub (MonitorDispatcher.pb.o) is included
-MonitorDispatcher: MonitorDispatcher.h MonitorDispatcher.cpp IMonitorManager.h
-	$(CC) $(CFLAGS) $(INC_PATH) $(LIB_PATH) -lPracticalSocket -lClassLoader $?
-	ar cru libMonitorDispatcher.a $@.o stubs/MonitorDispatcher.pb.o
-
-# Note that the protobuf stub (ProcessCollector.pb.o) is included
-ProcessCollector: ProcessCollector.h ProcessCollector.cpp
-	$(CC) $(CFLAGS) $(INC_PATH) $?
-	ar rcs lib$@.a $@.o LinuxProcessMonitor.o PidMonitor.o System.o stubs/ProcessCollector.pb.o
-
 NameTagList: NameTagList.h NameTagList.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
+
+# Note that the protobuf stub (MonitorDispatcher.pb.o) is included
+MonitorDispatcher: PracticalSocket.o ClassLoader.o MonitorDispatcher.h MonitorDispatcher.cpp IMonitorManager.h
+	$(CC) $(CFLAGS) $(INC_PATH) $?
+	ar cru lib$@.a $@.o stubs/MonitorDispatcher.pb.o
+
+# Note that the protobuf stub (ProcessCollector.pb.o) is included
+ProcessCollector: LinuxProcessMonitor.o PidMonitor.o ProcessCollector.h ProcessCollector.cpp
+	$(CC) $(CFLAGS) $(INC_PATH) $?
+	ar rcs lib$@.a $@.o ProcessCollector.o LinuxProcessMonitor.o PidMonitor.o System.o stubs/ProcessCollector.pb.o
 	
 SubDirsPost:
 	@ for dir in ${DIRS_POST}; do (cd $${dir}; ${MAKE}) ; done

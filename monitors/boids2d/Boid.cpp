@@ -15,14 +15,18 @@
 
 using namespace std;
 
-Boid::Boid()
+Boid::Boid(BoidSharedContext *ctx_)
 {
+	ctx = ctx_;
+	entityShape = ctx->boidShape;
+
 	_oldDestx = -1;
 	_oldDesty = -1;
 	width = 2;
 	height = 2;
+	tx = 0;
+	ty = 0;
 	_visible = false;
-	_quadric = gluNewQuadric();
 }
 
 Boid::~Boid()
@@ -101,32 +105,26 @@ bool Boid::_IsDestinationReached(float destx, float desty)
 
 void Boid::_DrawBoid()
 {
-	switch (ctx->shape)
+	switch (ctx->boidShape)
 	{
 	case QUAD:
-		glBegin(GL_QUADS);
-		glVertex2f(tx - (width / 2), ty - (height / 2));
-		glVertex2f(tx + (width / 2), ty - (height / 2));
-		glVertex2f(tx + (width / 2), ty + (height / 2));
-		glVertex2f(tx - (width / 2), ty + (height / 2));
-		glEnd();
+		if (BoidSharedContext::showCpuBoid == false)
+			return;
 		break;
 	case TRIANGLE:
-		glBegin(GL_TRIANGLES);
-		glVertex2f(tx - (width / 2), ty - (height / 2));
-		glVertex2f(tx + (width / 2), ty - (height / 2));
-		glVertex2f(tx, ty + (height / 2));
-		glEnd();
+		if (BoidSharedContext::showMemoryBoid == false)
+			return;
 		break;
 	case DIAMOND:
-		glBegin(GL_QUADS);
-		glVertex2f(tx - (width / 2), ty);
-		glVertex2f(tx, ty - (height / 2));
-		glVertex2f(tx + (width / 2), ty);
-		glVertex2f(tx, ty + (height / 2));
-		glEnd();
+		if (BoidSharedContext::showNetworkBoid == false)
+			return;
+		break;
+	case POLYGON:
+		if (BoidSharedContext::showStorageBoid == false)
+			return;
 		break;
 	}
+	DrawEntityShape();
 }
 
 void Boid::HandleHit(TouchEvent & event)

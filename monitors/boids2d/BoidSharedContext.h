@@ -9,23 +9,19 @@
 #define BOIDSHAREDCONTEXT_H_
 
 #include <boost/thread/mutex.hpp>
+#include "Entity.h"
 
 using namespace std;
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
-enum BoidShape {
-	QUAD,
-	TRIANGLE,
-	CIRCLE,
-	DIAMOND
-};
 
 class BoidSharedContext {
 public:
 	int red, green, blue;
-	BoidShape shape;
+	Shape boidShape;
 	static int tailLength;
+	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
 
 	void SetDestination(float x, float y);
 	void GetDestination(float *x, float *y);

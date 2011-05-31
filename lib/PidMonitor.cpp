@@ -5,18 +5,9 @@
  *      Author: arild
  */
 
-#include <glog/logging.h>
 #include <algorithm>
 #include "System.h"
 #include "PidMonitor.h"
-
-int isSorted_(vector<int> *v)
-{
-	for (int i = 0; i < v->size() - 1; i++)
-		if ((*v)[i] > (*v)[i + 1])
-			return 0;
-	return 1;
-}
 
 PidMonitor::PidMonitor()
 {
@@ -45,33 +36,18 @@ void PidMonitor::Update()
 	Update(*System::GetAllPids());
 }
 
-vector<int> PidMonitor::GetUnion()
-{
-	vector<int> res(_new->size() + _old->size());
-	vector<int>::iterator it = set_union(_new->begin(), _new->end(), _old->begin(), _old->end(),
-			res.begin());
-	res.erase(it, res.end());
-	return res;
-}
-
-vector<int> PidMonitor::GetIntersection()
-{
-	int size = std::min(_new->size(), _old->size());
-	vector<int> res(size);
-	vector<int>::iterator it = set_intersection(_new->begin(), _new->end(), _old->begin(),
-			_old->end(), res.begin());
-	res.erase(it, res.end());
-	_RemoveIgnored(res);
-	return res;
-}
-
 vector<int> PidMonitor::GetDifference()
 {
-	vector<int> res(_new->size());
+	vector<int> ret(_new->size());
 	vector<int>::iterator it = set_difference(_new->begin(), _new->end(), _old->begin(),
-			_old->end(), res.begin());
-	res.erase(it, res.end());
-	return res;
+			_old->end(), ret.begin());
+	ret.erase(it, ret.end());
+
+	it = set_difference(ret.begin(), ret.end(), _ignored->begin(),
+			_ignored->end(), ret.begin());
+	ret.erase(it, ret.end());
+
+	return ret;
 }
 
 void PidMonitor::Ignore(int pid)

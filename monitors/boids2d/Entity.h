@@ -5,6 +5,13 @@ using namespace std;
 
 #include "TouchEvent.h"
 
+enum Shape {
+	QUAD,
+	TRIANGLE,
+	DIAMOND,
+	POLYGON
+};
+
 class Entity {
 public:
 	float tx, ty;
@@ -18,6 +25,13 @@ public:
 
 	virtual bool IsHit(float x, float y);
 	virtual void HandleHit(TouchEvent &event);
+};
+
+class EntityShape : virtual Entity {
+public:
+	Shape entityShape;
+	virtual ~EntityShape() {}
+	void DrawEntityShape();
 };
 
 #endif /* IENTITY_H_ */

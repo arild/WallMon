@@ -21,13 +21,12 @@ extern "C" ProcessCollector *create_collector()
 	}
 	else {
 		// Currently assumed to be ice cluster
-		p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
+		p->context->AddServer("129.242.19.57");
+		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	}
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	p->filter->set_processname("");
 	p->filter->set_pid(0);
-	//p->filter->set_usercpuload(0);
-	//p->filter->set_systemcpuload(0);
 	p->filter->set_usercpuutilization(0);
 	p->filter->set_systemcpuutilization(0);
 	p->filter->set_memoryutilization(0);

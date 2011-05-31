@@ -86,20 +86,20 @@ void Handler::Handle(WallmonMessage *msg)
 			BoidSharedContext *ctx = procStat->boids->cpu;
 			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
 					&ctx->blue);
-			ctx->shape = QUAD;
-			_boidsApp->CreateBoid(0, 0, ctx);
+			ctx->boidShape = QUAD;
+			_boidsApp->CreateBoid(ctx);
 
 			ctx = procStat->boids->memory;
 			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
 					&ctx->blue);
-			ctx->shape = TRIANGLE;
-			_boidsApp->CreateBoid(0, 0, ctx);
+			ctx->boidShape = TRIANGLE;
+			_boidsApp->CreateBoid(ctx);
 
 			ctx = procStat->boids->network;
 			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
 					&ctx->blue);
-			ctx->shape = DIAMOND;
-			_boidsApp->CreateBoid(0, 0, ctx);
+			ctx->boidShape = DIAMOND;
+			_boidsApp->CreateBoid(ctx);
 		} else {
 			procStat = (*_procMap)[procMapKey];
 		}

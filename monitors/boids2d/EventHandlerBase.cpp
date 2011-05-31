@@ -17,38 +17,43 @@ typedef void (EventHandlerBase::*HandleTouchesPtr)(touchVector_t &down, touchVec
 
 EventHandlerBase::EventHandlerBase()
 {
+	_outputQueue = new Queue<TouchEventQueueItem> (10000);
+	HandleTouchesPtr handle = &EventHandlerBase::HandleTouches;
+	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
+	_touchManager = new STouchManager(this, callback);
+
 	_shout = shout_connect_default(kClient_type_both, "Boids2D");
 	if (!_shout)
 		_shout = shout_connect(kClient_type_both, "rocksvv.cs.uit.no", kShout_default_port,
 				"Boids2D");
 	if (!_shout) {
 		LOG(WARNING) << "no shout server available, touch will not work.";
-		;
 		return;
 	}
 
 	uint32_t filter[] = { kEvt_type_calibrated_touch_location, kEvt_type_touch_remove };
 	shout_set_event_filter(_shout, sizeof(filter) / 4, filter);
 
-	_outputQueue = new Queue<TouchEventQueueItem> (10000);
-	HandleTouchesPtr handle = &EventHandlerBase::HandleTouches;
-	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
-	_touchManager = new STouchManager(this, callback);
 }
 
 EventHandlerBase::~EventHandlerBase()
 {
 	delete _outputQueue;
+	delete _touchManager;
 }
 
 void EventHandlerBase::Start()
 {
+	if (!_shout)
+		return;
 	_running = true;
 	_thread = boost::thread(&EventHandlerBase::_HandleEventsForever, this);
 }
 
 void EventHandlerBase::Stop()
 {
+	if (_running == false)
+		return;
 	LOG(INFO) << "stopping EventHandlerBase...";
 	_running = false;
 	_thread.join();
