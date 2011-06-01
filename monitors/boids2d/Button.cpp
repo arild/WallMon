@@ -13,12 +13,14 @@
 
 bool activateButton = false;
 
-Button::Button(float x, float y, float w, float h)// : tx(x), ty(y), width(w), height(h)
+Button::Button(float x, float y, float w, float h, Shape buttonShape)
 {
 	tx = x;
 	ty = y;
 	width = w;
 	height = h;
+	entityShape = buttonShape;
+	centerShape = false;
 	_isActivated = false;
 	_timestampSec = System::GetTimeInSec();
 
@@ -78,35 +80,49 @@ void Button::OnLoop()
 void Button::OnRender()
 {
 	if (slowActivationApproach) {
+		float widthSave = width;
+		float txSave = tx;
+
 		glColor3f(0, 1, 0);
-		glBegin(GL_QUADS);
-		glVertex2f(tx, ty);
-		glVertex2f(tx + _offset, ty);
-		glVertex2f(tx + _offset, ty + height);
-		glVertex2f(tx, ty + height);
-		glEnd();
+		width = _offset;
+		DrawEntityShape();
 
 		glColor3f(1, 1, 1);
-		float x = tx + _offset;
-		glBegin(GL_QUADS);
-		glVertex2f(x, ty);
-		glVertex2f(x + (width - _offset), ty);
-		glVertex2f(x + (width - _offset), ty + height);
-		glVertex2f(x, ty + height);
-		glEnd();
+		tx += _offset;
+		width = widthSave - _offset;
+		DrawEntityShape();
+
+		width = widthSave;
+		tx = txSave;
+
+//		glBegin(GL_QUADS);
+//		glVertex2f(tx, ty);
+//		glVertex2f(tx + _offset, ty);
+//		glVertex2f(tx + _offset, ty + height);
+//		glVertex2f(tx, ty + height);
+//		glEnd();
+//
+//		glColor3f(1, 1, 1);
+//		float x = tx + _offset;
+//		glBegin(GL_QUADS);
+//		glVertex2f(x, ty);
+//		glVertex2f(x + (width - _offset), ty);
+//		glVertex2f(x + (width - _offset), ty + height);
+//		glVertex2f(x, ty + height);
+//		glEnd();
 
 	} else {
 		if (_isActivated)
 			glColor3f(0, 1, 0);
 		else
 			glColor3f(1, 1, 1);
-
-		glBegin(GL_QUADS);
-		glVertex2f(tx, ty);
-		glVertex2f(tx + width, ty);
-		glVertex2f(tx + width, ty + height);
-		glVertex2f(tx, ty + height);
-		glEnd();
+		DrawEntityShape();
+//		glBegin(GL_QUADS);
+//		glVertex2f(tx, ty);
+//		glVertex2f(tx + width, ty);
+//		glVertex2f(tx + width, ty + height);
+//		glVertex2f(tx, ty + height);
+//		glEnd();
 	}
 }
 

@@ -10,10 +10,10 @@
 
 #include "Entity.h"
 
-class Button : Entity {
+class Button : virtual Entity, EntityShape {
 public:
 	bool slowActivationApproach;
-	Button(float x, float y, float w, float h);
+	Button(float x, float y, float w, float h, Shape buttonShape=QUAD);
 	virtual ~Button();
 	void SetCallback(void (*callback)());
 	virtual void OnLoop();

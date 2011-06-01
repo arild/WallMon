@@ -18,6 +18,7 @@ public:
 	float width, height;
 	bool supportsTouch;
 
+	Entity();
 	virtual ~Entity() {}
 	virtual void OnLoop() = 0;
 	virtual void OnRender() = 0;
@@ -30,6 +31,8 @@ public:
 class EntityShape : virtual Entity {
 public:
 	Shape entityShape;
+	bool centerShape;
+	EntityShape();
 	virtual ~EntityShape() {}
 	void DrawEntityShape();
 };

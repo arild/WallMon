@@ -27,15 +27,19 @@ Font::~Font()
 	delete _font;
 }
 
-void Font::RenderText(string text, float tx, float ty, bool center)
+void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical)
 {
 	Scene *s = Scene::current;
 	s->Unload();
 	s->LoadReal();
-	float centerAlignment = 0;
-	if (center)
-		centerAlignment = _font->Advance(text.c_str()) / (float)2;
-	glTranslatef(tx * s->scale - centerAlignment, ty * s->scale, 0);
+	float horizontalAlignment = 0;
+	if (centerHorizontal)
+		horizontalAlignment = _font->Advance(text.c_str()) / (float)2;
+	float verticalAlignment = 0;
+	if (centerHorizontal)
+		verticalAlignment = _font->FaceSize() / (float)2;
+
+	glTranslatef(tx * s->scale - horizontalAlignment, ty * s->scale - verticalAlignment, 0);
 	_font->Render(text.c_str());
 	s->Unload();
 	s->LoadVirtual();

@@ -11,7 +11,7 @@ class Font {
 public:
 	Font(int size);
 	virtual ~Font();
-	void RenderText(string text, float tx, float ty, bool center=false);
+	void RenderText(string text, float tx, float ty, bool centerHorizontal=false, bool centerVertical=false);
 
 private:
 	FTFont *_font;

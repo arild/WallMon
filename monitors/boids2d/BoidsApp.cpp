@@ -22,7 +22,7 @@
 #include "WallView.h"
 #include "TouchEvent.h"
 #include "Button.h"
-#include "BoidDescription.h"
+#include "ControlPanel.h"
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
@@ -88,8 +88,8 @@ void BoidsApp::Stop()
 
 void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 {
+	Scene::current = _boidScene;
 	Boid *boid = new Boid(ctx);
-	_boidScene->entityList.push_back((Entity *) boid);
 }
 
 void BoidsApp::RemoveBoid(Boid *Boid)
@@ -100,8 +100,8 @@ NameTagList *BoidsApp::CreateNameTagList()
 {
 	_nameTagList = new NameTagList();
 	string fontPath = Config::GetFontPath();
+	Scene::current = _leftColumnScene;
 	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(fontPath.c_str()));
-	_leftColumnScene->entityList.push_back((Entity *) nameDrawer);
 	return _nameTagList;
 }
 
@@ -165,30 +165,9 @@ void BoidsApp::_SetupScenes()
 	Scene::current = _boidScene;
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
-	_boidScene->entityList.push_back((Entity *) axis);
 
 	Scene::current = _controlPanelScene;
-	BoidDescription *boidDescription = new BoidDescription();
-	_controlPanelScene->entityList.push_back((Entity *) boidDescription);
-
-
-	Button *b = new Button(10, 50, 20, 20);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
-	_controlPanelScene->entityList.push_back((Entity *) b);
-
-	b = new Button(10, 10, 20, 20);
-	b->slowActivationApproach = false;
-	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
-	_controlPanelScene->entityList.push_back((Entity *) b);
-
-	b = new Button(40, 10, 20, 20);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ButtonCallbacks::BoidTailCallback);
-	_controlPanelScene->entityList.push_back((Entity *) b);
-
-	b = new Button(70, 10, 20, 20);
-	_controlPanelScene->entityList.push_back((Entity *) b);
+	ControlPanel *boidDescription = new ControlPanel();
 }
 
 void BoidsApp::_HandleTouchEvents()
@@ -242,11 +221,5 @@ int BoidsApp::_CountTotalNumObjects()
 		numObjects += s->entityList.size();
 	}
 	return numObjects;
-}
-
-void ButtonCallbacks::BoidTailCallback()
-{
-	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength == 75
-			: BoidSharedContext::tailLength == 0;
 }
 

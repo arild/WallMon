@@ -19,7 +19,7 @@ Boid::Boid(BoidSharedContext *ctx_)
 {
 	ctx = ctx_;
 	entityShape = ctx->boidShape;
-
+	centerShape = true;
 	_oldDestx = -1;
 	_oldDesty = -1;
 	width = 2;

@@ -1,53 +1,55 @@
 /*
- * ControlPanel.cpp
+ * BoidDescription.cpp
  *
- *  Created on: May 13, 2011
+ *  Created on: May 29, 2011
  *      Author: arild
  */
 
+#include "Button.h"
+#include "BoidSharedContext.h"
+#include "Scene.h"
 #include "ControlPanel.h"
-#include <GL/gl.h>
-#include <math.h>
 
-float tailButton[] = {0, 0, 40, 40};
-bool tailButtonPushed = false;
 
 ControlPanel::ControlPanel()
 {
+	// Metric types
+	Button *b = new Button(4, 75, 20, 20, QUAD);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ControlPanel::CpuBoidButtonCallback);
+
+	b = new Button(28, 75, 20, 20, TRIANGLE);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ControlPanel::MemoryBoidButtonCallback);
+
+	b = new Button(52, 75, 20, 20, DIAMOND);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ControlPanel::NetworkBoidButtonCallback);
+
+	b = new Button(76, 75, 20, 20, POLYGON);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ControlPanel::StorageBoidButtonCallback);
+
+	// Data views
+
+
+	// Configuration
+	b = new Button(4, 4, 20, 20);
+	b->slowActivationApproach = false;
+	b->SetCallback(&ControlPanel::BoidTailCallback);
+
+	b = new Button(28, 4, 20, 20);
+	b->slowActivationApproach = true;
+	b->SetCallback(&ControlPanel::BoidTailCallback);
+
+	b = new Button(52, 4, 20, 20);
+
+
+	_font = new Font(4);
 }
 
 ControlPanel::~ControlPanel()
 {
-}
-
-void DrawCircle(int tx, int ty, int r, float lineWidth=1.0)
-{
-	float x, y;
-	glLineWidth(lineWidth);
-	glBegin(GL_LINES);
-	for (int i = 0; i < 180; i++) {
-		x = r * cos(i) - tx;
-		y = r * sin(i) + ty;
-		glVertex3f(x + ty, y - tx, 0);
-
-		x = r * cos(i + 0.1) - tx;
-		y = r * sin(i + 0.1) + ty;
-		glVertex3f(x + ty, y - tx, 0);
-	}
-	glEnd();
-}
-
-void ControlPanel::TailButtonClick()
-{
-	if (tailButtonPushed)
-		tailButtonPushed = false;
-	else
-		tailButtonPushed = true;
-}
-
-bool ControlPanel::IsTailButton()
-{
-
 }
 
 void ControlPanel::OnLoop()
@@ -56,24 +58,50 @@ void ControlPanel::OnLoop()
 
 void ControlPanel::OnRender()
 {
-	glPushMatrix();
-	if (tailButtonPushed)
-		glColor3f(1, 0, 0);
-	else
-		glColor3f(0, 1, 0);
-	DrawCircle(50, 50, 3);
-	glPopMatrix();
+	glColor3f(0, 0, 1);
+	_font->RenderText("Metric Types", 50, 99, true, true);
+	_font->RenderText("CPU", 14, 73, true, true);
+	_font->RenderText("Memory", 38, 73, true, true);
+	_font->RenderText("Network", 62, 73, true, true);
+	_font->RenderText("Storage", 86, 73, true, true);
+
+	_font->RenderText("Data Views", 50, 68, true, true);
+
+	_font->RenderText("Configuration", 50, 38, true, true);
 }
 
 void ControlPanel::OnCleanup()
 {
 }
 
-//void ControlPanel::Handle(float x, float y)
-//{
-//	if (x >= tailButton[0] && x <= tailButton[2] && y >= tailButton[1] && y <= tailButton[3])
-//		// hit
-//		TailButtonClick();
-//}
+void ControlPanel::CpuBoidButtonCallback()
+{
+	BoidSharedContext::showCpuBoid == true ? BoidSharedContext::showCpuBoid == false
+			: BoidSharedContext::showCpuBoid == true;
+}
+
+void ControlPanel::MemoryBoidButtonCallback()
+{
+	BoidSharedContext::showMemoryBoid == true ? BoidSharedContext::showMemoryBoid == false
+			: BoidSharedContext::showMemoryBoid == true;
+}
+
+void ControlPanel::NetworkBoidButtonCallback()
+{
+	BoidSharedContext::showNetworkBoid == true ? BoidSharedContext::showNetworkBoid == false
+			: BoidSharedContext::showNetworkBoid == true;
+}
+
+void ControlPanel::StorageBoidButtonCallback()
+{
+	BoidSharedContext::showStorageBoid == true ? BoidSharedContext::showStorageBoid == false
+			: BoidSharedContext::showStorageBoid == true;
+}
+
+void ControlPanel::BoidTailCallback()
+{
+	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength == 75
+			: BoidSharedContext::tailLength == 0;
+}
 
 
