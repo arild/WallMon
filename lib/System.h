@@ -21,8 +21,8 @@ public:
 	static double GetTimeInSec();
 	static double GetTimeInMsec();
 	static string &GetHostname();
-	static int GetNumCores();
-	static int GetNumCoresExcludeHyperThreading();
+	static int GetNumLogicalCores();
+	static int GetNumRealCores();
 	static int GetTotalMemory();
 	static bool HasSupportForProcPidIo();
 	static bool IsRocksvvCluster();

@@ -33,6 +33,7 @@ private:
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
+	bool _hasSupportForProcIo;
 	void _AddProcesses();
 	void _AddProcess(int pid);
 };

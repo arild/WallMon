@@ -6,7 +6,7 @@
 #include "PortForwarder.h"
 
 #define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	1000
+#define SAMPLE_FREQUENCY_MSEC 	750
 
 extern "C" ProcessCollector *create_collector()
 {
@@ -32,6 +32,7 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_memoryutilization(0);
 
 	if (System::HasSupportForProcPidIo()) {
+		LOG(INFO) << "support for /proc/<pid>/io detected, monitoring it";
 		p->filter->set_networkinutilization(0);
 		p->filter->set_networkoututilization(0);
 	}

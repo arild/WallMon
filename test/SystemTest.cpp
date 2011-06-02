@@ -33,7 +33,7 @@ protected:
 
 TEST_F(SystemTest, NumCores)
 {
-	ASSERT_EQ(4, System::GetNumCores());
+	ASSERT_EQ(4, System::GetNumRealCores());
 }
 
 TEST_F(SystemTest, CurrentUser)

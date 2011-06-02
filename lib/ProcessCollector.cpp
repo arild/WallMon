@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #define MESSAGE_BUF_SIZE				(1024 * 1000) * 5
-const double NETWORK_MAX_IN_AND_OUT_BYTES = (1024 * 1024 * 10) * 2;
+const double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 5;
 
 ProcessCollector::ProcessCollector()
 {
@@ -32,16 +32,20 @@ void ProcessCollector::OnInit(Context *ctx)
 	delete context;
 	context = ctx;
 
-	_numCores = System::GetNumCoresExcludeHyperThreading();
+	_numCores = System::GetNumLogicalCores();
 	_totalMemoryMb = (double)System::GetTotalMemory() / 1024.;
-
+	_hasSupportForProcIo = System::HasSupportForProcPidIo();
 	// Create a process monitor for each pid on system
 	_monitors = new vector<LinuxProcessMonitor *>();
 	_pidMonitor = new PidMonitor;
 	_AddProcesses();
-	LOG(INFO) << "Num processes being monitored: " << _monitors->size();
 	_buffer = new char[MESSAGE_BUF_SIZE];
 	memset(_buffer, 0, MESSAGE_BUF_SIZE);
+
+	LOG(INFO) << "num cores detected: " << _numCores;
+	LOG(INFO) << "total memory detected: " << _totalMemoryMb << " MB";
+	LOG(INFO) << "num processes being monitored: " << _monitors->size();
+
 }
 
 void ProcessCollector::OnStop()
@@ -86,8 +90,6 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			processMsg->set_systemcpuutilization(util * 100.);
 		}
 		if (filter->has_memoryutilization()) {
-//			LOG(INFO) << "Prog : " << monitor->getTotalProgramSize();
-//			LOG(INFO) << "Total: " << _totalMemoryMb;
 			util = monitor->getTotalProgramSize() / (double)_totalMemoryMb;
  			processMsg->set_memoryutilization(util * 100.);
 		}
@@ -130,8 +132,8 @@ void ProcessCollector::_AddProcess(int pid)
 		_pidMonitor->Ignore(pid);
 		return;
 	}
-	//if (System::HasSupportForProcPidIo())
-	//	monitor->OpenIo(pid);
+	if (_hasSupportForProcIo)
+		monitor->OpenIo(pid);
 	monitor->update();
 	_monitors->push_back(monitor);
 }

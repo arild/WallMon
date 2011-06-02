@@ -17,9 +17,7 @@
 
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
-#define SAMPLE_FREQUENCY_MSEC 		1000
-#define FRAMES_PER_SEC				2
-#define NUM_PROCESSES_TO_DISPLAY	8
+#define FILTER_THRESHOLD 			3.0
 
 
 void Handler::OnInit(Context *ctx)
@@ -105,16 +103,14 @@ void Handler::Handle(WallmonMessage *msg)
 		}
 		procStat->numSamples += 1;
 
-		double utilFilterFactor = 0.0;
-
 		// CPU
-		double user = processMessage->usercpuutilization();//processMessage->usercpuload();
-		double system = processMessage->systemcpuutilization();//processMessage->systemcpuload();
+		double user = processMessage->usercpuutilization();
+		double system = processMessage->systemcpuutilization();
 		double totalCpuUtilization = user + system;
 		double userCpuRelativeShare = 50;
 		if (totalCpuUtilization > 0)
 			userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
-		if (totalCpuUtilization < utilFilterFactor)
+		if (totalCpuUtilization < FILTER_THRESHOLD)
 			procStat->boids->cpu->SetDestination(-1, -1);
 		else {
 			BoidSharedContext *b = procStat->boids->cpu;
@@ -127,7 +123,7 @@ void Handler::Handle(WallmonMessage *msg)
 		procStat->totalMemoryUtilization += (double) processMessage->memoryutilization();
 		double avgMemoryUtilization = procStat->totalMemoryUtilization
 				/ (double) procStat->numSamples;
-		if (processMessage->memoryutilization() < utilFilterFactor)
+		if (processMessage->memoryutilization() < FILTER_THRESHOLD)
 			procStat->boids->memory->SetDestination(-1, -1);
 		else
 			procStat->boids->memory->SetDestination(processMessage->memoryutilization(),
@@ -140,14 +136,10 @@ void Handler::Handle(WallmonMessage *msg)
 		double outNetworkRelativeShare = 50;
 		if (networkUtilization > 0)
 			outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
-		if (networkUtilization < utilFilterFactor)
+		if (networkUtilization < FILTER_THRESHOLD)
 			procStat->boids->network->SetDestination(-1, -1);
 		else
 			procStat->boids->network->SetDestination(networkUtilization, outNetworkRelativeShare);
-
-		//		LOG(INFO) << "Mem util: " << avgMemoryUtilization;
-		//LOG(INFO) << "memory : " << processMessage->memoryutilization();
-		//		LOG(INFO) << "system: " << processMessage->systemcpuload();
 	}
 }
 

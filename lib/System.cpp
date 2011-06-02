@@ -65,18 +65,12 @@ void System::Daemonize()
 
 int System::GetPid(string processName)
 {
-	char buf[100];
 	string cmd = "pgrep " + processName;
-	FILE *fp = popen(cmd.c_str(), "r");
-	if (fp == NULL) {
-		return -1;
-	}
-	void *res = fgets(buf, 100, fp);
-	pclose(fp);
-	if (res == NULL)
+	processName = RunCommand(cmd);
+	if (processName.empty())
 		// process name not found
 		return -1;
-	return atoi(buf);
+	return atoi(processName.c_str());
 }
 
 void _TokenizeFile(FILE *file, vector<int> *v)
@@ -93,18 +87,6 @@ void _TokenizeFile(FILE *file, vector<int> *v)
 			v->push_back(atoi(buf));
 		}
 	}
-}
-
-int _RunCommand(string cmd, char *buf, int len)
-{
-	FILE *fp = popen(cmd.c_str(), "r");
-	if (fp == NULL)
-		return -1;
-	void *res = fgets(buf, len, fp);
-	pclose(fp);
-	if (res == NULL)
-		return -1;
-	return 0;
 }
 
 vector<int> *System::System::GetAllPids()
@@ -144,48 +126,54 @@ string &System::GetHostname()
 	return *hostname;
 }
 
-int System::GetNumCores()
+/**
+ * Takes Hyper-threading and duplicated multicore technology into account.
+ *
+ * For example: A 2-way quad core with Hyper-threading will have 16 logical cores
+ */
+int System::GetNumLogicalCores()
 {
-	char buf[4096];
 	string cmd = "cat /proc/cpuinfo | grep processor | wc -l";
-	_RunCommand(cmd, buf, 4096);
-	return atoi(buf);
+	return atoi(RunCommand(cmd).c_str());
 }
 
-int System::GetNumCoresExcludeHyperThreading()
+/**
+ * Excludes Hyper-threading and duplicated multicore technology into account.
+ *
+ * For example: A 2-way quad core with Hyper-threading will have 4 real cores
+ */
+
+int System::GetNumRealCores()
 {
-	char buf[128];
 	string cmd = "cat /proc/cpuinfo | grep -m 1 'cpu cores' | awk '{print $4}'";
-	_RunCommand(cmd, buf, 128);
-	return atoi(buf);
+	return atoi(RunCommand(cmd).c_str());
 }
 
 int System::GetTotalMemory()
 {
-	char buf[4096];
 	string cmd = "cat /proc/meminfo | grep MemTotal: | awk '{print $2}'";
-	_RunCommand(cmd, buf, 4096);
-	return atoi(buf);
+	return atoi(RunCommand(cmd).c_str());
 }
 
 bool System::HasSupportForProcPidIo()
 {
 	ifstream file("/proc/1/io");
-//	if (!file)
-//		return false;
-//	file.close();
+	if (!file)
+		return false;
+	file.close();
+//	int pid = getpid();
+//	stringstream ss;
+//	ss << "/proc/" << pid << "/io";
 	return true;
 }
 
 bool System::IsRocksvvCluster()
 {
-	char buf[4096];
-	string cmd = "hostname";
-	_RunCommand(cmd, buf, 4096);
+	string hostname = RunCommand("hostname");;
 	string rocks = "rocksvv.cs.uit.no";
-	if (strncmp(buf, rocks.c_str(), rocks.length()) == 0)
+	if (rocks.compare(hostname) == 0)
 		return true;
-	if (strncmp(buf, "tile-", 5) == 0)
+	if (hostname.compare("tile-") == 0)
 		return true;
 	return false;
 }
@@ -215,9 +203,7 @@ vector<string> System::HostnameToIpAddress(string hostname)
 
 void System::ExportDisplayToLocalhost()
 {
-	string cmd = "export DISPLAY=localhost:0";
-	char buf[1024];
-	_RunCommand(cmd, buf, 1024);
+	RunCommand("export DISPLAY=localhost:0");
 }
 
 string System::GetCurrentUser()
@@ -245,11 +231,11 @@ string System::RunCommand(string cmd)
 
 	FILE *fp = popen(cmd.c_str(), "r");
 	if (fp == NULL)
-		return NULL;
+		return "";
 	void *res = fgets(buf, 4096, fp);
 	pclose(fp);
 	if (res == NULL)
-		return NULL;
+		return "";
 
 	// Remove '\n' before returning result
 	string retval = (string)buf;
