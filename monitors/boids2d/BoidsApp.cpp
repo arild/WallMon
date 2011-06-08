@@ -16,7 +16,6 @@
 #include "BoidsApp.h"
 #include "Fps.h"
 #include "Scene.h"
-#include "LeftColumn.h"
 #include "BoidAxis.h"
 #include "ControlPanel.h"
 #include "WallView.h"
@@ -28,7 +27,6 @@ BoidsApp::BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem>
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
 	_SetupScenes();
-	_nameTagList = NULL;
 	_touchEventQueue = touchEventQueue;
 }
 
@@ -92,17 +90,10 @@ void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 	Boid *boid = new Boid(ctx);
 }
 
-void BoidsApp::RemoveBoid(Boid *Boid)
+NameTable *BoidsApp::GetNameTable()
 {
-}
-
-NameTagList *BoidsApp::CreateNameTagList()
-{
-	_nameTagList = new NameTagList();
-	string fontPath = Config::GetFontPath();
 	Scene::current = _leftColumnScene;
-	LeftColumn *nameDrawer = new LeftColumn(_nameTagList, new FTGLTextureFont(fontPath.c_str()));
-	return _nameTagList;
+	return new NameTable();
 }
 
 void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
@@ -152,7 +143,7 @@ void BoidsApp::_SetupScenes()
 	float s = 100;
 
 	// Create scenes
-	_leftColumnScene = new Scene(0, 0, (w * 2), h * 4, w * 2, h * 4);
+	_leftColumnScene = new Scene(0, h/2, (w * 2), h * 3, 100, 100);
 	_boidScene = new Scene(w * 2, h / 2, w * 3 + w / 2, (h * 3), 100, 100);
 	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 3, 100, 100);
 
@@ -162,6 +153,9 @@ void BoidsApp::_SetupScenes()
 	Scene::scenes.push_back(_controlPanelScene);
 
 	// Populate scenes with various entities
+	Scene::current = _leftColumnScene;
+	_nameTable = new NameTable();
+
 	Scene::current = _boidScene;
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);

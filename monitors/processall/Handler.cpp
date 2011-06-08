@@ -77,16 +77,16 @@ void Handler::Handle(WallmonMessage *msg)
 
 		// Maintain aggregated statistics at various levels:
 		// Per process name
-		procNameStat->totalUserCpuLoad -= procStat->userCpuLoad;
-		procNameStat->totalSystemCpuLoad -= procStat->systemCpuLoad;
+		procNameStat->userCpuLoad -= procStat->userCpuLoad;
+		procNameStat->systemCpuLoad -= procStat->systemCpuLoad;
 
 		// Per unique process
 		procStat->userCpuLoad = processMessage->usercpuload();
 		procStat->systemCpuLoad = processMessage->systemcpuload();
 
 		// Per Process name
-		procNameStat->totalUserCpuLoad += procStat->userCpuLoad;
-		procNameStat->totalSystemCpuLoad += procStat->systemCpuLoad;
+		procNameStat->userCpuLoad += procStat->userCpuLoad;
+		procNameStat->systemCpuLoad += procStat->systemCpuLoad;
 	}
 
 	totalBytesReceived += length;
@@ -149,30 +149,30 @@ void Handler::_UpdateBarChart()
 		string processName = i.first;
 		ProcNameStat *procNameStat = i.second;
 
-		totalUserCpuLoad += procNameStat->totalUserCpuLoad;
-		totalSystemCpuLoad += procNameStat->totalSystemCpuLoad;
+		totalUserCpuLoad += procNameStat->userCpuLoad;
+		totalSystemCpuLoad += procNameStat->systemCpuLoad;
 
 		// -1 since "Others" process category will be included
 		if (heap.size() < (NUM_PROCESSES_TO_DISPLAY - 1)) {
 			BarData *barData = &barDataArray[heap.size()];
 			barData->label = processName;
-			barData->user = procNameStat->totalUserCpuLoad;
-			barData->system = procNameStat->totalSystemCpuLoad;
+			barData->user = procNameStat->userCpuLoad;
+			barData->system = procNameStat->systemCpuLoad;
 			heap.push_back(barData);
 			push_heap(heap.begin(), heap.end(), cmp);
 		} else {
 			//BarData current(processName, procStatSum->totalCpuLoad);
 			BarData *min = heap.front();
-			double totalCpuLoad = procNameStat->totalUserCpuLoad
-					+ procNameStat->totalSystemCpuLoad;
+			double totalCpuLoad = procNameStat->userCpuLoad
+					+ procNameStat->systemCpuLoad;
 			double totalCpuLoadCurrent = min->user + min->system;
 
 			// Check if minimum element should be replaced
 			if (totalCpuLoad > totalCpuLoadCurrent) {
 				pop_heap(heap.begin(), heap.end(), cmp);
 				min->label = processName;
-				min->user = procNameStat->totalUserCpuLoad;
-				min->system = procNameStat->totalSystemCpuLoad;
+				min->user = procNameStat->userCpuLoad;
+				min->system = procNameStat->systemCpuLoad;
 				push_heap(heap.begin(), heap.end(), cmp);
 			}
 		}

@@ -8,9 +8,9 @@
 #include <vector>
 #include "Scene.h"
 #include "Boid.h"
-#include "NameTagList.h"
 #include "EventHandlerBase.h"
 #include "TouchEvent.h"
+#include "NameTable.h"
 
 using namespace std;
 
@@ -21,8 +21,8 @@ public:
 	void Start();
 	void Stop();
 	void CreateBoid(BoidSharedContext *ctx);
-	void RemoveBoid(Boid *boid);
-	NameTagList *CreateNameTagList();
+	NameTable *GetNameTable();
+
 	void SetDisplayArea(double x, double y, double width, double height);
 private:
 	boost::thread _thread;
@@ -32,7 +32,7 @@ private:
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
-	NameTagList *_nameTagList;
+	NameTable *_nameTable;
 	Queue<TouchEventQueueItem> *_touchEventQueue;
 
 	void _InitSdlAndOpenGl();

@@ -4,7 +4,7 @@ CFLAGS = -O2 -c -fPIC
 DIRS_PRE = stubs 
 DIRS_POST = touchmanager
 
-all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor NameTagList MonitorDispatcher ProcessCollector SubDirsPost 
+all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector SubDirsPost 
 	
 clean: 	
 	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE} clean) ; done
@@ -48,10 +48,6 @@ WallView: WallView.h WallView.cpp
 	ar cru lib$@.a $@.o
 
 PidMonitor: PidMonitor.h PidMonitor.cpp
-	$(CC) $(CFLAGS) $(INC_PATH) $?
-	ar cru lib$@.a $@.o
-
-NameTagList: NameTagList.h NameTagList.cpp
 	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 

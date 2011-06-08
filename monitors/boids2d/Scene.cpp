@@ -136,30 +136,3 @@ void Scene::Run()
 	Visualize();
 }
 
-//void Scene::ScreenToSceneCoords(float screenX, float screenY, float *sceneX, float *sceneY)
-//{
-//	*sceneX = (screenX / (float) SCREEN_WIDTH) * (y - x);
-//	*sceneY = (screenY / (float) SCREEN_HEIGHT) * (h - w);
-//}
-//
-//void Scene::SceneToScreenCoords(float sceneX, float sceneY, float *screenX, float *screenY)
-//{
-//	float rx, ry;
-//	SceneToRelativeCoords(sceneX, sceneY, &rx, &ry);
-//
-//	float scaleFactorX = (float) SCREEN_WIDTH / (float) 100;
-//	float scaleFactorY = (float) SCREEN_HEIGHT / (float) 100;
-//
-//	*screenX = rx * scaleFactorX;
-//	*screenY = ry * scaleFactorY;
-//
-//}
-//
-//void Scene::SceneToRelativeCoords(float sx, float sy, float *rx, float *ry)
-//{
-//	float scaleFactorX = (y - x) / (float) 100;
-//	float scaleFactorY = (h - w) / (float) 100;
-//	*rx = x + (sx * scaleFactorX);
-//	*ry = w + (sy * scaleFactorY);
-//}
-

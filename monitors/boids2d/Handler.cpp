@@ -19,13 +19,14 @@
 #define MESSAGE_BUF_SIZE			1024 * 1000
 #define FILTER_THRESHOLD 			3.0
 
+int numUniqueProcesses = 0;
 
 void Handler::OnInit(Context *ctx)
 {
 	ctx->key = KEY;
 	_boidsApp = NULL;
 	_message = new ProcessesMessage();
-	_procMap = new ProcMap();
+	_data = new Data();
 
 	_eventHandler = new EventHandlerBase();
 	Queue<TouchEventQueueItem> *touchEventQueue = _eventHandler->GetOutputQueue();
@@ -33,20 +34,22 @@ void Handler::OnInit(Context *ctx)
 
 #ifdef ROCKSVV
 	WallView w(2, 1, 3, 3);
-	if (w.IsTileWithin()) {
-		double x, y, width, height;
-		w.GetDisplayArea(&x, &y, &width, &height);
-		_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, touchEventQueue);
-		_boidsApp->SetDisplayArea(x, y, width, height);
-		_nameTagList = _boidsApp->CreateNameTagList();
-		_boidsApp->Start();
-	}
+	if (w.IsTileWithin() == false)
+	return;
+	double x, y, width, height;
+	w.GetDisplayArea(&x, &y, &width, &height);
+	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, touchEventQueue);
+	_boidsApp->SetDisplayArea(x, y, width, height);
+
 #else
 	_boidsApp = new BoidsApp(1600, 768, touchEventQueue);
-	_nameTagList = _boidsApp->CreateNameTagList();
-	_boidsApp->Start();
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif
+	_nameTable = _boidsApp->GetNameTable();
+	_boidsApp->Start();
+
+	VisualBase::boidsApp = _boidsApp;
+	VisualBase::nameTable = _nameTable;
 }
 
 void Handler::OnStop()
@@ -57,137 +60,117 @@ void Handler::OnStop()
 		delete _boidsApp;
 	}
 	delete _message;
-	delete _procMap;
+	delete _data;
 }
 
 void Handler::Handle(WallmonMessage *msg)
 {
+	LOG(INFO) << "** HANDLE **";
 	if (_boidsApp == NULL)
 		return;
 	const char *data = msg->data().c_str();
 	int length = msg->data().length();
 	if (_message->ParseFromArray(data, length) == false)
 		LOG(FATAL) << "Protocol buffer parsing failed: ";
-	// Go through all process specific messages and read statistics
+	// Go through all process specific messages
 	for (int i = 0; i < _message->processmessage_size(); i++) {
 		ProcessesMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
-
-		ProcStat *procStat = NULL;
-		string hostname = msg->hostname();
-		int pid = processMessage->pid();
-		string procMapKey = _CreateProcMapKey(hostname, pid);
-
-		if (_procMap->count(procMapKey) == 0) {
-			procStat = new ProcStat();
-			(*_procMap)[procMapKey] = procStat;
-
-			BoidSharedContext *ctx = procStat->boids->cpu;
-			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
-					&ctx->blue);
-			ctx->boidShape = QUAD;
-			_boidsApp->CreateBoid(ctx);
-
-			ctx = procStat->boids->memory;
-			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
-					&ctx->blue);
-			ctx->boidShape = TRIANGLE;
-			_boidsApp->CreateBoid(ctx);
-
-			ctx = procStat->boids->network;
-			_ProcessNameToRgbColor(processMessage->processname(), &ctx->red, &ctx->green,
-					&ctx->blue);
-			ctx->boidShape = DIAMOND;
-			_boidsApp->CreateBoid(ctx);
-		} else {
-			procStat = (*_procMap)[procMapKey];
-		}
-		procStat->numSamples += 1;
-
-		// CPU
-		double user = processMessage->usercpuutilization();
-		double system = processMessage->systemcpuutilization();
-		double totalCpuUtilization = user + system;
-		double userCpuRelativeShare = 50;
-		if (totalCpuUtilization > 0)
-			userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
-		if (totalCpuUtilization < FILTER_THRESHOLD)
-			procStat->boids->cpu->SetDestination(-1, -1);
-		else {
-			BoidSharedContext *b = procStat->boids->cpu;
-			b->SetDestination(totalCpuUtilization, userCpuRelativeShare);
-			NameTag tag(processMessage->processname(), b->red, b->green, b->blue);
-			_nameTagList->Add(tag);
-		}
-
-		// Memory
-		procStat->totalMemoryUtilization += (double) processMessage->memoryutilization();
-		double avgMemoryUtilization = procStat->totalMemoryUtilization
-				/ (double) procStat->numSamples;
-		if (processMessage->memoryutilization() < FILTER_THRESHOLD)
-			procStat->boids->memory->SetDestination(-1, -1);
-		else
-			procStat->boids->memory->SetDestination(processMessage->memoryutilization(),
-					avgMemoryUtilization);
-
-		// Network
-		double in = processMessage->networkinutilization();
-		double out = processMessage->networkoututilization();
-		double networkUtilization = in + out;
-		double outNetworkRelativeShare = 50;
-		if (networkUtilization > 0)
-			outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
-		if (networkUtilization < FILTER_THRESHOLD)
-			procStat->boids->network->SetDestination(-1, -1);
-		else
-			procStat->boids->network->SetDestination(networkUtilization, outNetworkRelativeShare);
+		_HandleProcessMessage(*processMessage, msg->hostname());
 	}
 }
 
-string Handler::_CreateProcMapKey(string hostName, int pid)
+void Handler::_HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname)
 {
-	stringstream ss;
-	ss << hostName << pid;
-	return ss.str();
-}
 
-void Handler::_ProcessNameToRgbColor(string name, int *r, int *g, int *b)
-{
-	unsigned long hash = _OatHash(name);
-	*r = hash & 0xFF;
-	*g = (hash >> 8) & 0xFF;
-	*b = (hash >> 16) & 0xFF;
-	// Make sure color does not become too dark
-	if (*r < 20)
-		*r = 20;
-	if (*g < 20)
-		*g = 20;
-	if (*b < 20)
-		*b = 20;
+	DataUpdate update = _data->Update(hostname, msg.processname(), msg.pid());
+	Proc *proc = update.proc;
+	ProcName *procName = update.procName;
+	Node *node = update.node;
+
+	_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
+	_UpdateProcessStatistics(msg, *proc->stat);
+
+	// CPU
+	double user = proc->stat->userCpuUtilization;
+	double system = proc->stat->systemCpuUtilization;
+	double totalCpuUtilization = user + system;
+	double userCpuRelativeShare = 50;
+	if (totalCpuUtilization > 0)
+		userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
+	if (totalCpuUtilization < FILTER_THRESHOLD)
+		proc->visual->cpu->SetDestination(-1, -1);
+	else
+		proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+
+	// Memory
+	double avgMemoryUtilization = proc->stat->memoryUtilizationSum
+			/ (double) proc->stat->numSamples;
+	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
+		proc->visual->memory->SetDestination(-1, -1);
+	else
+		proc->visual->memory->SetDestination(proc->stat->memoryUtilization, avgMemoryUtilization);
+
+	// Network
+	double in = proc->stat->networkInUtilization;
+	double out = proc->stat->networkOutUtilization;
+	double networkUtilization = in + out;
+	double outNetworkRelativeShare = 50;
+	if (networkUtilization > 0)
+		outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
+	if (networkUtilization < FILTER_THRESHOLD)
+		proc->visual->network->SetDestination(-1, -1);
+	else
+		proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
+
+	proc->visual->tableItem->score += (totalCpuUtilization * 0.1);
 }
 
 /**
- * One-at-a-time hash by Bob Jenkins: http://en.wikipedia.org/wiki/Jenkins_hash_function
+ * Boiler plate code for maintaining aggregated values
  *
- * This hash function appears to have sufficient avalanch effect, especially compared
- * to the hash function found in boost (<boost/functional/hash.hpp>).
+ * @param msg  A process specific message with fresh data
+ * @param pstat  The old values for the same process (in the message)
+ * @param astat  The aggregated statistics for some metric
  */
-unsigned long Handler::_OatHash(string key)
+void Handler::_UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage &msg,
+		StatBase &pstat, StatBase &astat)
 {
-	unsigned char *p = (unsigned char *)key.c_str();
-	unsigned long h = 0;
-	int i;
+	// CPU
+	// Subtract old values
+	astat.userCpuUtilization -= pstat.userCpuUtilization;
+	astat.systemCpuUtilization -= pstat.systemCpuUtilization;
+	// Add updated values
+	astat.userCpuUtilization += msg.usercpuutilization();
+	astat.systemCpuUtilization += msg.systemcpuutilization();
 
-	for (i = 0; i < key.length(); i++) {
-		h += p[i];
-		h += (h << 10);
-		h ^= (h >> 6);
-	}
+	// Memory
+	astat.memoryUtilization -= pstat.memoryUtilization;
+	astat.memoryUtilization += msg.memoryutilization();
 
-	h += (h << 3);
-	h ^= (h >> 11);
-	h += (h << 15);
+	// Network
+	astat.networkInUtilization -= pstat.networkInUtilization;
+	astat.networkOutUtilization -= pstat.networkOutUtilization;
+	astat.networkInUtilization += msg.networkinutilization();
+	astat.networkOutUtilization += msg.networkoututilization();
 
-	return h;
+	astat.numSamples += 1;
+}
+
+void Handler::_UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat)
+{
+	pstat.userCpuUtilization = msg.usercpuutilization();
+	pstat.systemCpuUtilization = msg.systemcpuutilization();
+	pstat.memoryUtilization = msg.memoryutilization();
+	pstat.networkInUtilization = msg.networkinutilization();
+	pstat.networkOutUtilization = msg.networkoututilization();
+
+	pstat.userCpuUtilizationSum += pstat.userCpuUtilization;
+	pstat.systemCpuUtilizationSum += pstat.systemCpuUtilization;
+	pstat.memoryUtilizationSum += pstat.memoryUtilization;
+	pstat.networkInUtilizationSum += pstat.networkInUtilization;
+	pstat.networkOutUtilizationSum += pstat.networkOutUtilization;
+
+	pstat.numSamples += 1;
 }
 
 /**
@@ -202,3 +185,4 @@ extern "C" void destroy_handler(Handler *p)
 {
 	delete p;
 }
+

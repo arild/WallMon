@@ -15,13 +15,21 @@ using namespace std;
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
+enum BoidType {
+	PROCESS,
+	PROCESS_NAME,
+	NODE
+};
 
 class BoidSharedContext {
 public:
 	int red, green, blue;
 	Shape boidShape;
+	BoidType boidType;
 	static int tailLength;
 	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
+
+	BoidSharedContext(int red_, int green_, int blue_, Shape shape_);
 
 	void SetDestination(float x, float y);
 	void GetDestination(float *x, float *y);

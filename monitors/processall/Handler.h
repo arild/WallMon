@@ -47,14 +47,14 @@ typedef map<string, ProcStat *> ProcMap;
 class ProcNameStat {
 public:
 	ProcMap *procMap;
-	double totalUserCpuLoad;
-	double totalSystemCpuLoad;
+	double userCpuLoad;
+	double systemCpuLoad;
 
 	ProcNameStat()
 	{
 		procMap = new ProcMap();
-		totalUserCpuLoad = 0;
-		totalSystemCpuLoad = 0;
+		userCpuLoad = 0;
+		systemCpuLoad = 0;
 	}
 
 	virtual ~ProcNameStat()

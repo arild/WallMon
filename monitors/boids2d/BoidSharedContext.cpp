@@ -14,6 +14,14 @@ bool BoidSharedContext::showMemoryBoid = true;
 bool BoidSharedContext::showNetworkBoid = true;
 bool BoidSharedContext::showStorageBoid = true;
 
+BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_)
+{
+	red = red_;
+	green = green_;
+	blue = blue_;
+	boidShape = shape_;
+}
+
 void BoidSharedContext::SetDestination(float x, float y)
 {
 	scoped_lock lock(_mutex);
@@ -33,6 +41,7 @@ void BoidSharedContext::SetTailLength(int length)
 	scoped_lock lock(_mutex);
 	_tailLength = length;
 }
+
 
 int BoidSharedContext::GetTailLength()
 {

@@ -9,11 +9,12 @@ using namespace std;
 
 class Font {
 public:
-	Font(int size);
+	Font(int size, bool centerHorizontal=false, bool centerVertical=false);
 	virtual ~Font();
-	void RenderText(string text, float tx, float ty, bool centerHorizontal=false, bool centerVertical=false);
-
+	void RenderText(string text, float tx, float ty);
+	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
 private:
+	bool _centerHorizontal, _centerVertical;
 	FTFont *_font;
 };
 

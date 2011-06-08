@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <boost/tuple/tuple.hpp>
 
 #include "Wallmon.h"
 #include "stubs/Wallmon.pb.h"
@@ -19,40 +20,11 @@
 #include "BoidsApp.h"
 #include "BoidSharedContext.h"
 #include "EventHandlerBase.h"
+#include "NameTable.h"
+#include "DataContainers.h"
 
 using namespace std;
-
-
-class BoidsContainer {
-public:
-	BoidSharedContext *cpu;
-	BoidSharedContext *memory;
-	BoidSharedContext *network;
-
-	BoidsContainer()
-	{
-		cpu = new BoidSharedContext();
-		memory = new BoidSharedContext();
-		network = new BoidSharedContext();
-	}
-};
-
-class ProcStat {
-public:
-	unsigned int numSamples;
-	double avgCpuUtilization;
-	double totalMemoryUtilization;
-	BoidsContainer *boids;
-
-	ProcStat()
-	{
-		boids = new BoidsContainer();
-		numSamples = 0;
-		avgCpuUtilization = 0;
-		totalMemoryUtilization = 0;
-	}
-};
-typedef map<string, ProcStat *> ProcMap;
+using namespace boost::tuples;
 
 class Handler: public IDataHandlerProtobuf {
 public:
@@ -62,13 +34,12 @@ public:
 private:
 	ProcessesMessage *_message;
 	BoidsApp *_boidsApp;
-	ProcMap *_procMap;
-	NameTagList *_nameTagList;
+	Data *_data;
 	EventHandlerBase *_eventHandler;
-
-	string _CreateProcMapKey(string hostName, int pid);
-	unsigned long _OatHash(string key);
-	void _ProcessNameToRgbColor(string name, int *r, int *g, int *b);
+	NameTable *_nameTable;
+	void _HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname);
+	void _UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat, StatBase &astat);
+	void _UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat);
 };
 
 #endif /* HANDLER_H_ */

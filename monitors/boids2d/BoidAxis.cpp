@@ -14,7 +14,7 @@
 
 BoidAxis::BoidAxis()
 {
-	_font = new Font(4);
+	_font = new Font(4, true);
 }
 
 BoidAxis::~BoidAxis()
@@ -90,11 +90,11 @@ void BoidAxis::OnRender()
 		glColor3f(1, 0, 0);
 		stringstream ss;
 		ss << i * _tickSize;
-		_font->RenderText(ss.str(), tx + tw/(float)2, -9, true);
+		_font->RenderText(ss.str(), tx + tw/(float)2, -9);
 		glColor3f(0, 1, 0);
 	}
 
-	_font->RenderText("Utilization", 50, -15, true);
+	_font->RenderText("Utilization", 50, -15);
 
 	// Top
 	glBegin(GL_QUADS);
