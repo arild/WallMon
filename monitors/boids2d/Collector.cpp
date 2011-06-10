@@ -17,7 +17,7 @@ extern "C" ProcessCollector *create_collector()
 	if (System::IsRocksvvCluster())
 		p->context->AddServers(servers);
 	else if (System::GetHostname().compare("arild-uit-ubuntu") == 0) {
-		p->context->AddServer("129.242.19.60");
+		p->context->AddServer("localhost");
 	}
 	else {
 		// Currently assumed to be ice cluster

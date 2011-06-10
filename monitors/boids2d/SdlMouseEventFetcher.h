@@ -9,24 +9,22 @@
 #define SDLMOUSEEVENTFETCHER_H_
 
 #include "boost/tuple/tuple.hpp"
-#include "EventHandlerBase.h"
+#include "EventSystemBase.h"
 #include "Queue.h"
 
 using namespace std;
-using namespace boost::tuples;
 
-typedef tuple<float, float> TupleType;
-
-class SdlMouseEventFetcher : public EventHandlerBase {
+class SdlMouseEventFetcher : public EventSystemBase {
 public:
 	SdlMouseEventFetcher();
 	virtual ~SdlMouseEventFetcher();
 	virtual void PollEvents();
-	virtual void _InitEventSystem();
-	virtual void _WaitNextEvent(float *x, float *y);
+	virtual bool InitEventSystem();
+	virtual void WaitAndHandleNextEvent();
 
-	Queue<TupleType> *_queue;
-
+private:
+	Queue<TT_touch_state_t *> *_queue;
+	double _timestamp;
 };
 
 #endif /* SDLMOUSEEVENTFETCHER_H_ */

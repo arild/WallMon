@@ -8,7 +8,7 @@
 #include <vector>
 #include "Scene.h"
 #include "Boid.h"
-#include "EventHandlerBase.h"
+#include "EventSystemBase.h"
 #include "TouchEvent.h"
 #include "NameTable.h"
 
@@ -16,7 +16,7 @@ using namespace std;
 
 class BoidsApp {
 public:
-	BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue);
+	BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem);
 	virtual ~BoidsApp();
 	void Start();
 	void Stop();
@@ -33,7 +33,7 @@ private:
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
 	NameTable *_nameTable;
-	Queue<TouchEventQueueItem> *_touchEventQueue;
+	EventSystemBase *_eventSystem;
 
 	void _InitSdlAndOpenGl();
 	void _RenderForever();

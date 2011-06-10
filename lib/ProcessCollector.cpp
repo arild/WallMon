@@ -13,7 +13,7 @@
 #include "unistd.h"
 
 #define MESSAGE_BUF_SIZE				(1024 * 1000) * 5
-const double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 5;
+const double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 100;
 
 ProcessCollector::ProcessCollector()
 {

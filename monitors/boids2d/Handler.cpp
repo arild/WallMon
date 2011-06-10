@@ -14,6 +14,7 @@
 #include "unistd.h"
 #include "WallView.h"
 #include "SdlMouseEventFetcher.h"
+#include "ShoutEventSystem.h"
 
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
@@ -28,24 +29,34 @@ void Handler::OnInit(Context *ctx)
 	_message = new ProcessesMessage();
 	_data = new Data();
 
-	_eventHandler = new EventHandlerBase();
-	Queue<TouchEventQueueItem> *touchEventQueue = _eventHandler->GetOutputQueue();
-	_eventHandler->Start();
-
 #ifdef ROCKSVV
-	WallView w(2, 1, 3, 3);
+	/**
+	 * On the display wall cluster it is likely that only a a sub-set of available
+	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
+	 */
+	_wallView = new WallView(2, 1, 3, 3);
 	if (w.IsTileWithin() == false)
-	return;
+		return;
 	double x, y, width, height;
+	_eventSystem = new ShoutEventSystem();
 	w.GetDisplayArea(&x, &y, &width, &height);
-	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, touchEventQueue);
+	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, _eventSystem);
 	_boidsApp->SetDisplayArea(x, y, width, height);
-
 #else
-	_boidsApp = new BoidsApp(1600, 768, touchEventQueue);
+	/**
+	 * In a local environment (only one computer/screen) the event system is told that
+	 * the 'entire' display wall is used, and coordinates are mapped thereafter. Also,
+	 * the single screen is told to show everything.
+	 */
+	_wallView = new WallView(0, 0, 7, 4);
+	_eventSystem = new SdlMouseEventFetcher();
+	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif
+	// Common operations
+	_eventSystem->SetWallView(_wallView);
 	_nameTable = _boidsApp->GetNameTable();
+	_eventSystem->Start();
 	_boidsApp->Start();
 
 	VisualBase::boidsApp = _boidsApp;
@@ -54,18 +65,19 @@ void Handler::OnInit(Context *ctx)
 
 void Handler::OnStop()
 {
-	_eventHandler->Stop();
+	_eventSystem->Stop();
 	if (_boidsApp != NULL) {
+		// Triggered only by nodes that was within the defined grid (on the display wall)
 		_boidsApp->Stop();
 		delete _boidsApp;
 	}
 	delete _message;
 	delete _data;
+	delete _wallView;
 }
 
 void Handler::Handle(WallmonMessage *msg)
 {
-	LOG(INFO) << "** HANDLE **";
 	if (_boidsApp == NULL)
 		return;
 	const char *data = msg->data().c_str();
@@ -77,8 +89,12 @@ void Handler::Handle(WallmonMessage *msg)
 		ProcessesMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
 		_HandleProcessMessage(*processMessage, msg->hostname());
 	}
+	_RankTableItems();
 }
 
+/**
+ * Updates statistics in data indexes and boids
+ */
 void Handler::_HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname)
 {
 
@@ -173,6 +189,16 @@ void Handler::_UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, St
 	pstat.numSamples += 1;
 }
 
+void Handler::_RankTableItems()
+{
+//	LOG(INFO) << "Num proc names: " << _data->procNameMap.size();
+	BOOST_FOREACH(ProcNameMap::value_type val, _data->procNameMap) {
+		ProcName *procName = val.second;
+		double newScore = procName->stat->userCpuUtilization + procName->stat->systemCpuUtilization;
+		procName->visual->tableItem->score = newScore;
+	}
+}
+
 /**
  * class factories - needed to bootstrap object orientation with dlfcn.h
  */
@@ -185,4 +211,7 @@ extern "C" void destroy_handler(Handler *p)
 {
 	delete p;
 }
+
+
+
 

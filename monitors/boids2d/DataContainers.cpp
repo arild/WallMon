@@ -23,19 +23,19 @@ VisualBase::~VisualBase()
 	delete tableItem;
 }
 
-void VisualBase::InitBoids(string identifierString)
+void VisualBase::InitBoids(string identifierString, BoidType boidType)
 {
 	float red, green, blue;
 	Data::NameToRgbColor(identifierString, &red, &green, &blue);
-	cpu = new BoidSharedContext(red, green, blue, QUAD);
-	memory = new BoidSharedContext(red, green, blue, TRIANGLE);
-	network = new BoidSharedContext(red, green, blue, DIAMOND);
+	cpu = new BoidSharedContext(red, green, blue, QUAD, boidType);
+	memory = new BoidSharedContext(red, green, blue, TRIANGLE, boidType);
+	network = new BoidSharedContext(red, green, blue, DIAMOND, boidType);
 	tableItem = new TableItem(identifierString, red, green, blue);
 
 	boidsApp->CreateBoid(cpu);
 	boidsApp->CreateBoid(memory);
 	boidsApp->CreateBoid(network);
-	nameTable->Add(tableItem);
+//	nameTable->Add(tableItem);
 }
 
 StatBase::StatBase()
@@ -65,7 +65,7 @@ ProcStat::ProcStat()
 
 ProcVisual::ProcVisual(string processName)
 {
-	InitBoids(processName);
+	InitBoids(processName, BOID_TYPE_PROCESS);
 }
 
 ProcVisual::~ProcVisual()
@@ -94,7 +94,8 @@ ProcNameStat::~ProcNameStat()
 
 ProcNameVisual::ProcNameVisual(string processName)
 {
-	InitBoids(processName);
+	InitBoids(processName, BOID_TYPE_PROCESS_NAME);
+	VisualBase::nameTable->Add(tableItem);
 }
 
 ProcNameVisual::~ProcNameVisual()
@@ -172,12 +173,10 @@ DataUpdate Data::Update(string hostname, string processName, int pid)
 		update.procName = new ProcName(processName);
 		procNameMap[processName] = update.procName;
 		update.procNameWasCreated = true;
+		update.procName->procs.push_back(update.proc);
 	}
 	else
 		update.procName = procNameMap[processName];
-
-	if (update.procWasCreated)
-		update.procName->procs.push_back(update.proc);
 
 	// Per node
 //	if (nodeMap.count(hostname) == 0) {

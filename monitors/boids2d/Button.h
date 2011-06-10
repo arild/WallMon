@@ -16,6 +16,7 @@ public:
 	Button(float x, float y, float w, float h, Shape buttonShape=QUAD);
 	virtual ~Button();
 	void SetCallback(void (*callback)());
+	void ButtonClick();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
@@ -28,7 +29,6 @@ private:
 	float _stepSize;
 	bool _isActivated;
 	void (*_callback)();
-	void _ButtonClick();
 };
 
 #endif /* BUTTON_H_ */

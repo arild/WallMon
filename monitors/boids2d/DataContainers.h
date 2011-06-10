@@ -23,6 +23,10 @@ using namespace boost::tuples;
 //using namespace ProcessMessage;
 
 
+/**
+ * Base class for visualizing a boid representing anything,
+ * including a process, a process name, a node, a core, etc.
+ */
 class VisualBase {
 public:
 	int red, green, blue;
@@ -36,9 +40,12 @@ public:
 
 	VisualBase();
 	~VisualBase();
-	void InitBoids(string identifierString);
+	void InitBoids(string identifierString, BoidType boidType);
 };
 
+/**
+ * Base class for statistics associated with a boid
+ */
 class StatBase {
 public:
 	double userCpuUtilization;

@@ -23,11 +23,11 @@
 #include "Button.h"
 #include "ControlPanel.h"
 
-BoidsApp::BoidsApp(int screenWidth, int screenHeight, Queue<TouchEventQueueItem> *touchEventQueue) :
+BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
 	_SetupScenes();
-	_touchEventQueue = touchEventQueue;
+	_eventSystem = eventSystem;
 }
 
 BoidsApp::~BoidsApp()
@@ -142,32 +142,30 @@ void BoidsApp::_SetupScenes()
 	float h = TILE_SCREEN_HEIGHT;
 	float s = 100;
 
-	// Create scenes
-	_leftColumnScene = new Scene(0, h/2, (w * 2), h * 3, 100, 100);
+	// Create scenes and populate them with various entities
+	_leftColumnScene = new Scene(0, h/2, (w * 2), h * 3, 50, 100);
+	_nameTable = new NameTable();
+
 	_boidScene = new Scene(w * 2, h / 2, w * 3 + w / 2, (h * 3), 100, 100);
+	BoidAxis *axis = new BoidAxis();
+	axis->Set(0, 100, 25);
+
 	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 3, 100, 100);
+	ControlPanel *boidDescription = new ControlPanel();
 
 	// Save scenes
 	Scene::scenes.push_back(_leftColumnScene);
 	Scene::scenes.push_back(_boidScene);
 	Scene::scenes.push_back(_controlPanelScene);
-
-	// Populate scenes with various entities
-	Scene::current = _leftColumnScene;
-	_nameTable = new NameTable();
-
-	Scene::current = _boidScene;
-	BoidAxis *axis = new BoidAxis();
-	axis->Set(0, 100, 25);
-
-	Scene::current = _controlPanelScene;
-	ControlPanel *boidDescription = new ControlPanel();
 }
 
 void BoidsApp::_HandleTouchEvents()
 {
-	while (_touchEventQueue->GetSize() > 0) {
-		TouchEventQueueItem item = _touchEventQueue->Pop();
+	_eventSystem->PollEvents();
+	LOG(INFO) << "Events available: " << _eventSystem->eventQueue->GetSize();
+	while (_eventSystem->eventQueue->GetSize() > 0) {
+		LOG(INFO) << "New event";
+		TouchEventQueueItem item = _eventSystem->eventQueue->Pop();
 		Scene *scene = item.get<0> ();
 		TouchEvent event = item.get<1> ();
 		if (event.visualizeOnly)

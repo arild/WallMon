@@ -22,9 +22,9 @@ Button::Button(float x, float y, float w, float h, Shape buttonShape)
 	entityShape = buttonShape;
 	centerShape = false;
 	_isActivated = false;
+	_offset = 0;
 	_timestampSec = System::GetTimeInSec();
 
-	_offset = 0;
 
 	// Try to achieve 500 msec activation
 	float iterationsPer500Msec = Fps::GetMaxIterationsPerTimeUnit(500);
@@ -39,6 +39,19 @@ Button::~Button()
 void Button::SetCallback(void(*callback)())
 {
 	_callback = callback;
+}
+
+void Button::ButtonClick()
+{
+	if (_isActivated) {
+		_isActivated = false;
+		_offset = 0;
+	}
+	else {
+		_isActivated = true;
+		_offset = width;
+	}
+	_callback();
 }
 
 void Button::OnLoop()
@@ -68,12 +81,12 @@ void Button::OnLoop()
 	if (_offset <= 0) {
 		_offset = 0;
 		_animationOn = false;
-		_ButtonClick();
+		ButtonClick();
 	}
 	if (_offset >= width) {
 		_offset = width;
 		_animationOn = false;
-		_ButtonClick();
+		ButtonClick();
 	}
 }
 
@@ -94,23 +107,6 @@ void Button::OnRender()
 
 		width = widthSave;
 		tx = txSave;
-
-//		glBegin(GL_QUADS);
-//		glVertex2f(tx, ty);
-//		glVertex2f(tx + _offset, ty);
-//		glVertex2f(tx + _offset, ty + height);
-//		glVertex2f(tx, ty + height);
-//		glEnd();
-//
-//		glColor3f(1, 1, 1);
-//		float x = tx + _offset;
-//		glBegin(GL_QUADS);
-//		glVertex2f(x, ty);
-//		glVertex2f(x + (width - _offset), ty);
-//		glVertex2f(x + (width - _offset), ty + height);
-//		glVertex2f(x, ty + height);
-//		glEnd();
-
 	} else {
 		if (_isActivated)
 			glColor3f(0, 1, 0);
@@ -141,18 +137,10 @@ void Button::HandleHit(TouchEvent &event)
 	} else {
 		if (event.isDown == true)
 			return;
-		_ButtonClick();
+		ButtonClick();
 	}
 }
 
-void Button::_ButtonClick()
-{
-	if (_isActivated)
-		_isActivated = false;
-	else
-		_isActivated = true;
-	_callback();
-}
 
 
 

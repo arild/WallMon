@@ -19,7 +19,7 @@
 #include "stubs/ProcessCollector.pb.h"
 #include "BoidsApp.h"
 #include "BoidSharedContext.h"
-#include "EventHandlerBase.h"
+#include "EventSystemBase.h"
 #include "NameTable.h"
 #include "DataContainers.h"
 
@@ -33,13 +33,15 @@ public:
 	virtual void Handle(WallmonMessage *msg);
 private:
 	ProcessesMessage *_message;
+	WallView *_wallView;
 	BoidsApp *_boidsApp;
 	Data *_data;
-	EventHandlerBase *_eventHandler;
+	EventSystemBase *_eventSystem;
 	NameTable *_nameTable;
 	void _HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname);
 	void _UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat, StatBase &astat);
 	void _UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat);
+	void _RankTableItems();
 };
 
 #endif /* HANDLER_H_ */

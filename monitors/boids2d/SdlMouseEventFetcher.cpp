@@ -9,10 +9,12 @@
 #include "SDL/SDL.h"
 #include "stdio.h"
 #include "WallView.h"
+#include "System.h"
 
 SdlMouseEventFetcher::SdlMouseEventFetcher()
 {
-	_queue = new Queue<TupleType>(100);
+	_queue = new Queue<TT_touch_state_t *>(100);
+	_timestamp = System::GetTimeInMsec();
 }
 
 SdlMouseEventFetcher::~SdlMouseEventFetcher()
@@ -20,12 +22,18 @@ SdlMouseEventFetcher::~SdlMouseEventFetcher()
 	delete _queue;
 }
 
-void SdlMouseEventFetcher::_InitEventSystem()
+bool SdlMouseEventFetcher::InitEventSystem()
 {
+	return true;
 }
 
 void SdlMouseEventFetcher::PollEvents()
 {
+	double ts = System::GetTimeInMsec();
+	if (ts - _timestamp < 50)
+		return;
+	_timestamp = ts;
+
 	SDL_Event event;
 	SDL_PumpEvents();
 //	if (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_EVENTMASK (SDL_MOUSEBUTTONDOWN)) == 1) {
@@ -41,18 +49,18 @@ void SdlMouseEventFetcher::PollEvents()
 
 	int mx, my;
 	SDL_GetMouseState(&mx, &my);
-	float x = mx * (float)(WALL_SCREEN_WIDTH / (float)1600);
-	float y = my * (float)(WALL_SCREEN_HEIGHT / (float)768);
+	TT_touch_state_t *obj = new TT_touch_state_t();
+	obj->loc.x = mx * (float)(WALL_SCREEN_WIDTH / (float)1600);
+	obj->loc.y = my * (float)(WALL_SCREEN_HEIGHT / (float)768);
 
-	//printf("Mouse event: x=%.2f | y=%.2f\n", x, y);
-	_queue->Push(make_tuple(x, y));
+//	printf("Sending mouse event: x=%.2f | y=%.2f\n", obj->loc.x, obj->loc.y);
+	_queue->Push(obj);
 }
 
-void SdlMouseEventFetcher::_WaitNextEvent(float *x, float *y)
+void SdlMouseEventFetcher::WaitAndHandleNextEvent()
 {
-	printf("Waiting for mouse event\n");
-	TupleType t = _queue->Pop();
-	*x = t.get<0>();
-	*y = t.get<1>();
-	printf("Mouse event received: x=%.2f | y=%.2f\n", *x, *y);
+//	printf("WaitAndHandleNextEvent()\n");
+	TT_touch_state_t *event = _queue->Pop();
+//	printf("Mouse event received: x=%.2f | y=%.2f\n", event->loc.x, event->loc.y);
+	FilterAndRouteEvent(event, true);
 }

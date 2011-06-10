@@ -3,7 +3,6 @@
 #define TABLE_H_
 
 #include <list>
-#include <set>
 #include <boost/thread/mutex.hpp>
 #include "Entity.h"
 #include "Font.h"
@@ -17,17 +16,17 @@ public:
 	int r, g, b;
 	double timestampMsec;
 	float score;
-	list<TableItem *> _items;
+//	list<TableItem *> _items;
 	TableItem(string displayName_, int r_, int g_, int b_);
 };
 
-struct ScoreCompare {
-	bool operator()(TableItem * const a, TableItem * const b)
+//typedef list<TableItem *> ItemContainerType;
+struct TableItemCompare {
+	bool operator()(TableItem * const  a, TableItem * const b)
 	{
-		return a->score < b->score;
+		return a->score > b->score;
 	}
 };
-typedef set<TableItem *, ScoreCompare> ItemContainerType;
 
 class NameTable : Entity {
 public:
@@ -42,7 +41,7 @@ public:
 
 private:
 	boost::mutex _mutex;
-	ItemContainerType _items;
+	list<TableItem *> _items;
 	Font *_font;
 	int _maxNumItemsToDisplay;
 	void _DrawAllItems();

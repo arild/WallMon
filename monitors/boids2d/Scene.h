@@ -13,7 +13,6 @@ public:
 	static Scene *current;
 
 	float x, y, w, h, scale;
-	float scaleX, scaleY;
 	vector<Entity *> entityList;
 
 	Scene(float x_, float y_, float w_, float h_, float virtualW, float virtualH);

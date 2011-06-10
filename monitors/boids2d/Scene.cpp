@@ -11,10 +11,36 @@
 vector<Scene *> Scene::scenes;
 Scene *Scene::current;
 
+/**
+ * Calculates the common scale factor in BOTH x and y direction based on virtual
+ * and real coordinate systems. The common scale factor is the smallest scale
+ * factor of the two.
+ *
+ * This results in an abstraction with several consequences. In the example below,
+ * we have a coordinate system with resolution 1000x500, hence the aspect ratio 2:1.
+ * If we make a scene that covers the whole coordinate system, with a local virtual
+ * coordinate system with resolution 100x100:
+ *
+ * 		Scene(0, 0, 1000, 500, 100, 100)
+ *
+ * And then create and renders a square starting in bottom-left (0,0) and that covers
+ * the whole virtual coordinate system (width = 100 and height = 100), this would be the result:
+ *       _______________			  _______________
+ *		|				|      	     |///////|		|
+ *  500 |				|  ->  '100' |///////|		|
+ * 		|				|		     |///////|		|
+ * 		 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾              ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ * 			   1000						   '100'
+ *
+ * As we can see, physically, only half of the screen will be filled... Does this make sense?
+ * It does, if one draws a square, the output should be a square, and not a rectangle (as would be
+ * the case if the whole screen had been filled).
+ *
+ */
 Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virtualH_) : x(x_), y(y_), w(w_), h(h_)
 {
-	scaleX = w_ / (float)virtualW_;
-	scaleY = h_ / (float) virtualH_;
+	float scaleX = w_ / (float)virtualW_;
+	float scaleY = h_ / (float) virtualH_;
 	scale = std::min(scaleX, scaleY);
 	current = this;
 }
@@ -23,6 +49,10 @@ Scene::~Scene()
 {
 }
 
+/**
+ * Loads the local coordinate system to the scene.
+ * (0,0) is bottom-left of scene.
+ */
 void Scene::LoadVirtual()
 {
 	glPushMatrix();
@@ -30,6 +60,10 @@ void Scene::LoadVirtual()
 	glScalef(scale, scale, 1);
 }
 
+/**
+ * Loads the global coordinate system, however, (0,0) is still
+ * bottom-left of current scene.
+ */
 void Scene::LoadReal()
 {
 	glPushMatrix();
