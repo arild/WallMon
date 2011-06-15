@@ -3,6 +3,7 @@
 #define TABLE_H_
 
 #include <list>
+#include <vector>
 #include <boost/thread/mutex.hpp>
 #include "Entity.h"
 #include "Font.h"
@@ -41,7 +42,9 @@ public:
 
 private:
 	boost::mutex _mutex;
-	list<TableItem *> _items;
+	vector<TableItem *> _items;
+	int _current; // index of item residing on top of displayed list
+	int _selected; // index of item currently marked and active
 	Font *_font;
 	int _maxNumItemsToDisplay;
 	void _DrawAllItems();

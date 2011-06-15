@@ -23,8 +23,9 @@ public:
 	virtual void WaitAndHandleNextEvent();
 
 private:
-	Queue<TT_touch_state_t *> *_queue;
+	Queue< tuple<TT_touch_state_t *, bool> > *_queue;
 	double _timestamp;
+	bool _isEventStreamActive;
 };
 
 #endif /* SDLMOUSEEVENTFETCHER_H_ */

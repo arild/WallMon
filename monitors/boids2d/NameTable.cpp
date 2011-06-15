@@ -13,6 +13,11 @@
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
+const float TABLE_ITEMS_TOP = 85.;
+const float TABLE_ITEMS_BOTTOM = 15.;
+const float TABLE_ITEM_HEIGHT = 6.;
+const float FONT_SIZE = 4.;
+
 TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 {
 	displayName = displayName_;
@@ -25,12 +30,22 @@ TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 
 NameTable::NameTable(int maxNumItemsToDisplay)
 {
-	_font = new Font(5);
+	_font = new Font(FONT_SIZE);
 	_maxNumItemsToDisplay = maxNumItemsToDisplay;
+
+	_current = 0;
+
+	_selected = -1;
+	// Set up hit box
+	tx = 0;
+	ty = TABLE_ITEMS_BOTTOM;
+	width = 50;
+	height = TABLE_ITEMS_TOP;
 }
 
 NameTable::~NameTable()
 {
+
 }
 
 /**
@@ -40,7 +55,7 @@ NameTable::~NameTable()
  */
 void NameTable::Add(TableItem *item)
 {
-	LOG(INFO) << "Addind item: " << item->displayName;
+//	LOG(INFO) << "Addind item: " << item->displayName;
 	scoped_lock lock(_mutex);
 //	ItemContainerType::iterator it;
 //	for (it = _items.begin(); it != _items.end(); it++) {
@@ -52,21 +67,16 @@ void NameTable::Add(TableItem *item)
 //	}
 	_items.push_back(item);
 }
-
 void NameTable::OnLoop()
 {
-	scoped_lock lock(_mutex);
-	_items.sort(TableItemCompare());
+//	scoped_lock lock(_mutex);
+//	_items.sort(TableItemCompare());
 }
 
 void NameTable::OnRender()
 {
 	scoped_lock lock(_mutex);
 	_DrawAllItems();
-	glColor3ub(1, 0, 0);
-	stringstream ss;
-	_font->RenderText("TEST", 95, 10);
-	_font->RenderText("aoeuaoeu", 70, 70);
 }
 
 void NameTable::OnCleanup()
@@ -76,35 +86,50 @@ void NameTable::OnCleanup()
 
 void NameTable::HandleHit(TouchEvent & event)
 {
+	// bottom-up offset
+	int offset = (TABLE_ITEMS_TOP - event.y) / TABLE_ITEM_HEIGHT;
+	_selected = _current + offset;
 }
 
 void NameTable::_DrawAllItems()
 {
-	float s = 3;
-	float y = 90;
+	float y = TABLE_ITEMS_TOP;
 
-	BOOST_FOREACH(TableItem *item, _items) {
-		y -= s;
+	for (int i = _current; i < _items.size(); i++) {
 
+		TableItem *item = _items[i];
 		glColor3ub(item->r, item->g, item->b);
+		if (i == _selected) {
+
+			float y_ = y - (TABLE_ITEM_HEIGHT - FONT_SIZE) / 2;
+			//y_ -= (_selected - _current) * TABLE_ITEM_HEIGHT;
+
+			glLineWidth(2);
+			glBegin(GL_LINE_STRIP);
+			glVertex3f(0, y_, 0);
+			glVertex3f(30, y_, 0);
+			glVertex3f(30, y_ + TABLE_ITEM_HEIGHT, 0);
+			glVertex3f(0, y_ + TABLE_ITEM_HEIGHT, 0);
+			glEnd();
+		}
+
 		glBegin(GL_QUADS);
 		glVertex2f(0, y);
-		glVertex2f(s, y);
-		glVertex2f(s, y + s);
-		glVertex2f(0, y + s);
+		glVertex2f(3, y);
+		glVertex2f(3, y + 3);
+		glVertex2f(0, y + 3);
 		glEnd();
 
-		_font->RenderText(item->displayName, s * 2, y);
+		_font->RenderText(item->displayName, 6, y);
 
-		y -= s;
+		y -= TABLE_ITEM_HEIGHT;
 
-		stringstream ss;
-		ss << "Score: " << item->score;
-		_font->RenderText(ss.str(), s * 2, y - s);
+//		stringstream ss;
+//		ss << "Score: " << item->score;
+//		_font->RenderText(ss.str(), s * 2, y - s);
 
-		y -= s*2;
 
-		if (y <= 5)
+		if (y <= TABLE_ITEMS_BOTTOM)
 			break;
 	}
 }

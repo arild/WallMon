@@ -62,11 +62,8 @@ void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
 	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
 	y = WALL_SCREEN_HEIGHT - y;
 
-//	LOG(INFO) << "Checking grid";
 	if (_wallView->IsCordsWithin(x, y) == false)
 		return;
-
-//	LOG(INFO) << "Event: x=" << x << " | y=" << y;
 
 	// Transform the global display wall coordinates from shout into global
 	// coordinates within the application, which uses the same coordinate system,
@@ -77,7 +74,6 @@ void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
 	event.isDown = isDown;
 	event.realX = x;
 	event.realY = y;
-	LOG(INFO) << "Maps to: x=" << x << " | y=" << y;
 	event.timestampSec = obj->time;
 	event.timestampPreviousSec = (float)obj->lastUpdated;
 
@@ -91,14 +87,9 @@ void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
 	eventQueue->Push(item);
 	event.visualizeOnly = false;
 
-//	LOG(INFO) << "Scene Hit: x=" << scene->x << " | y=" << scene->y;
-
 	// Transform global coordinates within the application to match coordinate
 	// system used within the relevant scene, which could be anything
 	scene->RealToVirtualCoords(event.realX, event.realY, &event.x, &event.y);
-
-//	LOG(INFO) << "Maps to virt: x=" << event.x << " | y=" << event.y;
-
 	item = make_tuple(scene, event);
 	eventQueue->Push(item);
 }

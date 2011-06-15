@@ -12,8 +12,7 @@
 
 class Button : virtual Entity, EntityShape {
 public:
-	bool slowActivationApproach;
-	Button(float x, float y, float w, float h, Shape buttonShape=QUAD);
+	Button(float x, float y, float w, float h, Shape buttonShape=QUAD, bool slowActivation=true);
 	virtual ~Button();
 	void SetCallback(void (*callback)());
 	void ButtonClick();
@@ -23,6 +22,7 @@ public:
 	void HandleHit(TouchEvent &event);
 
 private:
+	bool _slowActivation;
 	double _timestampSec;
 	bool _animationOn;
 	float _offset;

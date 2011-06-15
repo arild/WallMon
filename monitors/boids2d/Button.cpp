@@ -13,7 +13,7 @@
 
 bool activateButton = false;
 
-Button::Button(float x, float y, float w, float h, Shape buttonShape)
+Button::Button(float x, float y, float w, float h, Shape buttonShape, bool slowActivation)
 {
 	tx = x;
 	ty = y;
@@ -24,7 +24,7 @@ Button::Button(float x, float y, float w, float h, Shape buttonShape)
 	_isActivated = false;
 	_offset = 0;
 	_timestampSec = System::GetTimeInSec();
-
+	_slowActivation = slowActivation;
 
 	// Try to achieve 500 msec activation
 	float iterationsPer500Msec = Fps::GetMaxIterationsPerTimeUnit(500);
@@ -56,7 +56,7 @@ void Button::ButtonClick()
 
 void Button::OnLoop()
 {
-	if (slowActivationApproach == false)
+	if (_slowActivation == false)
 		return;
 
 	if (_animationOn == false)
@@ -92,7 +92,7 @@ void Button::OnLoop()
 
 void Button::OnRender()
 {
-	if (slowActivationApproach) {
+	if (_slowActivation) {
 		float widthSave = width;
 		float txSave = tx;
 
@@ -128,7 +128,7 @@ void Button::OnCleanup()
 
 void Button::HandleHit(TouchEvent &event)
 {
-	if (slowActivationApproach) {
+	if (_slowActivation) {
 		if (_animationOn == false && System::GetTimeInSec() - _timestampSec < 1.0)
 			// Wait time after a button has been clicked
 			return;

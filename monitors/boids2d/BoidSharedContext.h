@@ -16,6 +16,7 @@ using namespace std;
 typedef boost::mutex::scoped_lock scoped_lock;
 
 enum BoidType {
+	BOID_TYPE_CORE,
 	BOID_TYPE_PROCESS,
 	BOID_TYPE_PROCESS_NAME,
 	BOID_TYPE_NODE

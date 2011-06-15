@@ -14,37 +14,42 @@
 ControlPanel::ControlPanel()
 {
 	// Metric types
-	Button *b = new Button(4, 75, 20, 20, QUAD);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ControlPanel::CpuBoidButtonCallback);
+	Button *b = new Button(8, 75, 15, 15, QUAD);
+	b->SetCallback(&CpuBoidButtonCallback);
 	b->ButtonClick();
 
-	b = new Button(28, 75, 20, 20, TRIANGLE);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ControlPanel::MemoryBoidButtonCallback);
+	b = new Button(31, 75, 15, 15, TRIANGLE);
+	b->SetCallback(&MemoryBoidButtonCallback);
 
-	b = new Button(52, 75, 20, 20, DIAMOND);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ControlPanel::NetworkBoidButtonCallback);
+	b = new Button(54, 75, 15, 15, DIAMOND);
+	b->SetCallback(&NetworkBoidButtonCallback);
 
-	b = new Button(76, 75, 20, 20, POLYGON);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ControlPanel::StorageBoidButtonCallback);
+	b = new Button(77, 75, 15, 15, POLYGON);
+	b->SetCallback(&StorageBoidButtonCallback);
 
 	// Data views
+	b = new Button(8, 45, 15, 15, QUAD);
+	b->SetCallback(&CoreViewButtonCallback);
 
+	b = new Button(31, 45, 15, 15, QUAD);
+	b->SetCallback(&ProcessViewButtonCallback);
+	b->ButtonClick();
+
+	b = new Button(54, 45, 15, 15, QUAD);
+	b->SetCallback(&ProcessNameViewButtonCallback);
+
+	b = new Button(77, 45, 15, 15, QUAD);
+	b->SetCallback(&StorageBoidButtonCallback);
 
 	// Configuration
-	b = new Button(4, 4, 20, 20);
-	b->slowActivationApproach = false;
-	b->SetCallback(&ControlPanel::BoidTailCallback);
+	b = new Button(4, 4, 20, 20, QUAD, false);
+	b->SetCallback(&BoidTailCallback);
 
 	b = new Button(28, 4, 20, 20);
-	b->slowActivationApproach = true;
-	b->SetCallback(&ControlPanel::BoidTailCallback);
+	b->SetCallback(&BoidTailCallback);
 
 	b = new Button(52, 4, 20, 20);
-	_font = new Font(4);
+	_font = new Font(4, true, true);
 }
 
 ControlPanel::~ControlPanel()
@@ -58,15 +63,19 @@ void ControlPanel::OnLoop()
 void ControlPanel::OnRender()
 {
 	glColor3f(0, 0, 1);
-	_font->RenderText("Metric Types", 50, 99, true, true);
-	_font->RenderText("CPU", 14, 73, true, true);
-	_font->RenderText("Memory", 38, 73, true, true);
-	_font->RenderText("Network", 62, 73, true, true);
-	_font->RenderText("Storage", 86, 73, true, true);
+	_font->RenderText("Metric Types", 50, 95);
+	_font->RenderText("CPU", 15.5, 72);
+	_font->RenderText("Memory", 38.5, 72);
+	_font->RenderText("Network", 61.5, 72);
+	_font->RenderText("Storage", 84.5, 72);
 
-	_font->RenderText("Data Views", 50, 68, true, true);
+	_font->RenderText("Data Views", 50, 65);
+	_font->RenderText("Core", 15.5, 42);
+	_font->RenderText("Process", 38.5, 42);
+	_font->RenderText("Process Name", 61.5, 42);
+	_font->RenderText("Node", 84.5, 42);
 
-	_font->RenderText("Configuration", 50, 38, true, true);
+	_font->RenderText("Configuration", 50, 35);
 }
 
 void ControlPanel::OnCleanup()
@@ -101,6 +110,26 @@ void ControlPanel::BoidTailCallback()
 {
 	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength = 75
 			: BoidSharedContext::tailLength = 0;
+}
+
+void ControlPanel::CoreViewButtonCallback()
+{
+	BoidSharedContext::boidTypeToShow = BOID_TYPE_CORE;
+}
+
+void ControlPanel::ProcessViewButtonCallback()
+{
+	BoidSharedContext::boidTypeToShow = BOID_TYPE_PROCESS;
+}
+
+void ControlPanel::ProcessNameViewButtonCallback()
+{
+	BoidSharedContext::boidTypeToShow = BOID_TYPE_PROCESS_NAME;
+}
+
+void ControlPanel::NodeViewButtonCallback()
+{
+	BoidSharedContext::boidTypeToShow = BOID_TYPE_NODE;
 }
 
 

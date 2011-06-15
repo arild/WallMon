@@ -19,10 +19,17 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
+
 	static void CpuBoidButtonCallback();
 	static void MemoryBoidButtonCallback();
 	static void NetworkBoidButtonCallback();
 	static void StorageBoidButtonCallback();
+
+	static void CoreViewButtonCallback();
+	static void ProcessViewButtonCallback();
+	static void ProcessNameViewButtonCallback();
+	static void NodeViewButtonCallback();
+
 
 	static void BoidTailCallback();
 

@@ -92,8 +92,7 @@ void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 
 NameTable *BoidsApp::GetNameTable()
 {
-	Scene::current = _leftColumnScene;
-	return new NameTable();
+	return _nameTable;
 }
 
 void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
@@ -162,9 +161,7 @@ void BoidsApp::_SetupScenes()
 void BoidsApp::_HandleTouchEvents()
 {
 	_eventSystem->PollEvents();
-	LOG(INFO) << "Events available: " << _eventSystem->eventQueue->GetSize();
 	while (_eventSystem->eventQueue->GetSize() > 0) {
-		LOG(INFO) << "New event";
 		TouchEventQueueItem item = _eventSystem->eventQueue->Pop();
 		Scene *scene = item.get<0> ();
 		TouchEvent event = item.get<1> ();
@@ -172,7 +169,6 @@ void BoidsApp::_HandleTouchEvents()
 			_VisualizeShoutEvent(event.realX, event.realY);
 		else {
 			vector<Entity *> entities = scene->TestForEntityHits(event.x, event.y);
-			LOG(INFO) << "Num entity hits: " << entities.size();
 			if (entities.size() == 0)
 				// No entity hits within scene
 				continue;

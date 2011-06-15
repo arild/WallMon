@@ -10,7 +10,7 @@
 #include "BoidSharedContext.h"
 
 int BoidSharedContext::tailLength = 0;
-BoidType BoidSharedContext::boidTypeToShow = BOID_TYPE_PROCESS;
+BoidType BoidSharedContext::boidTypeToShow = BOID_TYPE_PROCESS_NAME;
 bool BoidSharedContext::showCpuBoid = false;
 bool BoidSharedContext::showMemoryBoid = false;
 bool BoidSharedContext::showNetworkBoid = false;
