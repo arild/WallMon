@@ -9,6 +9,7 @@
 #include <glog/logging.h>
 #include "Config.h"
 #include "ClassLoader.h"
+#include "System.h"
 #include "stubs/MonitorDispatcher.pb.h"
 #include "MonitorDispatcher.h"
 
@@ -71,7 +72,10 @@ void MonitorDispatcher::_ListenForever()
 
 			if (msg.type() == msg.INIT) {
 				try {
-					ClassLoader loader(msg.filepath());
+					string path = msg.filepath();
+//					if (System::IsUserPath(path))
+//						path = System::ExpandUserPath(path);
+					ClassLoader loader(path);
 					if (_multicastListenPort == SERVER_MULTICAST_LISTEN_PORT)
 						monitor = loader.LoadAndInstantiateHandler();
 					else

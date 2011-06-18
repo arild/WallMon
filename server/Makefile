@@ -7,7 +7,7 @@ SRC=*.cpp *.h
 all: wallmons
 
 wallmons: $(SRC)
-	$(CC) $(CFLAGS_COMMON) -o $(EXECUTABLE_NAME) $(SRC) $(INC_PATH) $(LIB_PATH) -L/home/local/lib $(LIB_COMMON) $(LIB_LOCAL)
+	$(CC) $(CFLAGS_COMMON) -D $(PLATFORM) -o $(EXECUTABLE_NAME) $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON) $(LIB_LOCAL)
 
 clean:
 	rm -f *.o

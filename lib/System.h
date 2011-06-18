@@ -29,9 +29,14 @@ public:
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
 	static void ExportDisplayToLocalhost();
+
 	static string GetCurrentUser();
 	static bool IsRocksvvClusterRootNode();
 	static bool IsIceClusterRootNode();
+	static bool IsLinux();
+	static string GetHomePath();
+	static bool IsUserPath(string path);
+	static string ExpandUserPath(string path);
 	static string RunCommand(string cmd);
 	static string RunCommand(char *cmd);
 };

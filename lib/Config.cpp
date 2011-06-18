@@ -10,8 +10,6 @@
 
 string Config::GetFontPath()
 {
-	string path = (string)FONT_PATH;
-	string repl = ((string)"/home/") + System::GetCurrentUser();
-	return path.replace(0, 1, repl);
+	return System::GetHomePath() + "/lib/times.ttf";
 }
 

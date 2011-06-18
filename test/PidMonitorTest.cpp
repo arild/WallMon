@@ -53,23 +53,7 @@ TEST_F(PidMonitorTest, All)
 	m->Update(*v2);
 	m->Update(*v1);
 
-	vector<int> v = m->GetUnion();
-	ASSERT_TRUE(isSorted(v));
-	for (int i = 0; i < 8; i++)
-		ASSERT_EQ(i+1, v[i]);
-	m->Ignore(1);
-	m->Ignore(8);
-	v = m->GetUnion();
-	for (int i = 1; i < 7; i++)
-		ASSERT_EQ(i+1, v[i]);
-
-
-	v = m->GetIntersection();
-	ASSERT_TRUE(isSorted(v));
-	ASSERT_EQ(4, v[0]);
-	ASSERT_EQ(5, v[1]);
-
-	v = m->GetDifference();
+	vector<int> v = m->GetDifference();
 	ASSERT_TRUE(isSorted(v));
 	ASSERT_EQ(1, v[0]);
 	ASSERT_EQ(2, v[1]);

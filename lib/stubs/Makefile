@@ -6,6 +6,8 @@ all: GenerateStubs MonitorDispatcher ProcessCollector Wallmon
 	mv *.a ..
 
 clean:
+	rm *.h
+	rm *.cc
 	rm *.o
 	
 GenerateStubs: *.proto

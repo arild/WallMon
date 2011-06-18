@@ -4,7 +4,7 @@ CFLAGS = -O2 -c -fPIC
 DIRS_PRE = stubs 
 DIRS_POST = touchmanager
 
-all: SubDirsPre System Config PracticalSocket ClassLoader ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector SubDirsPost 
+all: SubDirsPre ClassLoader System Config PracticalSocket ByteBuffer LinuxProcessMonitor IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector SubDirsPost
 	
 clean: 	
 	@ for dir in ${DIRS_PRE}; do (cd $${dir}; ${MAKE} clean) ; done
@@ -24,7 +24,7 @@ Config: Config.h Config.cpp
 	ar cru lib$@.a $@.o
 
 PracticalSocket: PracticalSocket.h PracticalSocket.cpp
-	$(CC) $(CFLAGS) $?
+	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 
 ClassLoader: ClassLoader.h ClassLoader.cpp
@@ -32,11 +32,11 @@ ClassLoader: ClassLoader.h ClassLoader.cpp
 	ar cru lib$@.a $@.o
 
 ByteBuffer: ByteBuffer.h ByteBuffer.cpp 
-	$(CC) $(CFLAGS) $?
+	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 
 LinuxProcessMonitor: LinuxProcessMonitor.h LinuxProcessMonitor.cpp 
-	$(CC) $(CFLAGS) $?
+	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar rcs lib$@.a $@.o
 
 IoLogger: IoLogger.h IoLogger.cpp
@@ -44,7 +44,7 @@ IoLogger: IoLogger.h IoLogger.cpp
 	ar cru lib$@.a $@.o
 
 WallView: WallView.h WallView.cpp
-	$(CC) $(CFLAGS) $?
+	$(CC) $(CFLAGS) $(INC_PATH) $?
 	ar cru lib$@.a $@.o
 
 PidMonitor: PidMonitor.h PidMonitor.cpp

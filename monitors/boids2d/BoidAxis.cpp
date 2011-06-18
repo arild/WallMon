@@ -94,7 +94,10 @@ void BoidAxis::OnRender()
 		glColor3f(0, 1, 0);
 	}
 
-	_font->RenderText("Utilization", 50, -15);
+	_font->RenderText("Metric Utilization", 50, -15);
+
+	glRotatef(90, 0, 0, 1);
+	_font->RenderText("Metric Specific", -30, 50);
 
 	// Top
 	glBegin(GL_QUADS);

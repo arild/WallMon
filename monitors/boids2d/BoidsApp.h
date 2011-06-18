@@ -31,7 +31,7 @@ private:
 	int _screenWidth, _screenHeight;
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
-	Scene *_boidScene, *_leftColumnScene, *_controlPanelScene;
+	Scene *_boidScene, *_tableScene, *_controlPanelScene;
 	NameTable *_nameTable;
 	EventSystemBase *_eventSystem;
 

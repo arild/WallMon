@@ -225,6 +225,33 @@ bool System::IsIceClusterRootNode()
 	return false;
 }
 
+bool System::IsLinux()
+{
+	if (RunCommand("uname").compare("Linux") == 0)
+		return true;
+	return false;
+}
+
+string System::GetHomePath()
+{
+	string homeDir = "Users";
+	if (IsLinux())
+		homeDir = "home";
+	return "/" + homeDir + "/" + GetCurrentUser();
+}
+
+bool System::IsUserPath(string path)
+{
+	if (path.compare(0, 1, "~") == 0)
+		return true;
+	return false;
+}
+
+string System::ExpandUserPath(string path)
+{
+	return path.replace(0, 1, GetHomePath());
+}
+
 string System::RunCommand(string cmd)
 {
 	char buf[4096];

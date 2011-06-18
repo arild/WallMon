@@ -55,16 +55,7 @@ NameTable::~NameTable()
  */
 void NameTable::Add(TableItem *item)
 {
-//	LOG(INFO) << "Addind item: " << item->displayName;
 	scoped_lock lock(_mutex);
-//	ItemContainerType::iterator it;
-//	for (it = _items.begin(); it != _items.end(); it++) {
-//		TableItem *current = *it;
-//		if (item->score > current->score) {
-//			_items.insert(it, item);
-//			return;
-//		}
-//	}
 	_items.push_back(item);
 }
 void NameTable::OnLoop()
@@ -86,9 +77,16 @@ void NameTable::OnCleanup()
 
 void NameTable::HandleHit(TouchEvent & event)
 {
-	// bottom-up offset
-	int offset = (TABLE_ITEMS_TOP - event.y) / TABLE_ITEM_HEIGHT;
-	_selected = _current + offset;
+	if (event.isDown == false) {
+		// Find item to be visually marked
+		int offset = (TABLE_ITEMS_TOP - event.y) / TABLE_ITEM_HEIGHT;
+		_selected = _current + offset;
+		return;
+	}
+
+	// Logic for sliding
+	LOG(INFO) << "Radius: " << event.radius;
+	LOG(INFO) << "Moved : " << event.movedDistance;
 }
 
 void NameTable::_DrawAllItems()
@@ -96,6 +94,9 @@ void NameTable::_DrawAllItems()
 	float y = TABLE_ITEMS_TOP;
 
 	for (int i = _current; i < _items.size(); i++) {
+		if (y <= TABLE_ITEMS_BOTTOM)
+			break;
+		y -= TABLE_ITEM_HEIGHT;
 
 		TableItem *item = _items[i];
 		glColor3ub(item->r, item->g, item->b);
@@ -121,16 +122,6 @@ void NameTable::_DrawAllItems()
 		glEnd();
 
 		_font->RenderText(item->displayName, 6, y);
-
-		y -= TABLE_ITEM_HEIGHT;
-
-//		stringstream ss;
-//		ss << "Score: " << item->score;
-//		_font->RenderText(ss.str(), s * 2, y - s);
-
-
-		if (y <= TABLE_ITEMS_BOTTOM)
-			break;
 	}
 }
 

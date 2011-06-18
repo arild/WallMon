@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <linux/limits.h>
+//#include <linux/limits.h>
 #include <sys/times.h>
 #include <iomanip>
 
@@ -105,7 +105,7 @@ public:
 private:
 	// /proc/<pid>/stat variables
 	int _pid;
-	char _comm[PATH_MAX];
+	char _comm[4096];
 	char _state;
 	int _ppid;
 	int _pgrp;

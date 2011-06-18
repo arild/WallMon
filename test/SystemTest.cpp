@@ -40,3 +40,8 @@ TEST_F(SystemTest, CurrentUser)
 {
 	ASSERT_EQ("arild", System::GetCurrentUser());
 }
+
+TEST_F(SystemTest, HomePath)
+{
+	ASSERT_EQ("/home/arild", System::GetHomePath());
+}

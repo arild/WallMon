@@ -6,7 +6,6 @@
 #define MULITCAST_ADDRESS				"224.0.0.127"
 #define DAEMON_MULTICAST_LISTEN_PORT	9955
 #define SERVER_MULTICAST_LISTEN_PORT	9956
-#define FONT_PATH						"~/lib/times.ttf"
 
 
 #include <iostream>

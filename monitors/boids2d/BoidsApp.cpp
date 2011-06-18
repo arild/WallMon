@@ -1,3 +1,5 @@
+
+
 /**
  * @file   BoidsApp.cpp
  * @Author Arild Nilsen
@@ -142,18 +144,18 @@ void BoidsApp::_SetupScenes()
 	float s = 100;
 
 	// Create scenes and populate them with various entities
-	_leftColumnScene = new Scene(0, h/2, (w * 2), h * 3, 50, 100);
-	_nameTable = new NameTable();
+	_controlPanelScene = new Scene(0, h, w * 2, h * 2, 100, 100);
+	ControlPanel *boidDescription = new ControlPanel();
 
-	_boidScene = new Scene(w * 2, h / 2, w * 3 + w / 2, (h * 3), 100, 100);
+	_boidScene = new Scene(w * 2.5, h / 2, w * 2, (h * 3), 100, 100);
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
 
-	_controlPanelScene = new Scene(w * 6, h, w * 2, h * 3, 100, 100);
-	ControlPanel *boidDescription = new ControlPanel();
+	_tableScene = new Scene(w * 5, h, w * 3, h * 3, 50, 100);
+	_nameTable = new NameTable();
 
 	// Save scenes
-	Scene::scenes.push_back(_leftColumnScene);
+	Scene::scenes.push_back(_tableScene);
 	Scene::scenes.push_back(_boidScene);
 	Scene::scenes.push_back(_controlPanelScene);
 }

@@ -74,6 +74,8 @@ void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
 	event.isDown = isDown;
 	event.realX = x;
 	event.realY = y;
+	event.movedDistance = obj->movedDistance;
+	event.radius = obj->radius;
 	event.timestampSec = obj->time;
 	event.timestampPreviousSec = (float)obj->lastUpdated;
 
