@@ -28,15 +28,17 @@ if __name__ == '__main__':
         msg.type = msg.INIT
         for path in listdir_fullpath(MONITORS_PATH):
             msg.filePath = path
-            print path
+            multicast_monitor_message(msg.SerializeToString())
+    
     elif sys.argv[1].startswith('stop'):
         msg.type = msg.STOP
         for path in listdir_fullpath(MONITORS_PATH):
             msg.filePath = path
+    
     elif sys.argv[1].startswith('event'):
         msg.type = msg.EVENT
         msg.eventData = 'Hello'
+    
     else:
         print 'Unknown command'
-    multicast_monitor_message(msg.SerializeToString())
         

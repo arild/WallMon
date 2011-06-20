@@ -22,6 +22,7 @@ public:
 	ProcessesMessage::ProcessMessage *filter;
 	Context *context;
 	ProcessCollector();
+	void SetProcesses(list<string> processNames);
 
 	// Wallmon API
 	virtual void OnInit(Context *ctx);
@@ -30,11 +31,13 @@ public:
 private:
 	vector<LinuxProcessMonitor *> *_monitors;
 	PidMonitor *_pidMonitor;
+	list<string> _processNames;
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
 	bool _hasSupportForProcIo;
-	void _AddProcesses();
+	void _FindAllNewProcesses();
+	void _AddDefinedProcesses();
 	void _AddProcess(int pid);
 };
 

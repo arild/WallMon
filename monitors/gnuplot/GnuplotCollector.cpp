@@ -1,30 +1,35 @@
+/*
+ * Collector.cpp
+ *
+ *  Created on: Feb 1, 2011
+ *      Author: arild
+ */
 
 #include <glog/logging.h>
-#include "ProcessCollector.h"
 #include "System.h"
-#include "WallView.h"
-#include "PortForwarder.h"
+#include "ProcessCollector.h"
+#include <list>
 
-#define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	750
+using namespace std;
+
+#define KEY					"gnuplot"
+#define SERVER				"129.242.19.58"
+#define SAMPLE_FREQUENCY	1000
+#define PROCESS_NAME		"wallmond"
+#define MESSAGE_BUF_SIZE	4096
 
 extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector();
-	p->context->key = KEY;
 
-	vector<string> servers = WallView(2, 1, 3, 3).GetGrid();
-	if (System::IsRocksvvCluster())
-		p->context->AddServers(servers);
-	else if (System::GetHostname().compare("arild-uit-ubuntu") == 0) {
-		p->context->AddServer("129.242.19.58");
-	}
-	else {
-		// Currently assumed to be ice cluster
-		p->context->AddServer("129.242.19.60");
-		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
-	}
-	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
+	list<string> processNames;
+	processNames.push_back(PROCESS_NAME);
+	p->SetProcesses(processNames);
+
+	p->context->key = KEY;
+	p->context->AddServer(SERVER);
+	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY;
+
 	p->filter->set_processname("");
 	p->filter->set_pid(0);
 	p->filter->set_usercpuutilization(0);

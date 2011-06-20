@@ -32,7 +32,7 @@ bool LinuxProcessMonitor::open(int pid)
 	_procstatm = fopen(sstatm.str().c_str(), "r");
 
 	if (!_procstat || !_procstatm) {
-		cout << "Error opening files..." << endl;
+		//cout << "Error opening files..." << endl;
 		return false;
 	}
 	return true;
@@ -44,7 +44,7 @@ bool LinuxProcessMonitor::OpenIo(int pid)
 	sio << "/proc/" << pid << "/io";
 	_procio = fopen(sio.str().c_str(), "r");
 	if (!_procio) {
-		cout << "Error opening io files..." << endl;
+		//cout << "Error opening io files..." << endl;
 		return false;
 	}
 	return true;

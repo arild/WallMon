@@ -14,6 +14,13 @@ ifeq ($(PLATFORM), Darwin)
 endif
 HOME_PATH=/$(HOME_DIR)/$(USER)
 
+# Flags for building dynamic libraries
+CFLAGS_SO_PREPARE = -c -fPIC
+CFLAGS_SO_CREATE = -shared
+ifeq ($(PLATFORM), Darwin)	
+	CFLAGS_SO_CREATE+=-undefined dynamic_lookup
+endif
+
 # Global paths for libraries required by Wallmon
 WALLMON=$(HOME_PATH)/WallMon
 SYSTEM=$(HOME_PATH)

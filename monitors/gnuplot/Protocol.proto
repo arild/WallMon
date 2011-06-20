@@ -1,0 +1,17 @@
+
+message GnuplotMessage
+{
+	optional string processname = 1;
+	optional uint32 pid = 2;
+	
+	optional double userCpuLoad = 3;
+	optional double systemCpuLoad = 4;
+	
+	optional double systemCpuUtilization = 5;
+	optional double userCpuUtilization = 6;
+	
+	optional double memoryUtilization = 7;
+	
+	optional uint32 networkInBytes = 8;
+	optional uint32 networkOutBytes = 9;
+}

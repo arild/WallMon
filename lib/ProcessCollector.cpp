@@ -15,10 +15,20 @@
 #define MESSAGE_BUF_SIZE				(1024 * 1000) * 5
 const double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 100;
 
+
 ProcessCollector::ProcessCollector()
 {
 	context = new Context();
 	filter = new ProcessesMessage::ProcessMessage;
+}
+
+/**
+ * Tells the process collector to only look for defined process names
+ * during its life-cycle
+ */
+void ProcessCollector::SetProcesses(list<string> processNames)
+{
+	_processNames = processNames;
 }
 
 void ProcessCollector::OnInit(Context *ctx)
@@ -38,14 +48,17 @@ void ProcessCollector::OnInit(Context *ctx)
 	// Create a process monitor for each pid on system
 	_monitors = new vector<LinuxProcessMonitor *>();
 	_pidMonitor = new PidMonitor;
-	_AddProcesses();
 	_buffer = new char[MESSAGE_BUF_SIZE];
 	memset(_buffer, 0, MESSAGE_BUF_SIZE);
+
+	if (_processNames.size() == 0)
+		_FindAllNewProcesses();
+	else
+		_AddDefinedProcesses();
 
 	LOG(INFO) << "num cores detected: " << _numCores;
 	LOG(INFO) << "total memory detected: " << _totalMemoryMb << " MB";
 	LOG(INFO) << "num processes being monitored: " << _monitors->size();
-
 }
 
 void ProcessCollector::OnStop()
@@ -54,11 +67,11 @@ void ProcessCollector::OnStop()
 	delete filter;
 }
 
-double maxIn = 0, maxOut = 0;
-
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
-	_AddProcesses();
+	if (_processNames.size() == 0)
+		_FindAllNewProcesses();
+
 	ProcessesMessage processesMsg;
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (vector<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
@@ -95,18 +108,10 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		}
 		if (filter->has_networkinutilization()) {
 			util = monitor->GetNetworkInInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
-			if (util > maxIn) {
-				LOG(INFO) << "Network in : " << monitor->GetNetworkInInBytes();
-				maxIn = util;
-			}
 			processMsg->set_networkinutilization(util * 100.);
 		}
 		if (filter->has_networkoututilization()) {
 			util = monitor->GetNetworkOutInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
-			if (util > maxOut) {
-				LOG(INFO) << "Network out: " << monitor->GetNetworkOutInBytes();
-				maxOut = util;
-			}
 			processMsg->set_networkoututilization(util * 100.);
 		}
 	}
@@ -116,12 +121,18 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 	msg->set_data(_buffer, processesMsg.ByteSize());
 }
 
-void ProcessCollector::_AddProcesses()
+void ProcessCollector::_FindAllNewProcesses()
 {
 	_pidMonitor->Update();
 	vector<int> pids = _pidMonitor->GetDifference();
 	BOOST_FOREACH(int pid, pids)
 		_AddProcess(pid);
+}
+
+void ProcessCollector::_AddDefinedProcesses()
+{
+	BOOST_FOREACH(string processName, _processNames)
+		_AddProcess(System::GetPid(processName));
 }
 
 void ProcessCollector::_AddProcess(int pid)

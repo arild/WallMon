@@ -57,10 +57,12 @@ MonitorDispatcher: PracticalSocket.o ClassLoader.o MonitorDispatcher.h MonitorDi
 	ar cru lib$@.a $@.o stubs/MonitorDispatcher.pb.o
 
 # Note that the protobuf stub (ProcessCollector.pb.o) is included
-ProcessCollector: LinuxProcessMonitor.o PidMonitor.o ProcessCollector.h ProcessCollector.cpp
-	$(CC) $(CFLAGS) $(INC_PATH) $?
-	ar rcs lib$@.a $@.o ProcessCollector.o LinuxProcessMonitor.o PidMonitor.o System.o stubs/ProcessCollector.pb.o
-	
+OBJS=LinuxProcessMonitor.o PidMonitor.o stubs/ProcessCollector.pb.o
+ProcessCollector: $(OBJS) ProcessCollector.h ProcessCollector.cpp
+	$(CC) $(CFLAGS_SO_PREPARE) $(INC_PATH) $?
+	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o lib$@.so $(OBJS) ProcessCollector.o $(LIB)
+	mv lib$@.so $(SYSTEM)/lib # Should not be necessary, but otherwise it is not found...
+		
 SubDirsPost:
 	@ for dir in ${DIRS_POST}; do (cd $${dir}; ${MAKE}) ; done
 	

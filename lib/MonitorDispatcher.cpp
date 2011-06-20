@@ -80,7 +80,7 @@ void MonitorDispatcher::_ListenForever()
 						monitor = loader.LoadAndInstantiateHandler();
 					else
 						monitor = loader.LoadAndInstantiateCollector();
-					LOG(INFO) << "user-defined collector successfully loaded";
+					LOG(INFO) << "user-defined collector successfully loaded (" << path << ")";
 				} catch (exception &e) {
 					LOG(ERROR) << "failed loading user-defined collector: " << e.what();
 					continue;
