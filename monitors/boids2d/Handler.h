@@ -32,15 +32,15 @@ public:
 	virtual void OnStop();
 	virtual void Handle(WallmonMessage *msg);
 private:
-	ProcessesMessage *_message;
+	ProcessCollectorMessage *_message;
 	WallView *_wallView;
 	BoidsApp *_boidsApp;
 	Data *_data;
 	EventSystemBase *_eventSystem;
 	NameTable *_nameTable;
-	void _HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname);
-	void _UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat, StatBase &astat);
-	void _UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat);
+	void _HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg, string hostname);
+	void _UpdateCommonAggregatedStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat, StatBase &astat);
+	void _UpdateProcessStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat);
 	void _RankTableItems();
 };
 

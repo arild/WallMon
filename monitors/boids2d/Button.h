@@ -16,6 +16,7 @@ public:
 	virtual ~Button();
 	void SetCallback(void (*callback)());
 	void ButtonClick();
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

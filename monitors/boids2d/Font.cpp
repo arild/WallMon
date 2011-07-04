@@ -16,7 +16,7 @@
 Font::Font(int size, bool centerHorizontal, bool centerVertical)
 {
 	string fontPath = Config::GetFontPath();
-	_font = new FTGLTextureFont(fontPath.c_str());
+	_font = new FTTextureFont(fontPath.c_str());
 	_font->FaceSize((unsigned int)(size * Scene::current->scale));
 	_centerHorizontal = centerHorizontal;
 	_centerVertical = centerVertical;

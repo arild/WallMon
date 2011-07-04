@@ -49,7 +49,7 @@ void Collector::OnStop()
 
 void Collector::Sample(WallmonMessage *msg)
 {
-	ProcessesMessage processesMsg;
+	ProcessCollectorMessage processesMsg;
 	for (list<LinuxProcessMonitor *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitor *monitor = (*it);
 		monitor->update();
@@ -62,7 +62,7 @@ void Collector::Sample(WallmonMessage *msg)
 		processName.erase(processName.length() - 1, 1);
 		processName.erase(0, 1);
 
-		ProcessesMessage::ProcessMessage *processMsg = processesMsg.add_processmessage();
+		ProcessCollectorMessage::ProcessMessage *processMsg = processesMsg.add_processmessage();
 		processMsg->set_processname(processName);
 		processMsg->set_pid(monitor->pid());
 		processMsg->set_usercpuload(userCpuLoad);

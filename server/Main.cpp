@@ -8,28 +8,29 @@
 
 #include <signal.h>
 #include <glog/logging.h>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/mutex.hpp>
-
 #include "Config.h"
 #include "System.h"
 #include "IMonitorManager.h"
 #include "MonitorDispatcher.h"
 #include "DataSink.h"
+#ifdef Darwin
+#include <SDL/SDL.h>
+#endif
 
 using namespace std;
 
-boost::condition mainThreadCondition;
-boost::mutex mainThreadMutex;
+
+bool running;
 
 void sigproc(int signal)
 {
 	LOG(INFO) << "signal catched: " << signal;
-	mainThreadCondition.notify_one();
+	running = false;
 }
 
 int main(int argc, char *argv[])
 {
+	running = true;
 	google::InitGoogleLogging(argv[0]);
 	signal(SIGINT, &sigproc); // CTRL+C
 	signal(SIGTERM, &sigproc); // pkill -SIGTERM wallmond
@@ -57,9 +58,10 @@ int main(int argc, char *argv[])
 	router->Start();
 	sink->Start();
 
-	// Block main thread and wait for termination signal
-	mainThreadCondition.wait(mainThreadMutex);
+	while (running)
+		sleep(2);
 
+	LOG(INFO) << "stopping server...";
 	dispatcher->Stop();
 	sink->Stop();
 	router->Stop();

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "Entity.h"
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ public:
 
 	float x, y, w, h, scale;
 	vector<Entity *> entityList;
+	vector<Entity *> entityListInit;
 
 	Scene(float x_, float y_, float w_, float h_, float virtualW, float virtualH);
 	virtual ~Scene();
@@ -23,10 +25,17 @@ public:
 	void RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY);
 	void Visualize();
 
-	// Assumes that coordinates are within scene of the instantiated object
+	void AddEntity(Entity *entity);
+	static void AddEntityToCurrent(Entity *entity);
 	vector<Entity *> TestForEntityHits(float x, float y);
-	static Scene *TestForSceneHit(float x, float y);
-
 	void Run();
+
+	static void AddScene(Scene *scene);
+	static Scene *TestForSceneHit(float x, float y);
+	static void RunAllScenes();
+
+private:
+	boost::mutex _entityMutex;
+	static boost::mutex _sceneMutex;
 };
 #endif /* SCENE_H_ */

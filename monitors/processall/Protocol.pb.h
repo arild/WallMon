@@ -30,7 +30,7 @@ void  protobuf_AddDesc_Protocol_2eproto();
 void protobuf_AssignDesc_Protocol_2eproto();
 void protobuf_ShutdownFile_Protocol_2eproto();
 
-class ProcessesMessage;
+class ProcessCollectorMessage;
 class ProcessesMessage_ProcessMessage;
 
 // ===================================================================
@@ -152,14 +152,14 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class ProcessesMessage : public ::google::protobuf::Message {
+class ProcessCollectorMessage : public ::google::protobuf::Message {
  public:
-  ProcessesMessage();
-  virtual ~ProcessesMessage();
+  ProcessCollectorMessage();
+  virtual ~ProcessCollectorMessage();
   
-  ProcessesMessage(const ProcessesMessage& from);
+  ProcessCollectorMessage(const ProcessCollectorMessage& from);
   
-  inline ProcessesMessage& operator=(const ProcessesMessage& from) {
+  inline ProcessCollectorMessage& operator=(const ProcessCollectorMessage& from) {
     CopyFrom(from);
     return *this;
   }
@@ -173,17 +173,17 @@ class ProcessesMessage : public ::google::protobuf::Message {
   }
   
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ProcessesMessage& default_instance();
+  static const ProcessCollectorMessage& default_instance();
   
-  void Swap(ProcessesMessage* other);
+  void Swap(ProcessCollectorMessage* other);
   
   // implements Message ----------------------------------------------
   
-  ProcessesMessage* New() const;
+  ProcessCollectorMessage* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ProcessesMessage& from);
-  void MergeFrom(const ProcessesMessage& from);
+  void CopyFrom(const ProcessCollectorMessage& from);
+  void MergeFrom(const ProcessCollectorMessage& from);
   void Clear();
   bool IsInitialized() const;
   
@@ -244,7 +244,7 @@ class ProcessesMessage : public ::google::protobuf::Message {
   }
   
   void InitAsDefaultInstance();
-  static ProcessesMessage* default_instance_;
+  static ProcessCollectorMessage* default_instance_;
 };
 // ===================================================================
 
@@ -348,27 +348,27 @@ inline void ProcessesMessage_ProcessMessage::set_systemcpuload(double value) {
 // ProcessesMessage
 
 // repeated .ProcessesMessage.ProcessMessage processmessage = 1;
-inline int ProcessesMessage::processmessage_size() const {
+inline int ProcessCollectorMessage::processmessage_size() const {
   return processmessage_.size();
 }
-inline void ProcessesMessage::clear_processmessage() {
+inline void ProcessCollectorMessage::clear_processmessage() {
   processmessage_.Clear();
 }
-inline const ::ProcessesMessage_ProcessMessage& ProcessesMessage::processmessage(int index) const {
+inline const ::ProcessesMessage_ProcessMessage& ProcessCollectorMessage::processmessage(int index) const {
   return processmessage_.Get(index);
 }
-inline ::ProcessesMessage_ProcessMessage* ProcessesMessage::mutable_processmessage(int index) {
+inline ::ProcessesMessage_ProcessMessage* ProcessCollectorMessage::mutable_processmessage(int index) {
   return processmessage_.Mutable(index);
 }
-inline ::ProcessesMessage_ProcessMessage* ProcessesMessage::add_processmessage() {
+inline ::ProcessesMessage_ProcessMessage* ProcessCollectorMessage::add_processmessage() {
   return processmessage_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >&
-ProcessesMessage::processmessage() const {
+ProcessCollectorMessage::processmessage() const {
   return processmessage_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >*
-ProcessesMessage::mutable_processmessage() {
+ProcessCollectorMessage::mutable_processmessage() {
   return &processmessage_;
 }
 

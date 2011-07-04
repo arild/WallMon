@@ -35,7 +35,7 @@ void VisualBase::InitBoids(string identifierString, BoidType boidType)
 	boidsApp->CreateBoid(cpu);
 	boidsApp->CreateBoid(memory);
 	boidsApp->CreateBoid(network);
-//	nameTable->Add(tableItem);
+	nameTable->Add(tableItem);
 }
 
 StatBase::StatBase()

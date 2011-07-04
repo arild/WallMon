@@ -25,8 +25,7 @@ int numUniqueProcesses = 0;
 void Handler::OnInit(Context *ctx)
 {
 	ctx->key = KEY;
-	_boidsApp = NULL;
-	_message = new ProcessesMessage();
+	_message = new ProcessCollectorMessage();
 	_data = new Data();
 
 #ifdef ROCKSVV
@@ -57,8 +56,9 @@ void Handler::OnInit(Context *ctx)
 	_eventSystem->SetWallView(_wallView);
 	_nameTable = _boidsApp->GetNameTable();
 	_eventSystem->Start();
+	LOG(INFO) << "starting BoidsApp...";
 	_boidsApp->Start();
-
+	LOG(INFO) << "BoidsApp started";
 	VisualBase::boidsApp = _boidsApp;
 	VisualBase::nameTable = _nameTable;
 }
@@ -86,7 +86,7 @@ void Handler::Handle(WallmonMessage *msg)
 		LOG(FATAL) << "Protocol buffer parsing failed: ";
 	// Go through all process specific messages
 	for (int i = 0; i < _message->processmessage_size(); i++) {
-		ProcessesMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
+		ProcessCollectorMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
 		_HandleProcessMessage(*processMessage, msg->hostname());
 	}
 	_RankTableItems();
@@ -95,9 +95,8 @@ void Handler::Handle(WallmonMessage *msg)
 /**
  * Updates statistics in data indexes and boids
  */
-void Handler::_HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, string hostname)
+void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg, string hostname)
 {
-
 	DataUpdate update = _data->Update(hostname, msg.processname(), msg.pid());
 	Proc *proc = update.proc;
 	ProcName *procName = update.procName;
@@ -105,7 +104,6 @@ void Handler::_HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, strin
 
 	_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
-
 	// CPU
 	double user = proc->stat->userCpuUtilization;
 	double system = proc->stat->systemCpuUtilization;
@@ -148,7 +146,7 @@ void Handler::_HandleProcessMessage(ProcessesMessage::ProcessMessage &msg, strin
  * @param pstat  The old values for the same process (in the message)
  * @param astat  The aggregated statistics for some metric
  */
-void Handler::_UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage &msg,
+void Handler::_UpdateCommonAggregatedStatistics(ProcessCollectorMessage::ProcessMessage &msg,
 		StatBase &pstat, StatBase &astat)
 {
 	// CPU
@@ -172,7 +170,7 @@ void Handler::_UpdateCommonAggregatedStatistics(ProcessesMessage::ProcessMessage
 	astat.numSamples += 1;
 }
 
-void Handler::_UpdateProcessStatistics(ProcessesMessage::ProcessMessage &msg, StatBase &pstat)
+void Handler::_UpdateProcessStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat)
 {
 	pstat.userCpuUtilization = msg.usercpuutilization();
 	pstat.systemCpuUtilization = msg.systemcpuutilization();

@@ -12,7 +12,7 @@
 #include "Entity.h"
 #include "Font.h"
 
-class BoidAxis : Entity {
+class BoidAxis : public Entity {
 public:
 	BoidAxis();
 	virtual ~BoidAxis();
@@ -20,6 +20,7 @@ public:
 	void Set(int start, int stop, int tickSize);
 	void Get(int *start, int *stop, int *tickSize);
 
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

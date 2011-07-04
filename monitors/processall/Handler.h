@@ -95,7 +95,7 @@ public:
 private:
 	void _UpdateBarChart();
 	ProcNameMap *_processNameMap;
-	ProcessesMessage *_message;
+	ProcessCollectorMessage *_message;
 	vector<double> *_minHeap;
 	BarChart *_barChart;
 	double _timestamp;

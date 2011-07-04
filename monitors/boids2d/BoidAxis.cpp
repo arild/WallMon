@@ -14,7 +14,6 @@
 
 BoidAxis::BoidAxis()
 {
-	_font = new Font(4, true);
 }
 
 BoidAxis::~BoidAxis()
@@ -30,6 +29,11 @@ void BoidAxis::Set(int start, int stop, int tickSize)
 
 void BoidAxis::Get(int *start, int *stop, int *tickSize)
 {
+}
+
+void BoidAxis::OnInit()
+{
+	_font = new Font(4, true);
 }
 
 void BoidAxis::OnCleanup()

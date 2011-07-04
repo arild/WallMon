@@ -164,7 +164,7 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	// Update local statistics
 	if (event->timestampLastScheduleMsec != 0.) {
 		double actualFrequencyMsec = (double)(timestampBeforeSampleInMsec - (double)event->timestampLastScheduleMsec);
-		event->scheduleDriftinMsec += (actualFrequencyMsec - event->ctx->sampleFrequencyMsec);
+		event->scheduleDriftinMsec = (actualFrequencyMsec - event->ctx->sampleFrequencyMsec);
 	}
 	event->timestampLastScheduleMsec = timestampBeforeSampleInMsec; // Save timestamp until next schedule
 	event->numSamples += 1;
@@ -184,7 +184,7 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	for (int i = 0; i < event->ctx->servers.size(); i++) {
 		string serverAddress = event->ctx->servers[i].get<0>();
 		int serverPort = event->ctx->servers[i].get<1>();
-		LOG(INFO) << "Streaming to: " << serverAddress << " | " << serverPort;
+		LOG_EVERY_N(INFO, 1000) << "Streaming to: " << serverAddress << " | " << serverPort;
 		int sockfd = streamer->SetupStream(serverAddress, serverPort);
 		if (sockfd > -1)
 			item.serversSockFd.push_back(sockfd);

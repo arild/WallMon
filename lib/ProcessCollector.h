@@ -11,17 +11,23 @@
 #include "Wallmon.h"
 #include <list>
 #include "stubs/ProcessCollector.pb.h"
-#include "LinuxProcessMonitor.h"
+#include "LinuxProcessMonitorLight.h"
 #include "PidMonitor.h"
 
 using namespace std;
 
 
+class IProcessCollectorController {
+public:
+	virtual ~IProcessCollectorController() {}
+	virtual void AfterSample(Context *ctx) = 0;
+};
+
 class ProcessCollector: public IDataCollectorProtobuf {
 public:
-	ProcessesMessage::ProcessMessage *filter;
+	ProcessCollectorMessage::ProcessMessage *filter;
 	Context *context;
-	ProcessCollector();
+	ProcessCollector(IProcessCollectorController *controller = NULL);
 	void SetProcesses(list<string> processNames);
 
 	// Wallmon API
@@ -29,13 +35,14 @@ public:
 	virtual void OnStop();
 	virtual void Sample(WallmonMessage *msg);
 private:
-	vector<LinuxProcessMonitor *> *_monitors;
+	vector<LinuxProcessMonitorLight *> *_monitors;
 	PidMonitor *_pidMonitor;
 	list<string> _processNames;
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
 	bool _hasSupportForProcIo;
+	IProcessCollectorController *_controller;
 	void _FindAllNewProcesses();
 	void _AddDefinedProcesses();
 	void _AddProcess(int pid);

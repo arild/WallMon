@@ -1,7 +1,7 @@
-CC = g++
-CFLAGS_COMMON = -Wno-multichar -g
+CC=g++
+CFLAGS_COMMON = -Wno-multichar -g -rdynamic -fno-stack-protector
 
-LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
+LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lwSystem -lWallmonMessage -lIoLogger
 
 # Determine the path to the home directory
 USER = $(shell whoami)
@@ -26,4 +26,4 @@ WALLMON=$(HOME_PATH)/WallMon
 SYSTEM=$(HOME_PATH)
 
 INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
-LIB_PATH=-L$(SYSTEM)/lib -L$(SYSTEM)/lib64 -L$(WALLMON)/lib
+LIB_PATH=-L$(SYSTEM)/lib -L$(SYSTEM)/lib32 -L$(SYSTEM)/lib64 -L$(WALLMON)/lib

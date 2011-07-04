@@ -7,9 +7,14 @@
 #include <boost/foreach.hpp>
 #include <algorithm>
 #include "Scene.h"
+#include <glog/logging.h>
+
+typedef boost::mutex::scoped_lock scoped_lock;
 
 vector<Scene *> Scene::scenes;
-Scene *Scene::current;
+Scene *Scene::current = NULL;
+boost::mutex Scene::_sceneMutex;
+
 
 /**
  * Calculates the common scale factor in BOTH x and y direction based on virtual
@@ -42,7 +47,6 @@ Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virt
 	float scaleX = w_ / (float)virtualW_;
 	float scaleY = h_ / (float) virtualH_;
 	scale = std::min(scaleX, scaleY);
-	current = this;
 }
 
 Scene::~Scene()
@@ -129,12 +133,28 @@ void Scene::Visualize()
 	Unload();
 }
 
+void Scene::AddEntity(Entity *entity)
+{
+	scoped_lock(_entityMutex);
+	entityListInit.push_back(entity);
+}
+
+void Scene::AddEntityToCurrent(Entity *entity)
+{
+	if (current == NULL)
+		return;
+	current->_entityMutex.lock();
+	current->entityListInit.push_back(entity);
+	current->_entityMutex.unlock();
+}
+
 /**
  * Takes coordinates according to scene coordinate system and returns all
  * entities within the scene that overlaps with given coordinates
  */
 vector<Entity *> Scene::TestForEntityHits(float x, float y)
 {
+	scoped_lock(_entityMutex);
 	LoadVirtual();
 	vector<Entity *> v;
 	for (int i = 0; i < entityList.size(); i++)
@@ -144,12 +164,40 @@ vector<Entity *> Scene::TestForEntityHits(float x, float y)
 	return v;
 }
 
+void Scene::Run()
+{
+	scoped_lock(_entityMutex);
+	current = this;
+	LoadVirtual();
+	while (entityListInit.size() > 0) {
+		Entity *e = entityListInit.back();
+		entityListInit.pop_back();
+		entityList.push_back(e);
+		e->OnInit();
+	}
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnLoop();
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnRender();
+	Unload();
+//	Visualize();
+}
+
+void Scene::AddScene(Scene *scene)
+{
+	scoped_lock(_sceneMutex);
+	scenes.push_back(scene);
+}
+
 /**
  * Takes coordinates according to global coordinate system and returns
  * at maximum one scene that overlaps with given coordinates
+ *
+ * Assumes that coordinates are within scene of the instantiated object
  */
 Scene *Scene::TestForSceneHit(float x, float y)
 {
+	scoped_lock(_sceneMutex);
 	BOOST_FOREACH(Scene *s, Scene::scenes)
 	{
 		if (x >= s->x && x <= s->x + s->w && y >= s->y && y <= s->y + s->h)
@@ -158,15 +206,13 @@ Scene *Scene::TestForSceneHit(float x, float y)
 	return NULL;
 }
 
-void Scene::Run()
+void Scene::RunAllScenes()
 {
-	current = this;
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnLoop();
-	LoadVirtual();
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnRender();
-	Unload();
-	Visualize();
+	Entity::automaticallyAddToCurrentScene = true;
+	scoped_lock(_sceneMutex);
+	for (int i = 0; i < Scene::scenes.size(); i++)
+		Scene::scenes[i]->Run();
+	Entity::automaticallyAddToCurrentScene = false;
 }
+
 

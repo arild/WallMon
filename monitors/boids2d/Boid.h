@@ -12,11 +12,12 @@ using namespace boost::tuples;
 typedef tuple<float, float> TailTupleType;
 
 
-class Boid: virtual Entity, EntityShape {
+class Boid: public virtual Entity, EntityShape {
 public:
 	BoidSharedContext *ctx;
 	Boid(BoidSharedContext *ctx_);
 	virtual ~Boid();
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

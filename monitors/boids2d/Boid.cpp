@@ -34,6 +34,11 @@ Boid::~Boid()
 	delete ctx;
 }
 
+void Boid::OnInit()
+{
+
+}
+
 void Boid::OnLoop()
 {
 	float destx, desty;

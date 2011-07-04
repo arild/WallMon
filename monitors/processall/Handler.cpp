@@ -33,7 +33,7 @@ double timestampShowStatisticsMsec = 0.;
 void Handler::OnInit(Context *ctx)
 {
 	ctx->key = KEY;
-	_message = new ProcessesMessage();
+	_message = new ProcessCollectorMessage();
 	_minHeap = new vector<double> ();
 
 	_processNameMap = new ProcNameMap();
@@ -58,7 +58,7 @@ void Handler::Handle(WallmonMessage *msg)
 
 	// Go through all process specific messages and read statistics
 	for (int i = 0; i < _message->processmessage_size(); i++) {
-		ProcessesMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
+		ProcessCollectorMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
 
 		// Lookup keys
 		string processName = processMessage->processname();

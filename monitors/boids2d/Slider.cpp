@@ -19,6 +19,11 @@ Slider::~Slider()
 	// TODO Auto-generated destructor stub
 }
 
+void Slider::OnInit()
+{
+
+}
+
 void Slider::OnLoop()
 {
 }

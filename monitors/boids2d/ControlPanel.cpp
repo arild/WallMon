@@ -9,51 +9,46 @@
 #include "BoidSharedContext.h"
 #include "Scene.h"
 #include "ControlPanel.h"
+#include <glog/logging.h>
 
 
-ControlPanel::ControlPanel()
+void ControlPanel::OnInit()
 {
 	// Metric types
-	Button *b = new Button(8, 75, 15, 15, QUAD);
+	Button *b = new Button(8, 170, 15, 15, QUAD);
 	b->SetCallback(&CpuBoidButtonCallback);
 	b->ButtonClick();
 
-	b = new Button(31, 75, 15, 15, TRIANGLE);
+	b = new Button(31, 170, 15, 15, TRIANGLE);
 	b->SetCallback(&MemoryBoidButtonCallback);
+	b->ButtonClick();
 
-	b = new Button(54, 75, 15, 15, DIAMOND);
+	b = new Button(54, 170, 15, 15, DIAMOND);
 	b->SetCallback(&NetworkBoidButtonCallback);
 
-	b = new Button(77, 75, 15, 15, POLYGON);
+	b = new Button(77, 170, 15, 15, POLYGON);
 	b->SetCallback(&StorageBoidButtonCallback);
 
 	// Data views
-	b = new Button(8, 45, 15, 15, QUAD);
+	b = new Button(8, 130, 15, 15, QUAD);
 	b->SetCallback(&CoreViewButtonCallback);
 
-	b = new Button(31, 45, 15, 15, QUAD);
+	b = new Button(31, 130, 15, 15, QUAD);
 	b->SetCallback(&ProcessViewButtonCallback);
 	b->ButtonClick();
 
-	b = new Button(54, 45, 15, 15, QUAD);
+	b = new Button(54, 130, 15, 15, QUAD);
 	b->SetCallback(&ProcessNameViewButtonCallback);
 
-	b = new Button(77, 45, 15, 15, QUAD);
+	b = new Button(77, 130, 15, 15, QUAD);
 	b->SetCallback(&StorageBoidButtonCallback);
 
 	// Configuration
-	b = new Button(4, 4, 20, 20, QUAD, false);
+	b = new Button(8, 90, 15, 15);
 	b->SetCallback(&BoidTailCallback);
 
-	b = new Button(28, 4, 20, 20);
-	b->SetCallback(&BoidTailCallback);
-
-	b = new Button(52, 4, 20, 20);
 	_font = new Font(4, true, true);
-}
-
-ControlPanel::~ControlPanel()
-{
+	_fontLarge = new Font(5, true, true);
 }
 
 void ControlPanel::OnLoop()
@@ -62,20 +57,23 @@ void ControlPanel::OnLoop()
 
 void ControlPanel::OnRender()
 {
-	glColor3f(0, 0, 1);
-	_font->RenderText("Metric Types", 50, 95);
-	_font->RenderText("CPU", 15.5, 72);
-	_font->RenderText("Memory", 38.5, 72);
-	_font->RenderText("Network", 61.5, 72);
-	_font->RenderText("Storage", 84.5, 72);
+	glColor3ub(0, 100, 0);
+	_font->RenderText("CPU", 15.5, 168);
+	_font->RenderText("Memory", 38.5, 168);
+	_font->RenderText("Network", 61.5, 168);
+	_font->RenderText("Storage", 84.5, 168);
 
-	_font->RenderText("Data Views", 50, 65);
-	_font->RenderText("Core", 15.5, 42);
-	_font->RenderText("Process", 38.5, 42);
-	_font->RenderText("Process Name", 61.5, 42);
-	_font->RenderText("Node", 84.5, 42);
+	_font->RenderText("Core", 15.5, 128);
+	_font->RenderText("Process", 38.5, 128);
+	_font->RenderText("Process Name", 61.5, 128);
+	_font->RenderText("Node", 84.5, 128);
 
-	_font->RenderText("Configuration", 50, 35);
+	_font->RenderText("Tail", 15.5, 88);
+
+	glColor3f(0, 1, 0);
+	_fontLarge->RenderText("Metric Types", 50, 192);
+	_fontLarge->RenderText("Data Views", 50, 152);
+	_fontLarge->RenderText("Configuration", 50, 112);
 }
 
 void ControlPanel::OnCleanup()

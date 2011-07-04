@@ -14,12 +14,14 @@ enum Shape {
 
 class Entity {
 public:
+	static bool automaticallyAddToCurrentScene;
 	float tx, ty;
 	float width, height;
 	bool supportsTouch;
 
 	Entity();
 	virtual ~Entity() {}
+	virtual void OnInit() = 0;
 	virtual void OnLoop() = 0;
 	virtual void OnRender() = 0;
 	virtual void OnCleanup() = 0;

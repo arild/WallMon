@@ -6,22 +6,23 @@
 #include "PortForwarder.h"
 
 #define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	750
+#define SAMPLE_FREQUENCY_MSEC 	1000
 
 extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 
-	vector<string> servers = WallView(2, 1, 3, 3).GetGrid();
-	if (System::IsRocksvvCluster())
+	if (System::IsRocksvvCluster()) {
+		vector<string> servers = WallView(2, 1, 3, 3).GetGrid();
 		p->context->AddServers(servers);
-	else if (System::GetHostname().compare("arild-uit-ubuntu") == 0) {
-		p->context->AddServer("129.242.19.58");
+	}
+	else if (System::GetHostname().compare(0, 5, "arild") == 0) {
+		p->context->AddServer("localhost");
 	}
 	else {
 		// Currently assumed to be ice cluster
-		p->context->AddServer("129.242.19.60");
+		p->context->AddServer("129.242.19.56");
 		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	}
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;

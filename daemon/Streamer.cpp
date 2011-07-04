@@ -67,6 +67,7 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 	if (_serverMap->count(serverAddress) > 0)
 		return (*_serverMap)[serverAddress];
 
+	LOG(INFO) << "new server, connecting...";
 	string serverIpAddress = serverAddress;
 	if (System::IsValidIpAddress(serverIpAddress) == false) {
 		// Translate hostname to an ip address

@@ -10,27 +10,31 @@ ifeq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
 ROCKSVV += -D ROCKSVV
 endif
 
-LDFLAGS=-lm -lConfig -lSystem -lTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs`
+LDFLAGS=-lm -lConfig -lwSystem -lTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs`
 ifeq ($(PLATFORM), Darwin)	
 	LDFLAGS+=-framework OpenGL
+	OBJS+=WMAutorelease.o
 else
 	LDFLAGS+=-lGL
 endif
 LDFLAGS+= -lProcessCollector -lshout
 
 libboids2d.so: $(OBJS)
-	$(CC) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LDFLAGS)
+	$(CC) -D $(PLATFORM) -g -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LDFLAGS)
 	mv *.so ../bin
 
 all: libboids2d.so
 			
 clean:
 	rm -f *.o
+	rm -f *.gch
 	rm -f *.so
 
 %.o:%.cpp
-	$(CC) -g -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
+	$(CC) -D $(PLATFORM) -g -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
 
+%.o:%.mm
+	$(CC) -D $(PLATFORM) -g -Wno-multichar -framework Cocoa $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
         
 depend: .depend
 .depend:

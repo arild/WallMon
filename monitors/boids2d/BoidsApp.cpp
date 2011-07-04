@@ -1,5 +1,4 @@
 
-
 /**
  * @file   BoidsApp.cpp
  * @Author Arild Nilsen
@@ -13,6 +12,8 @@
 
 #include <glog/logging.h>
 #include <iostream>
+#include <boost/thread/condition.hpp>
+#include <boost/thread/mutex.hpp>
 #include "boost/foreach.hpp"
 #include "Config.h" // FONT_PATH
 #include "BoidsApp.h"
@@ -24,16 +25,96 @@
 #include "TouchEvent.h"
 #include "Button.h"
 #include "ControlPanel.h"
+#ifdef Darwin
+#include "WMAutorelease.h"
+#endif
+
+boost::condition mainLoopThreadCondition;
+boost::mutex mainLoopThreadMutex;
 
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
-	_SetupScenes();
 	_eventSystem = eventSystem;
+	_SetupScenes();
+	_PopulateScenes();
 }
 
 BoidsApp::~BoidsApp()
 {
+}
+
+/**
+ * Dispatches the animation thread
+ */
+void BoidsApp::Start()
+{
+	_running = true;
+	_thread = boost::thread(&BoidsApp::_RenderForever, this);
+	//mainLoopThreadCondition.wait(mainLoopThreadMutex);
+}
+
+/**
+ * Terminates the animation thread
+ */
+void BoidsApp::Stop()
+{
+	LOG(INFO) << "Stopping BoidsApp...";
+	_running = false;
+	_thread.join();
+	SDL_Quit();
+	LOG(INFO) << "BoidsApp stopped";
+}
+
+void BoidsApp::CreateBoid(BoidSharedContext *ctx)
+{
+	_boidScene->AddEntity(new Boid(ctx));
+}
+
+NameTable *BoidsApp::GetNameTable()
+{
+	return _nameTable;
+}
+
+void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
+{
+	_orthoLeft = x;
+	_orthoRight = x + (double) width;
+	_orthoBottom = y;
+	_orthoTop = y + (double) height;
+	_updateOrtho = true;
+}
+
+void BoidsApp::_RenderForever()
+{
+#ifdef Darwin
+	updateAutoreleasePool();
+#endif
+	_InitSdlAndOpenGl();
+	//mainLoopThreadCondition.notify_one();
+	LOG(INFO) << "BoidsApp entering infinite loop";
+	while (_running) {
+		if (_updateOrtho) {
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(_orthoLeft, _orthoRight, _orthoBottom, _orthoTop, 0, 100);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			_updateOrtho = false;
+		}
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Scene::RunAllScenes();
+		_HandleTouchEvents();
+
+		SDL_GL_SwapBuffers();
+		Fps::fpsControl.OnLoop();
+		char Buffer[255];
+		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), 0);
+		SDL_WM_SetCaption(Buffer, Buffer);
+#ifdef Darwin
+		updateAutoreleasePool();
+#endif
+	}
 }
 
 /**
@@ -65,99 +146,31 @@ void BoidsApp::_InitSdlAndOpenGl()
 	glViewport(0, 0, _screenWidth, _screenHeight);
 }
 
-/**
- * Dispatches the animation thread
- */
-void BoidsApp::Start()
-{
-	_running = true;
-	_thread = boost::thread(&BoidsApp::_RenderForever, this);
-}
-
-/**
- * Terminates the animation thread
- */
-void BoidsApp::Stop()
-{
-	LOG(INFO) << "Stopping BoidsApp...";
-	_running = false;
-	_thread.join();
-	SDL_Quit();
-	LOG(INFO) << "BoidsApp stopped";
-}
-
-void BoidsApp::CreateBoid(BoidSharedContext *ctx)
-{
-	Scene::current = _boidScene;
-	Boid *boid = new Boid(ctx);
-}
-
-NameTable *BoidsApp::GetNameTable()
-{
-	return _nameTable;
-}
-
-void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
-{
-	_orthoLeft = x;
-	_orthoRight = x + (double) width;
-	_orthoBottom = y;
-	_orthoTop = y + (double) height;
-	_updateOrtho = true;
-}
-
-void BoidsApp::_RenderForever()
-{
-	_InitSdlAndOpenGl();
-	srand(SDL_GetTicks());
-	SDL_Event event;
-
-	LOG(INFO) << "BoidsApp entering infinite loop";
-	while (_running) {
-		if (_updateOrtho) {
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			glOrtho(_orthoLeft, _orthoRight, _orthoBottom, _orthoTop, 0, 100);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			_updateOrtho = false;
-		}
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		for (int i = 0; i < Scene::scenes.size(); i++)
-			Scene::scenes[i]->Run();
-
-		_HandleTouchEvents();
-
-		SDL_GL_SwapBuffers();
-		Fps::fpsControl.OnLoop();
-		char Buffer[255];
-		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(),
-				_CountTotalNumObjects());
-		SDL_WM_SetCaption(Buffer, Buffer);
-	}
-}
-
 void BoidsApp::_SetupScenes()
 {
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
-	float s = 100;
 
-	// Create scenes and populate them with various entities
-	_controlPanelScene = new Scene(0, h, w * 2, h * 2, 100, 100);
-	ControlPanel *boidDescription = new ControlPanel();
-
+	_controlPanelScene = new Scene(0, 0, w * 2, h * 4, 100, 200);
 	_boidScene = new Scene(w * 2.5, h / 2, w * 2, (h * 3), 100, 100);
+	_tableScene = new Scene(w * 5, h, w * 3, h * 3, 50, 100);
+
+	Scene::AddScene(_controlPanelScene);
+	Scene::AddScene(_boidScene);
+	Scene::AddScene(_tableScene);
+}
+
+void BoidsApp::_PopulateScenes()
+{
+	ControlPanel *panel = new ControlPanel();
+	_controlPanelScene->AddEntity(panel);
+
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
+	_boidScene->AddEntity(axis);
 
-	_tableScene = new Scene(w * 5, h, w * 3, h * 3, 50, 100);
 	_nameTable = new NameTable();
-
-	// Save scenes
-	Scene::scenes.push_back(_tableScene);
-	Scene::scenes.push_back(_boidScene);
-	Scene::scenes.push_back(_controlPanelScene);
+	_tableScene->AddEntity(_nameTable);
 }
 
 void BoidsApp::_HandleTouchEvents()
@@ -207,9 +220,9 @@ int BoidsApp::_CountTotalNumObjects()
 {
 	int numObjects = 0;
 	BOOST_FOREACH(Scene *s, Scene::scenes)
-	{
-		numObjects += s->entityList.size();
-	}
+				{
+					numObjects += s->entityList.size();
+				}
 	return numObjects;
 }
 

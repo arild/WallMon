@@ -17,6 +17,7 @@ public:
 
 	// Required to implement. Entities inheriting from the slider
 	// class should override these
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

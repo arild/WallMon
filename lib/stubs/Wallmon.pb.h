@@ -108,14 +108,14 @@ class WallmonMessage : public ::google::protobuf::Message {
   inline void set_data(const void* value, size_t size);
   inline ::std::string* mutable_data();
   
-  // required double timestampMsec = 3;
+  // optional double timestampMsec = 3;
   inline bool has_timestampmsec() const;
   inline void clear_timestampmsec();
   static const int kTimestampMsecFieldNumber = 3;
   inline double timestampmsec() const;
   inline void set_timestampmsec(double value);
   
-  // required string hostname = 4;
+  // optional string hostname = 4;
   inline bool has_hostname() const;
   inline void clear_hostname();
   static const int kHostnameFieldNumber = 4;
@@ -125,26 +125,33 @@ class WallmonMessage : public ::google::protobuf::Message {
   inline void set_hostname(const char* value, size_t size);
   inline ::std::string* mutable_hostname();
   
-  // required double sampleFrequencyMsec = 5;
+  // optional double sampleFrequencyMsec = 5;
   inline bool has_samplefrequencymsec() const;
   inline void clear_samplefrequencymsec();
   static const int kSampleFrequencyMsecFieldNumber = 5;
   inline double samplefrequencymsec() const;
   inline void set_samplefrequencymsec(double value);
   
-  // required double sampleTimeMsec = 6;
+  // optional double sampleTimeMsec = 6;
   inline bool has_sampletimemsec() const;
   inline void clear_sampletimemsec();
   static const int kSampleTimeMsecFieldNumber = 6;
   inline double sampletimemsec() const;
   inline void set_sampletimemsec(double value);
   
-  // required double scheduleDriftMsec = 7;
+  // optional double scheduleDriftMsec = 7;
   inline bool has_scheduledriftmsec() const;
   inline void clear_scheduledriftmsec();
   static const int kScheduleDriftMsecFieldNumber = 7;
   inline double scheduledriftmsec() const;
   inline void set_scheduledriftmsec(double value);
+  
+  // optional uint32 networkMessageSizeBytes = 8;
+  inline bool has_networkmessagesizebytes() const;
+  inline void clear_networkmessagesizebytes();
+  static const int kNetworkMessageSizeBytesFieldNumber = 8;
+  inline ::google::protobuf::uint32 networkmessagesizebytes() const;
+  inline void set_networkmessagesizebytes(::google::protobuf::uint32 value);
   
   // @@protoc_insertion_point(class_scope:WallmonMessage)
  private:
@@ -161,11 +168,12 @@ class WallmonMessage : public ::google::protobuf::Message {
   double samplefrequencymsec_;
   double sampletimemsec_;
   double scheduledriftmsec_;
+  ::google::protobuf::uint32 networkmessagesizebytes_;
   friend void  protobuf_AddDesc_Wallmon_2eproto();
   friend void protobuf_AssignDesc_Wallmon_2eproto();
   friend void protobuf_ShutdownFile_Wallmon_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -272,7 +280,7 @@ inline ::std::string* WallmonMessage::mutable_data() {
   return data_;
 }
 
-// required double timestampMsec = 3;
+// optional double timestampMsec = 3;
 inline bool WallmonMessage::has_timestampmsec() const {
   return _has_bit(2);
 }
@@ -288,7 +296,7 @@ inline void WallmonMessage::set_timestampmsec(double value) {
   timestampmsec_ = value;
 }
 
-// required string hostname = 4;
+// optional string hostname = 4;
 inline bool WallmonMessage::has_hostname() const {
   return _has_bit(3);
 }
@@ -330,7 +338,7 @@ inline ::std::string* WallmonMessage::mutable_hostname() {
   return hostname_;
 }
 
-// required double sampleFrequencyMsec = 5;
+// optional double sampleFrequencyMsec = 5;
 inline bool WallmonMessage::has_samplefrequencymsec() const {
   return _has_bit(4);
 }
@@ -346,7 +354,7 @@ inline void WallmonMessage::set_samplefrequencymsec(double value) {
   samplefrequencymsec_ = value;
 }
 
-// required double sampleTimeMsec = 6;
+// optional double sampleTimeMsec = 6;
 inline bool WallmonMessage::has_sampletimemsec() const {
   return _has_bit(5);
 }
@@ -362,7 +370,7 @@ inline void WallmonMessage::set_sampletimemsec(double value) {
   sampletimemsec_ = value;
 }
 
-// required double scheduleDriftMsec = 7;
+// optional double scheduleDriftMsec = 7;
 inline bool WallmonMessage::has_scheduledriftmsec() const {
   return _has_bit(6);
 }
@@ -376,6 +384,22 @@ inline double WallmonMessage::scheduledriftmsec() const {
 inline void WallmonMessage::set_scheduledriftmsec(double value) {
   _set_bit(6);
   scheduledriftmsec_ = value;
+}
+
+// optional uint32 networkMessageSizeBytes = 8;
+inline bool WallmonMessage::has_networkmessagesizebytes() const {
+  return _has_bit(7);
+}
+inline void WallmonMessage::clear_networkmessagesizebytes() {
+  networkmessagesizebytes_ = 0u;
+  _clear_bit(7);
+}
+inline ::google::protobuf::uint32 WallmonMessage::networkmessagesizebytes() const {
+  return networkmessagesizebytes_;
+}
+inline void WallmonMessage::set_networkmessagesizebytes(::google::protobuf::uint32 value) {
+  _set_bit(7);
+  networkmessagesizebytes_ = value;
 }
 
 

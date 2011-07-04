@@ -38,6 +38,7 @@ private:
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
 	void _SetupScenes();
+	void _PopulateScenes();
 	void _HandleTouchEvents();
 	void _VisualizeShoutEvent(float x, float y);
 	int _CountTotalNumObjects();

@@ -12,10 +12,9 @@
 #include "Font.h"
 #include "Entity.h"
 
-class ControlPanel : Entity {
+class ControlPanel: public Entity {
 public:
-	ControlPanel();
-	virtual ~ControlPanel();
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
@@ -30,11 +29,9 @@ public:
 	static void ProcessNameViewButtonCallback();
 	static void NodeViewButtonCallback();
 
-
 	static void BoidTailCallback();
-
 private:
-	Font *_font;
+	Font *_font, *_fontLarge;
 };
 
 #endif /* BOIDDESCRIPTION_H_ */

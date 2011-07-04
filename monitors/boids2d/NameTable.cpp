@@ -30,7 +30,6 @@ TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 
 NameTable::NameTable(int maxNumItemsToDisplay)
 {
-	_font = new Font(FONT_SIZE);
 	_maxNumItemsToDisplay = maxNumItemsToDisplay;
 
 	_current = 0;
@@ -58,6 +57,12 @@ void NameTable::Add(TableItem *item)
 	scoped_lock lock(_mutex);
 	_items.push_back(item);
 }
+
+void NameTable::OnInit()
+{
+	_font = new Font(FONT_SIZE);
+}
+
 void NameTable::OnLoop()
 {
 //	scoped_lock lock(_mutex);
@@ -72,7 +77,6 @@ void NameTable::OnRender()
 
 void NameTable::OnCleanup()
 {
-
 }
 
 void NameTable::HandleHit(TouchEvent & event)

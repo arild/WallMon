@@ -89,14 +89,20 @@ void DataRouter::_RouteForever()
 		_msg->ParseFromArray(item->message, item->length);
 
 		// Retrieve and invoke associated handler
-		HandlerEvent *event = (*_handlers)[_msg->key()];
-		if (event->handler)
-			event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
-		else if (event->handlerProtobuf)
-			event->handlerProtobuf->Handle(_msg);
-		else
-			LOG(FATAL) << "unknown handler type";
-
+		handlerMap::iterator it = _handlers->find(_msg->key());
+		if (it == _handlers->end()) {
+			LOG(WARNING) << "no handler for key=" << _msg->key();
+		}
+		else {
+			_msg->set_networkmessagesizebytes(item->length);
+			HandlerEvent *event = it->second;
+			if (event->handler)
+				event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
+			else if (event->handlerProtobuf)
+				event->handlerProtobuf->Handle(_msg);
+			else
+				LOG(FATAL) << "unknown handler type";
+		}
 		delete item;
 	}
 }

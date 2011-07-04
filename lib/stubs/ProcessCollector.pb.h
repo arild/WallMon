@@ -30,19 +30,19 @@ void  protobuf_AddDesc_ProcessCollector_2eproto();
 void protobuf_AssignDesc_ProcessCollector_2eproto();
 void protobuf_ShutdownFile_ProcessCollector_2eproto();
 
-class ProcessesMessage;
-class ProcessesMessage_ProcessMessage;
+class ProcessCollectorMessage;
+class ProcessCollectorMessage_ProcessMessage;
 
 // ===================================================================
 
-class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
+class ProcessCollectorMessage_ProcessMessage : public ::google::protobuf::Message {
  public:
-  ProcessesMessage_ProcessMessage();
-  virtual ~ProcessesMessage_ProcessMessage();
+  ProcessCollectorMessage_ProcessMessage();
+  virtual ~ProcessCollectorMessage_ProcessMessage();
   
-  ProcessesMessage_ProcessMessage(const ProcessesMessage_ProcessMessage& from);
+  ProcessCollectorMessage_ProcessMessage(const ProcessCollectorMessage_ProcessMessage& from);
   
-  inline ProcessesMessage_ProcessMessage& operator=(const ProcessesMessage_ProcessMessage& from) {
+  inline ProcessCollectorMessage_ProcessMessage& operator=(const ProcessCollectorMessage_ProcessMessage& from) {
     CopyFrom(from);
     return *this;
   }
@@ -56,17 +56,17 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
   }
   
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ProcessesMessage_ProcessMessage& default_instance();
+  static const ProcessCollectorMessage_ProcessMessage& default_instance();
   
-  void Swap(ProcessesMessage_ProcessMessage* other);
+  void Swap(ProcessCollectorMessage_ProcessMessage* other);
   
   // implements Message ----------------------------------------------
   
-  ProcessesMessage_ProcessMessage* New() const;
+  ProcessCollectorMessage_ProcessMessage* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ProcessesMessage_ProcessMessage& from);
-  void MergeFrom(const ProcessesMessage_ProcessMessage& from);
+  void CopyFrom(const ProcessCollectorMessage_ProcessMessage& from);
+  void MergeFrom(const ProcessCollectorMessage_ProcessMessage& from);
   void Clear();
   bool IsInitialized() const;
   
@@ -155,7 +155,7 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 networkoututilization() const;
   inline void set_networkoututilization(::google::protobuf::uint32 value);
   
-  // @@protoc_insertion_point(class_scope:ProcessesMessage.ProcessMessage)
+  // @@protoc_insertion_point(class_scope:ProcessCollectorMessage.ProcessMessage)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
@@ -188,18 +188,18 @@ class ProcessesMessage_ProcessMessage : public ::google::protobuf::Message {
   }
   
   void InitAsDefaultInstance();
-  static ProcessesMessage_ProcessMessage* default_instance_;
+  static ProcessCollectorMessage_ProcessMessage* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class ProcessesMessage : public ::google::protobuf::Message {
+class ProcessCollectorMessage : public ::google::protobuf::Message {
  public:
-  ProcessesMessage();
-  virtual ~ProcessesMessage();
+  ProcessCollectorMessage();
+  virtual ~ProcessCollectorMessage();
   
-  ProcessesMessage(const ProcessesMessage& from);
+  ProcessCollectorMessage(const ProcessCollectorMessage& from);
   
-  inline ProcessesMessage& operator=(const ProcessesMessage& from) {
+  inline ProcessCollectorMessage& operator=(const ProcessCollectorMessage& from) {
     CopyFrom(from);
     return *this;
   }
@@ -213,17 +213,17 @@ class ProcessesMessage : public ::google::protobuf::Message {
   }
   
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ProcessesMessage& default_instance();
+  static const ProcessCollectorMessage& default_instance();
   
-  void Swap(ProcessesMessage* other);
+  void Swap(ProcessCollectorMessage* other);
   
   // implements Message ----------------------------------------------
   
-  ProcessesMessage* New() const;
+  ProcessCollectorMessage* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ProcessesMessage& from);
-  void MergeFrom(const ProcessesMessage& from);
+  void CopyFrom(const ProcessCollectorMessage& from);
+  void MergeFrom(const ProcessCollectorMessage& from);
   void Clear();
   bool IsInitialized() const;
   
@@ -244,28 +244,28 @@ class ProcessesMessage : public ::google::protobuf::Message {
   
   // nested types ----------------------------------------------------
   
-  typedef ProcessesMessage_ProcessMessage ProcessMessage;
+  typedef ProcessCollectorMessage_ProcessMessage ProcessMessage;
   
   // accessors -------------------------------------------------------
   
-  // repeated .ProcessesMessage.ProcessMessage processmessage = 1;
+  // repeated .ProcessCollectorMessage.ProcessMessage processmessage = 1;
   inline int processmessage_size() const;
   inline void clear_processmessage();
   static const int kProcessmessageFieldNumber = 1;
-  inline const ::ProcessesMessage_ProcessMessage& processmessage(int index) const;
-  inline ::ProcessesMessage_ProcessMessage* mutable_processmessage(int index);
-  inline ::ProcessesMessage_ProcessMessage* add_processmessage();
-  inline const ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >&
+  inline const ::ProcessCollectorMessage_ProcessMessage& processmessage(int index) const;
+  inline ::ProcessCollectorMessage_ProcessMessage* mutable_processmessage(int index);
+  inline ::ProcessCollectorMessage_ProcessMessage* add_processmessage();
+  inline const ::google::protobuf::RepeatedPtrField< ::ProcessCollectorMessage_ProcessMessage >&
       processmessage() const;
-  inline ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >*
+  inline ::google::protobuf::RepeatedPtrField< ::ProcessCollectorMessage_ProcessMessage >*
       mutable_processmessage();
   
-  // @@protoc_insertion_point(class_scope:ProcessesMessage)
+  // @@protoc_insertion_point(class_scope:ProcessCollectorMessage)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
   
-  ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage > processmessage_;
+  ::google::protobuf::RepeatedPtrField< ::ProcessCollectorMessage_ProcessMessage > processmessage_;
   friend void  protobuf_AddDesc_ProcessCollector_2eproto();
   friend void protobuf_AssignDesc_ProcessCollector_2eproto();
   friend void protobuf_ShutdownFile_ProcessCollector_2eproto();
@@ -284,50 +284,50 @@ class ProcessesMessage : public ::google::protobuf::Message {
   }
   
   void InitAsDefaultInstance();
-  static ProcessesMessage* default_instance_;
+  static ProcessCollectorMessage* default_instance_;
 };
 // ===================================================================
 
 
 // ===================================================================
 
-// ProcessesMessage_ProcessMessage
+// ProcessCollectorMessage_ProcessMessage
 
 // optional string processname = 1;
-inline bool ProcessesMessage_ProcessMessage::has_processname() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_processname() const {
   return _has_bit(0);
 }
-inline void ProcessesMessage_ProcessMessage::clear_processname() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_processname() {
   if (processname_ != &_default_processname_) {
     processname_->clear();
   }
   _clear_bit(0);
 }
-inline const ::std::string& ProcessesMessage_ProcessMessage::processname() const {
+inline const ::std::string& ProcessCollectorMessage_ProcessMessage::processname() const {
   return *processname_;
 }
-inline void ProcessesMessage_ProcessMessage::set_processname(const ::std::string& value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_processname(const ::std::string& value) {
   _set_bit(0);
   if (processname_ == &_default_processname_) {
     processname_ = new ::std::string;
   }
   processname_->assign(value);
 }
-inline void ProcessesMessage_ProcessMessage::set_processname(const char* value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_processname(const char* value) {
   _set_bit(0);
   if (processname_ == &_default_processname_) {
     processname_ = new ::std::string;
   }
   processname_->assign(value);
 }
-inline void ProcessesMessage_ProcessMessage::set_processname(const char* value, size_t size) {
+inline void ProcessCollectorMessage_ProcessMessage::set_processname(const char* value, size_t size) {
   _set_bit(0);
   if (processname_ == &_default_processname_) {
     processname_ = new ::std::string;
   }
   processname_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* ProcessesMessage_ProcessMessage::mutable_processname() {
+inline ::std::string* ProcessCollectorMessage_ProcessMessage::mutable_processname() {
   _set_bit(0);
   if (processname_ == &_default_processname_) {
     processname_ = new ::std::string;
@@ -336,159 +336,159 @@ inline ::std::string* ProcessesMessage_ProcessMessage::mutable_processname() {
 }
 
 // optional uint32 pid = 2;
-inline bool ProcessesMessage_ProcessMessage::has_pid() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_pid() const {
   return _has_bit(1);
 }
-inline void ProcessesMessage_ProcessMessage::clear_pid() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_pid() {
   pid_ = 0u;
   _clear_bit(1);
 }
-inline ::google::protobuf::uint32 ProcessesMessage_ProcessMessage::pid() const {
+inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::pid() const {
   return pid_;
 }
-inline void ProcessesMessage_ProcessMessage::set_pid(::google::protobuf::uint32 value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_pid(::google::protobuf::uint32 value) {
   _set_bit(1);
   pid_ = value;
 }
 
 // optional double userCpuLoad = 3;
-inline bool ProcessesMessage_ProcessMessage::has_usercpuload() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_usercpuload() const {
   return _has_bit(2);
 }
-inline void ProcessesMessage_ProcessMessage::clear_usercpuload() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_usercpuload() {
   usercpuload_ = 0;
   _clear_bit(2);
 }
-inline double ProcessesMessage_ProcessMessage::usercpuload() const {
+inline double ProcessCollectorMessage_ProcessMessage::usercpuload() const {
   return usercpuload_;
 }
-inline void ProcessesMessage_ProcessMessage::set_usercpuload(double value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_usercpuload(double value) {
   _set_bit(2);
   usercpuload_ = value;
 }
 
 // optional double systemCpuLoad = 4;
-inline bool ProcessesMessage_ProcessMessage::has_systemcpuload() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_systemcpuload() const {
   return _has_bit(3);
 }
-inline void ProcessesMessage_ProcessMessage::clear_systemcpuload() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_systemcpuload() {
   systemcpuload_ = 0;
   _clear_bit(3);
 }
-inline double ProcessesMessage_ProcessMessage::systemcpuload() const {
+inline double ProcessCollectorMessage_ProcessMessage::systemcpuload() const {
   return systemcpuload_;
 }
-inline void ProcessesMessage_ProcessMessage::set_systemcpuload(double value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_systemcpuload(double value) {
   _set_bit(3);
   systemcpuload_ = value;
 }
 
 // optional double systemCpuUtilization = 5;
-inline bool ProcessesMessage_ProcessMessage::has_systemcpuutilization() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_systemcpuutilization() const {
   return _has_bit(4);
 }
-inline void ProcessesMessage_ProcessMessage::clear_systemcpuutilization() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_systemcpuutilization() {
   systemcpuutilization_ = 0;
   _clear_bit(4);
 }
-inline double ProcessesMessage_ProcessMessage::systemcpuutilization() const {
+inline double ProcessCollectorMessage_ProcessMessage::systemcpuutilization() const {
   return systemcpuutilization_;
 }
-inline void ProcessesMessage_ProcessMessage::set_systemcpuutilization(double value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_systemcpuutilization(double value) {
   _set_bit(4);
   systemcpuutilization_ = value;
 }
 
 // optional double userCpuUtilization = 6;
-inline bool ProcessesMessage_ProcessMessage::has_usercpuutilization() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_usercpuutilization() const {
   return _has_bit(5);
 }
-inline void ProcessesMessage_ProcessMessage::clear_usercpuutilization() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_usercpuutilization() {
   usercpuutilization_ = 0;
   _clear_bit(5);
 }
-inline double ProcessesMessage_ProcessMessage::usercpuutilization() const {
+inline double ProcessCollectorMessage_ProcessMessage::usercpuutilization() const {
   return usercpuutilization_;
 }
-inline void ProcessesMessage_ProcessMessage::set_usercpuutilization(double value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_usercpuutilization(double value) {
   _set_bit(5);
   usercpuutilization_ = value;
 }
 
 // optional double memoryUtilization = 7;
-inline bool ProcessesMessage_ProcessMessage::has_memoryutilization() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_memoryutilization() const {
   return _has_bit(6);
 }
-inline void ProcessesMessage_ProcessMessage::clear_memoryutilization() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_memoryutilization() {
   memoryutilization_ = 0;
   _clear_bit(6);
 }
-inline double ProcessesMessage_ProcessMessage::memoryutilization() const {
+inline double ProcessCollectorMessage_ProcessMessage::memoryutilization() const {
   return memoryutilization_;
 }
-inline void ProcessesMessage_ProcessMessage::set_memoryutilization(double value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_memoryutilization(double value) {
   _set_bit(6);
   memoryutilization_ = value;
 }
 
 // optional uint32 networkInUtilization = 8;
-inline bool ProcessesMessage_ProcessMessage::has_networkinutilization() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_networkinutilization() const {
   return _has_bit(7);
 }
-inline void ProcessesMessage_ProcessMessage::clear_networkinutilization() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_networkinutilization() {
   networkinutilization_ = 0u;
   _clear_bit(7);
 }
-inline ::google::protobuf::uint32 ProcessesMessage_ProcessMessage::networkinutilization() const {
+inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::networkinutilization() const {
   return networkinutilization_;
 }
-inline void ProcessesMessage_ProcessMessage::set_networkinutilization(::google::protobuf::uint32 value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_networkinutilization(::google::protobuf::uint32 value) {
   _set_bit(7);
   networkinutilization_ = value;
 }
 
 // optional uint32 networkOutUtilization = 9;
-inline bool ProcessesMessage_ProcessMessage::has_networkoututilization() const {
+inline bool ProcessCollectorMessage_ProcessMessage::has_networkoututilization() const {
   return _has_bit(8);
 }
-inline void ProcessesMessage_ProcessMessage::clear_networkoututilization() {
+inline void ProcessCollectorMessage_ProcessMessage::clear_networkoututilization() {
   networkoututilization_ = 0u;
   _clear_bit(8);
 }
-inline ::google::protobuf::uint32 ProcessesMessage_ProcessMessage::networkoututilization() const {
+inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::networkoututilization() const {
   return networkoututilization_;
 }
-inline void ProcessesMessage_ProcessMessage::set_networkoututilization(::google::protobuf::uint32 value) {
+inline void ProcessCollectorMessage_ProcessMessage::set_networkoututilization(::google::protobuf::uint32 value) {
   _set_bit(8);
   networkoututilization_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// ProcessesMessage
+// ProcessCollectorMessage
 
-// repeated .ProcessesMessage.ProcessMessage processmessage = 1;
-inline int ProcessesMessage::processmessage_size() const {
+// repeated .ProcessCollectorMessage.ProcessMessage processmessage = 1;
+inline int ProcessCollectorMessage::processmessage_size() const {
   return processmessage_.size();
 }
-inline void ProcessesMessage::clear_processmessage() {
+inline void ProcessCollectorMessage::clear_processmessage() {
   processmessage_.Clear();
 }
-inline const ::ProcessesMessage_ProcessMessage& ProcessesMessage::processmessage(int index) const {
+inline const ::ProcessCollectorMessage_ProcessMessage& ProcessCollectorMessage::processmessage(int index) const {
   return processmessage_.Get(index);
 }
-inline ::ProcessesMessage_ProcessMessage* ProcessesMessage::mutable_processmessage(int index) {
+inline ::ProcessCollectorMessage_ProcessMessage* ProcessCollectorMessage::mutable_processmessage(int index) {
   return processmessage_.Mutable(index);
 }
-inline ::ProcessesMessage_ProcessMessage* ProcessesMessage::add_processmessage() {
+inline ::ProcessCollectorMessage_ProcessMessage* ProcessCollectorMessage::add_processmessage() {
   return processmessage_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >&
-ProcessesMessage::processmessage() const {
+inline const ::google::protobuf::RepeatedPtrField< ::ProcessCollectorMessage_ProcessMessage >&
+ProcessCollectorMessage::processmessage() const {
   return processmessage_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::ProcessesMessage_ProcessMessage >*
-ProcessesMessage::mutable_processmessage() {
+inline ::google::protobuf::RepeatedPtrField< ::ProcessCollectorMessage_ProcessMessage >*
+ProcessCollectorMessage::mutable_processmessage() {
   return &processmessage_;
 }
 

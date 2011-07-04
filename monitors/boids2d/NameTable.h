@@ -29,12 +29,13 @@ struct TableItemCompare {
 	}
 };
 
-class NameTable : Entity {
+class NameTable : public Entity {
 public:
 	NameTable(int maxNumItemsToDisplay=10);
 	virtual ~NameTable();
 	void Add(TableItem *item);
 
+	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();

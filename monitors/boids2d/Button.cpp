@@ -54,6 +54,11 @@ void Button::ButtonClick()
 	_callback();
 }
 
+void Button::OnInit()
+{
+
+}
+
 void Button::OnLoop()
 {
 	if (_slowActivation == false)

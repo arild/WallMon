@@ -3,6 +3,8 @@
 #include "Entity.h"
 #include "Scene.h"
 
+bool Entity::automaticallyAddToCurrentScene = false;
+
 bool Entity::IsHit(float x, float y)
 {
 	if (x >= tx && x <= tx + width && y >= ty && y <= ty + height)
@@ -13,7 +15,8 @@ bool Entity::IsHit(float x, float y)
 Entity::Entity()
 {
 	tx, ty, width, height = 0;
-	Scene::current->entityList.push_back(this);
+	if (automaticallyAddToCurrentScene)
+		Scene::AddEntityToCurrent(this);
 }
 
 void Entity::HandleHit(TouchEvent &event)

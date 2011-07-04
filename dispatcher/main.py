@@ -28,6 +28,7 @@ if __name__ == '__main__':
         msg.type = msg.INIT
         for path in listdir_fullpath(MONITORS_PATH):
             msg.filePath = path
+            print 'Init path: ' + path
             multicast_monitor_message(msg.SerializeToString())
     
     elif sys.argv[1].startswith('stop'):
