@@ -6,8 +6,8 @@ SRC=*.cpp *.h
 
 all: $(SRC)
 	protoc --cpp_out=. *.proto
-	$(CC) -g $(CFLAGS_SO_PREPARE) $(INC_PATH) $(SRC)
-	$(CC) -g $(CFLAGS_SO_CREATE) $(LIB_PATH) -o gnuplot.so *.o $(LIB)
+	$(CC) $(CFLAGS_SO_PREPARE) $(INC_PATH) $(SRC)
+	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o gnuplot.so *.o $(LIB)
 	cp *.so ../bin
 			
 clean:

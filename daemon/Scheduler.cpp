@@ -25,20 +25,20 @@ using namespace boost::tuples;
  * Timers in libev have a special attribute where the user (programmer)
  * can store arbitrary data. The timers used here store an instance of this class.
  */
-class CollectorEvent {
+class CollectorTimerEvent {
 public:
 	Context *ctx; // The context which is shared and known by the collector
 	IDataCollector *collector; // The collector implementation itself
 	IDataCollectorProtobuf *collectorProtobuf;
 
-	double timestampLastScheduleMsec;
-	double scheduleDriftinMsec; // Accumulated drift for when collector is scheduled
+	double previousTsBeforeSampleSec;
+	double scheduleDurationSec;
 	unsigned int numSamples; // Number of times the collector has been invoked
 
-	CollectorEvent()
+	CollectorTimerEvent()
 	{
-		timestampLastScheduleMsec = 0.;
-		scheduleDriftinMsec = 0.;
+		previousTsBeforeSampleSec = -1;
+		scheduleDurationSec = -1;
 		numSamples = 0;
 	}
 };
@@ -77,7 +77,7 @@ void Scheduler::Stop()
 		ev_timer_stop(_loop, timer);
 
 		// Release memory allocated in RegisterColllector()
-		delete (CollectorEvent *)timer->data;
+		delete (CollectorTimerEvent *) timer->data;
 		delete timer;
 	}
 	_thread.join(); // Wait for event loop to terminate
@@ -109,16 +109,15 @@ void Scheduler::Register(IBase & monitor, Context & ctx)
 	ev_timer *timer = new ev_timer();
 
 	double scheduleIntervalInSec = ctx.sampleFrequencyMsec / (double) 1000;
-	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, 0.);
-	timer->repeat = scheduleIntervalInSec;
+	ev_timer_init(timer, &Scheduler::_TimerCallback, scheduleIntervalInSec, scheduleIntervalInSec);
 
-	CollectorEvent *event = new CollectorEvent();
+	CollectorTimerEvent *event = new CollectorTimerEvent();
 	event->ctx = &ctx;
 	event->collector = dynamic_cast<IDataCollector *> (&monitor);
 	event->collectorProtobuf = dynamic_cast<IDataCollectorProtobuf *> (&monitor);
 
 	timer->data = (void *) event;
-	ev_timer_again(_loop, timer);
+	ev_timer_start(_loop, timer);
 	_loopCondition.notify_one();
 
 	// Book-keep for cleanup
@@ -136,54 +135,63 @@ void Scheduler::Remove(IBase & monitor)
 /**
  * This method serves as a callback when a timer is scheduled.
  */
-void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
+void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revents)
 {
-	double timestampBeforeSampleInMsec = System::GetTimeInMsec();
-	ev_timer_again(loop, w); // Re-schedule collector
+	CollectorTimerEvent *event = (CollectorTimerEvent *) timer->data;
+	double oldSampleFrequencyMsec = event->ctx->sampleFrequencyMsec;
+	double tsBeforeSampleSec = ev_now(loop);
 
-	CollectorEvent *event = (CollectorEvent *) w->data;
 	WallmonMessage msg;
-	msg.set_key(event->ctx->key);
-
 	if (event->collector) {
 		void *data;
 		int dataLen = event->collector->Sample(&data);
 		msg.set_data(data, dataLen);
 	} else if (event->collectorProtobuf) {
 		event->collectorProtobuf->Sample(&msg);
-	}
-	else
+	} else
 		LOG(FATAL) << "unknown collector type";
 
 	if (event->ctx->sampleFrequencyMsec < 0) {
 		event->ctx->sampleFrequencyMsec = 0;
 		LOG(WARNING) << "negative sample frequency of key: " << event->ctx->key;
 	}
-	double timestampAfterSampleInMsec = System::GetTimeInMsec();
 
-	// Update local statistics
-	if (event->timestampLastScheduleMsec != 0.) {
-		double actualFrequencyMsec = (double)(timestampBeforeSampleInMsec - (double)event->timestampLastScheduleMsec);
-		event->scheduleDriftinMsec = (actualFrequencyMsec - event->ctx->sampleFrequencyMsec);
+	double sampleDurationSec = ev_time() - tsBeforeSampleSec;
+	if (event->ctx->sampleFrequencyMsec != oldSampleFrequencyMsec) {
+		// Tell libev about new frequency
+		double repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
+		double again = repeat - sampleDurationSec; // Account for time spent during sampling
+		// Re-schedules timer to trigger after 'again' seconds, and with a repeating
+		// trigger value of 'repeat' seconds
+		if (again < 0) {
+			LOG(INFO) << "scheduler not able to keep up with sample frequency: again=" << again;
+			again = 0;
+		}
+		ev_timer_set(timer, again, repeat); // Modifies internal values
+		ev_timer_again(loop, timer); // Restarts the timer (loading new values)
 	}
-	event->timestampLastScheduleMsec = timestampBeforeSampleInMsec; // Save timestamp until next schedule
+
 	event->numSamples += 1;
-
-	w->repeat = event->ctx->sampleFrequencyMsec / (double)1000.;
-
-	// Statistics sent to server
-	msg.set_timestampmsec(timestampAfterSampleInMsec);
+	msg.set_key(event->ctx->key);
+	msg.set_timestampmsec(tsBeforeSampleSec * (double)1000);
 	msg.set_hostname(System::GetHostname());
 	msg.set_samplefrequencymsec(event->ctx->sampleFrequencyMsec);
-	msg.set_sampletimemsec(timestampAfterSampleInMsec - timestampBeforeSampleInMsec);
-	msg.set_scheduledriftmsec(event->scheduleDriftinMsec);
+	msg.set_sampledurationmsec(sampleDurationSec * (double)1000);
+	if (event->previousTsBeforeSampleSec > 0) {
+		double actualFrequencyMsec = (tsBeforeSampleSec - event->previousTsBeforeSampleSec) * (double)1000;
+		msg.set_scheduledriftmsec(actualFrequencyMsec - oldSampleFrequencyMsec);
+	}
+	if (event->scheduleDurationSec > 0)
+		msg.set_scheduledurationmsec(event->scheduleDurationSec * (double)1000);
 
 	// Compose network message
 	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
+
+	// Send message to defined hosts
 	for (int i = 0; i < event->ctx->servers.size(); i++) {
-		string serverAddress = event->ctx->servers[i].get<0>();
-		int serverPort = event->ctx->servers[i].get<1>();
+		string serverAddress = event->ctx->servers[i].get<0> ();
+		int serverPort = event->ctx->servers[i].get<1> ();
 		LOG_EVERY_N(INFO, 1000) << "Streaming to: " << serverAddress << " | " << serverPort;
 		int sockfd = streamer->SetupStream(serverAddress, serverPort);
 		if (sockfd > -1)
@@ -193,5 +201,7 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *w, int revents)
 	}
 	// Queue message for transmission
 	Scheduler::streamer->Stream(item);
+	event->previousTsBeforeSampleSec = tsBeforeSampleSec; // Save timestamp until next schedule
+	event->scheduleDurationSec = ev_time() - tsBeforeSampleSec;
 }
 

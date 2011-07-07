@@ -132,12 +132,12 @@ class WallmonMessage : public ::google::protobuf::Message {
   inline double samplefrequencymsec() const;
   inline void set_samplefrequencymsec(double value);
   
-  // optional double sampleTimeMsec = 6;
-  inline bool has_sampletimemsec() const;
-  inline void clear_sampletimemsec();
-  static const int kSampleTimeMsecFieldNumber = 6;
-  inline double sampletimemsec() const;
-  inline void set_sampletimemsec(double value);
+  // optional double sampleDurationMsec = 6;
+  inline bool has_sampledurationmsec() const;
+  inline void clear_sampledurationmsec();
+  static const int kSampleDurationMsecFieldNumber = 6;
+  inline double sampledurationmsec() const;
+  inline void set_sampledurationmsec(double value);
   
   // optional double scheduleDriftMsec = 7;
   inline bool has_scheduledriftmsec() const;
@@ -146,10 +146,17 @@ class WallmonMessage : public ::google::protobuf::Message {
   inline double scheduledriftmsec() const;
   inline void set_scheduledriftmsec(double value);
   
-  // optional uint32 networkMessageSizeBytes = 8;
+  // optional double scheduleDurationMsec = 8;
+  inline bool has_scheduledurationmsec() const;
+  inline void clear_scheduledurationmsec();
+  static const int kScheduleDurationMsecFieldNumber = 8;
+  inline double scheduledurationmsec() const;
+  inline void set_scheduledurationmsec(double value);
+  
+  // optional uint32 networkMessageSizeBytes = 9;
   inline bool has_networkmessagesizebytes() const;
   inline void clear_networkmessagesizebytes();
-  static const int kNetworkMessageSizeBytesFieldNumber = 8;
+  static const int kNetworkMessageSizeBytesFieldNumber = 9;
   inline ::google::protobuf::uint32 networkmessagesizebytes() const;
   inline void set_networkmessagesizebytes(::google::protobuf::uint32 value);
   
@@ -166,14 +173,15 @@ class WallmonMessage : public ::google::protobuf::Message {
   ::std::string* hostname_;
   static const ::std::string _default_hostname_;
   double samplefrequencymsec_;
-  double sampletimemsec_;
+  double sampledurationmsec_;
   double scheduledriftmsec_;
+  double scheduledurationmsec_;
   ::google::protobuf::uint32 networkmessagesizebytes_;
   friend void  protobuf_AddDesc_Wallmon_2eproto();
   friend void protobuf_AssignDesc_Wallmon_2eproto();
   friend void protobuf_ShutdownFile_Wallmon_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -354,20 +362,20 @@ inline void WallmonMessage::set_samplefrequencymsec(double value) {
   samplefrequencymsec_ = value;
 }
 
-// optional double sampleTimeMsec = 6;
-inline bool WallmonMessage::has_sampletimemsec() const {
+// optional double sampleDurationMsec = 6;
+inline bool WallmonMessage::has_sampledurationmsec() const {
   return _has_bit(5);
 }
-inline void WallmonMessage::clear_sampletimemsec() {
-  sampletimemsec_ = 0;
+inline void WallmonMessage::clear_sampledurationmsec() {
+  sampledurationmsec_ = 0;
   _clear_bit(5);
 }
-inline double WallmonMessage::sampletimemsec() const {
-  return sampletimemsec_;
+inline double WallmonMessage::sampledurationmsec() const {
+  return sampledurationmsec_;
 }
-inline void WallmonMessage::set_sampletimemsec(double value) {
+inline void WallmonMessage::set_sampledurationmsec(double value) {
   _set_bit(5);
-  sampletimemsec_ = value;
+  sampledurationmsec_ = value;
 }
 
 // optional double scheduleDriftMsec = 7;
@@ -386,19 +394,35 @@ inline void WallmonMessage::set_scheduledriftmsec(double value) {
   scheduledriftmsec_ = value;
 }
 
-// optional uint32 networkMessageSizeBytes = 8;
-inline bool WallmonMessage::has_networkmessagesizebytes() const {
+// optional double scheduleDurationMsec = 8;
+inline bool WallmonMessage::has_scheduledurationmsec() const {
   return _has_bit(7);
+}
+inline void WallmonMessage::clear_scheduledurationmsec() {
+  scheduledurationmsec_ = 0;
+  _clear_bit(7);
+}
+inline double WallmonMessage::scheduledurationmsec() const {
+  return scheduledurationmsec_;
+}
+inline void WallmonMessage::set_scheduledurationmsec(double value) {
+  _set_bit(7);
+  scheduledurationmsec_ = value;
+}
+
+// optional uint32 networkMessageSizeBytes = 9;
+inline bool WallmonMessage::has_networkmessagesizebytes() const {
+  return _has_bit(8);
 }
 inline void WallmonMessage::clear_networkmessagesizebytes() {
   networkmessagesizebytes_ = 0u;
-  _clear_bit(7);
+  _clear_bit(8);
 }
 inline ::google::protobuf::uint32 WallmonMessage::networkmessagesizebytes() const {
   return networkmessagesizebytes_;
 }
 inline void WallmonMessage::set_networkmessagesizebytes(::google::protobuf::uint32 value) {
-  _set_bit(7);
+  _set_bit(8);
   networkmessagesizebytes_ = value;
 }
 

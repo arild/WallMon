@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-CFLAGS = -O2 -c -fPIC $(INC_PATH) $(LIB_PATH)
+CFLAGS = -c -fPIC $(INC_PATH) $(LIB_PATH)
 
 all: GenerateStubs MonitorDispatcher ProcessCollector Wallmon
 	mv *.a ..

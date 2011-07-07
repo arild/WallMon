@@ -37,7 +37,7 @@ private:
 
 
 	void _ScheduleForever();
-	static void _TimerCallback(struct ev_loop *loop, ev_timer *w, int revents);
+	static void _TimerCallback(struct ev_loop *loop, ev_timer *timer, int revents);
 };
 
 #endif /* SCHEDULER_H_ */

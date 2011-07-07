@@ -7,7 +7,8 @@ message WallmonMessage
 	optional double timestampMsec = 3;
 	optional string hostname = 4;
 	optional double sampleFrequencyMsec = 5;
-	optional double sampleTimeMsec = 6;
+	optional double sampleDurationMsec = 6;
 	optional double scheduleDriftMsec = 7;
-	optional uint32 networkMessageSizeBytes = 8;
+	optional double scheduleDurationMsec = 8;
+	optional uint32 networkMessageSizeBytes = 9;
 }

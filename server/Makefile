@@ -1,8 +1,7 @@
 include ../Makefile.inc
 
-
-
 SRC=*.cpp *.h
+CFLAGS= -Wno-multichar -rdynamic
 
 LIB_LOCAL=-lByteBuffer -lMonitorDispatcher
 ifeq ($(PLATFORM), Darwin)	
@@ -12,7 +11,7 @@ endif
 all: wallmons
 
 wallmons: $(SRC)
-	$(CC) $(CFLAGS_COMMON) -D $(PLATFORM) -o $@ $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON) $(LIB_LOCAL)
+	$(CC) $(CFLAGS) -D $(PLATFORM) -o $@ $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON) $(LIB_LOCAL)
 
 clean:
 	rm -f *.o

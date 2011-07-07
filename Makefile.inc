@@ -1,5 +1,4 @@
-CC=g++
-CFLAGS_COMMON = -Wno-multichar -g -rdynamic -fno-stack-protector
+CC=g++ -O4
 
 LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lwSystem -lWallmonMessage -lIoLogger
 

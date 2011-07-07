@@ -17,7 +17,8 @@
 using namespace std;
 
 // host name -> vector of CPU utilization
-typedef map<string, vector<double> *> DataContainer;
+typedef ProcessCollectorMessage::ProcessMessage ProcMsg;
+typedef map<string, vector<ProcMsg> *> DataContainer;
 
 class GnuplotHandler: public IDataHandlerProtobuf {
 public:
@@ -28,11 +29,11 @@ public:
 private:
 	ProcessCollectorMessage _message;
 	Gnuplot _plot;
-	vector<double> _x, _yDaemon, _yServer;
 	DataContainer _data;
-	void _GenerateGraph();
-	vector<double> _ComputeAverage();
-	void _SaveToFile(vector< vector<string> > xy);
+	void _GenerateCpuChart();
+	vector<double> _ComputeAverage(vector< vector<double> *> results);
+	void _SaveToFile(vector< vector<string> > xy, string firstLineComment);
+	int _expectedNumSamplesPerNode;
 };
 
 #endif /* HANDLER_H_ */

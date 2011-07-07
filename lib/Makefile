@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-CFLAGS = -O2 -c -fPIC
+CFLAGS = -c -fPIC
 DIRS_PRE = stubs 
 DIRS_POST = touchmanager
 

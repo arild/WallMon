@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <string>
 //#include <linux/limits.h>
 #include <sys/times.h>
 #include <iomanip>

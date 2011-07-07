@@ -20,7 +20,7 @@ endif
 LDFLAGS+= -lProcessCollector -lshout
 
 libboids2d.so: $(OBJS)
-	$(CC) -D $(PLATFORM) -g -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LDFLAGS)
+	$(CC) -D $(PLATFORM) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LDFLAGS)
 	mv *.so ../bin
 
 all: libboids2d.so
@@ -31,10 +31,10 @@ clean:
 	rm -f *.so
 
 %.o:%.cpp
-	$(CC) -D $(PLATFORM) -g -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
+	$(CC) -D $(PLATFORM) -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
 
 %.o:%.mm
-	$(CC) -D $(PLATFORM) -g -Wno-multichar -framework Cocoa $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
+	$(CC) -D $(PLATFORM) -Wno-multichar -framework Cocoa $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
         
 depend: .depend
 .depend:

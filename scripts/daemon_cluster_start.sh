@@ -9,6 +9,6 @@ then
 FORK_CMD="rocks run host"
 fi
 
-cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
+#cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
 ${FORK_CMD} "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
 

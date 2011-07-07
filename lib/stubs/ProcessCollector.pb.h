@@ -155,6 +155,20 @@ class ProcessCollectorMessage_ProcessMessage : public ::google::protobuf::Messag
   inline ::google::protobuf::uint32 networkoututilization() const;
   inline void set_networkoututilization(::google::protobuf::uint32 value);
   
+  // optional uint32 networkInBytes = 10;
+  inline bool has_networkinbytes() const;
+  inline void clear_networkinbytes();
+  static const int kNetworkInBytesFieldNumber = 10;
+  inline ::google::protobuf::uint32 networkinbytes() const;
+  inline void set_networkinbytes(::google::protobuf::uint32 value);
+  
+  // optional uint32 networkOutBytes = 11;
+  inline bool has_networkoutbytes() const;
+  inline void clear_networkoutbytes();
+  static const int kNetworkOutBytesFieldNumber = 11;
+  inline ::google::protobuf::uint32 networkoutbytes() const;
+  inline void set_networkoutbytes(::google::protobuf::uint32 value);
+  
   // @@protoc_insertion_point(class_scope:ProcessCollectorMessage.ProcessMessage)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -170,11 +184,13 @@ class ProcessCollectorMessage_ProcessMessage : public ::google::protobuf::Messag
   double memoryutilization_;
   ::google::protobuf::uint32 networkinutilization_;
   ::google::protobuf::uint32 networkoututilization_;
+  ::google::protobuf::uint32 networkinbytes_;
+  ::google::protobuf::uint32 networkoutbytes_;
   friend void  protobuf_AddDesc_ProcessCollector_2eproto();
   friend void protobuf_AssignDesc_ProcessCollector_2eproto();
   friend void protobuf_ShutdownFile_ProcessCollector_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -461,6 +477,38 @@ inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::networ
 inline void ProcessCollectorMessage_ProcessMessage::set_networkoututilization(::google::protobuf::uint32 value) {
   _set_bit(8);
   networkoututilization_ = value;
+}
+
+// optional uint32 networkInBytes = 10;
+inline bool ProcessCollectorMessage_ProcessMessage::has_networkinbytes() const {
+  return _has_bit(9);
+}
+inline void ProcessCollectorMessage_ProcessMessage::clear_networkinbytes() {
+  networkinbytes_ = 0u;
+  _clear_bit(9);
+}
+inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::networkinbytes() const {
+  return networkinbytes_;
+}
+inline void ProcessCollectorMessage_ProcessMessage::set_networkinbytes(::google::protobuf::uint32 value) {
+  _set_bit(9);
+  networkinbytes_ = value;
+}
+
+// optional uint32 networkOutBytes = 11;
+inline bool ProcessCollectorMessage_ProcessMessage::has_networkoutbytes() const {
+  return _has_bit(10);
+}
+inline void ProcessCollectorMessage_ProcessMessage::clear_networkoutbytes() {
+  networkoutbytes_ = 0u;
+  _clear_bit(10);
+}
+inline ::google::protobuf::uint32 ProcessCollectorMessage_ProcessMessage::networkoutbytes() const {
+  return networkoutbytes_;
+}
+inline void ProcessCollectorMessage_ProcessMessage::set_networkoutbytes(::google::protobuf::uint32 value) {
+  _set_bit(10);
+  networkoutbytes_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -71,8 +71,9 @@ void ProcessCollector::OnStop()
 
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
-	if (_processNames.size() == 0)
-		_FindAllNewProcesses();
+	// TODO: Investigate why this causes segfault at arbirary intervals
+//	if (_processNames.size() == 0)
+//		_FindAllNewProcesses();
 
 	ProcessCollectorMessage processesMsg;
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
@@ -104,13 +105,11 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			util = monitor->GetTotalProgramSize() / (double)_totalMemoryMb;
  			processMsg->set_memoryutilization(util * 100.);
 		}
-		if (filter->has_networkinutilization()) {
-			util = monitor->GetNetworkInInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
-			processMsg->set_networkinutilization(util * 100.);
+		if (filter->has_networkinbytes()) {
+			processMsg->set_networkinbytes(monitor->GetNetworkInInBytes());
 		}
-		if (filter->has_networkoututilization()) {
-			util = monitor->GetNetworkOutInBytes() / NETWORK_MAX_IN_AND_OUT_BYTES;
-			processMsg->set_networkoututilization(util * 100.);
+		if (filter->has_networkoutbytes()) {
+			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
 		}
 	}
 
