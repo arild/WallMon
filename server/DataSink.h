@@ -28,7 +28,7 @@ private:
 	boost::thread _thread;
 	struct ev_loop *_loop;
 	int _acceptSockfd;
-	set<ev::io *> *_watcherSet;
+	static set<ev::io *> _watcherSet;
 	static DataRouter *_router;
 	static unsigned int _numConnectedClients;
 	static IoLogger *_ioLogger;

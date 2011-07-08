@@ -18,6 +18,7 @@
 // Declared static variables. Static because there are some scope
 // problems with libev during the socket read callback
 
+set<ev::io *> DataSink::_watcherSet;
 DataRouter *DataSink::_router;
 IoLogger *DataSink::_ioLogger;
 unsigned int DataSink::_numConnectedClients;
@@ -56,14 +57,12 @@ DataSink::DataSink(DataRouter *router)
 	accept_watcher->start(sockfd, EV_READ);
 
 	// Book-keeping for cleanup
-	_watcherSet = new set<ev::io *>();
-	_watcherSet->insert(accept_watcher);
+	pair<set<ev::io *>::iterator,bool> retval = _watcherSet.insert(accept_watcher);
 }
 
 DataSink::~DataSink()
 {
 	ev_loop_destroy(_loop);
-	delete _watcherSet;
 }
 
 void DataSink::Start()
@@ -75,7 +74,7 @@ void DataSink::Stop()
 {
 	LOG(INFO) << "stopping DataSink...";
 	set<ev::io *>::iterator it;
-	for (it = _watcherSet->begin(); it != _watcherSet->end(); it++)
+	for (it = _watcherSet.begin(); it != _watcherSet.end(); it++)
 		_DeleteAndCleanupWatcher(*(*it));
 	ev_break(_loop, EVBREAK_ALL);
 	//_thread.join(); // Can take up to several seconds
@@ -110,7 +109,7 @@ void DataSink::_AcceptCallback(ev::io &watcher, int revents)
 	clientWatcher->set<DataSink, &DataSink::_ReadCallback> (this);
 	clientWatcher->data = new ByteBuffer(RECEIVE_BUF_START_SIZE); // Buffer for saving concatenated messages
 	clientWatcher->start(clientSockfd, EV_READ);
-	_watcherSet->insert(clientWatcher);
+	_watcherSet.insert(clientWatcher);
 }
 
 void DataSink::_ReadCallback(ev::io &watcher, int revents)
@@ -129,7 +128,7 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 		return;
 	}
 
-	if (numBytesReceived == 0) {
+	if (numBytesReceived <= 0) {
 		// Stop and free watcher if client socket is closing
 		_DeleteAndCleanupWatcher(watcher);
 		LOG(INFO) << --_numConnectedClients << " client(s) connected";
@@ -168,7 +167,8 @@ void DataSink::_DeleteAndCleanupWatcher(ev::io &watcher)
 {
 	watcher.stop(); // Make watcher inactive
 	close(watcher.fd); // Close associated socket
-	_watcherSet->erase(&watcher);
+	int numWatchersRemoved = _watcherSet.erase(&watcher);
+	CHECK(numWatchersRemoved == 1);
 	delete &watcher; // Release memory
 }
 
