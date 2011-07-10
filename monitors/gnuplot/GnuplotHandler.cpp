@@ -12,28 +12,72 @@
 #include "GnuplotHandler.h"
 #include "Common.h"
 
+#define TARGET_PROCESS		"wallmond"
+
 int TOTAL_NUM_SAMPLES;
 int NUM_SAMPLES = 0;
-
-double totalScheduleDurationMsec = 0;
-double totalScheduleDriftMsec = 0;
-
-double minSampleDurationMsec = 999999;
-double maxSampleDurationMsec = 0;
-double totalSampleDurationMsec = 0;
-
-double minMemory = 999999;
-double maxMemory = 0;
-double totalMemory = 0;
-
-unsigned int minNetOutBytes = 999999;
-unsigned int maxNetOutBytes = 0;
-unsigned int totalNetOutBytes = 0;
+int currentSampleFrequency = -1;
 
 
-int expectedSeqNum = 0;
+double totalScheduleDurationMsec;
+double totalScheduleDriftMsec;
+
+double minSampleDurationMsec;
+double maxSampleDurationMsec;
+double totalSampleDurationMsec;
+
+double minMemory;
+double maxMemory;
+double totalMemory;
+
+unsigned int minNetOutBytes;
+unsigned int maxNetOutBytes;
+unsigned int totalNetOutBytes;
+
 int NUM_NODES = 0;
 
+void reset_statistics()
+{
+	totalScheduleDurationMsec = 0;
+	totalScheduleDriftMsec = 0;
+
+	minSampleDurationMsec = 999999;
+	maxSampleDurationMsec = 0;
+	totalSampleDurationMsec = 0;
+
+	minMemory = 999999;
+	maxMemory = 0;
+	totalMemory = 0;
+
+	minNetOutBytes = 999999;
+	maxNetOutBytes = 0;
+	totalNetOutBytes = 0;
+}
+
+void print_statistics(bool perInterval)
+{
+
+	LOG(INFO) << "";
+	LOG(INFO) << "***** " << "Statistics at " << currentSampleFrequency << " frequency *****";
+	LOG(INFO) << "----------------------------------";
+	LOG(INFO) << "Avg schedule duration msec: " << totalScheduleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Avg total schedule drift msec: " << totalScheduleDriftMsec / (double)NUM_NODES;
+	LOG(INFO) << "----------------------------------";
+	LOG(INFO) << "Min sample duration msec: " << minSampleDurationMsec;
+	LOG(INFO) << "Max sample duration msec: " << maxSampleDurationMsec;
+	LOG(INFO) << "Average sample duration msec: " << totalSampleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Average total sample duration msec: " << totalSampleDurationMsec / (double)NUM_NODES;
+	LOG(INFO) << "----------------------------------";
+	LOG(INFO) << "Min memory: " << minMemory;
+	LOG(INFO) << "Max memory: " << maxMemory;
+	LOG(INFO) << "Avg memory: " << totalMemory / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "----------------------------------";
+	LOG(INFO) << "Min net out: " << minNetOutBytes;
+	LOG(INFO) << "Max net out: " << maxNetOutBytes;
+	LOG(INFO) << "Avg net out: " << totalNetOutBytes / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "----------------------------------";
+	LOG(INFO) << "";
+}
 
 template <typename T>
 vector<string> _ToString(vector<T> v)
@@ -52,6 +96,7 @@ void GnuplotHandler::OnInit(Context *ctx)
 {
 	ctx->key = "gnuplot";
 	_expectedNumSamplesPerNode = get_total_num_samples();
+	reset_statistics();
 }
 
 void GnuplotHandler::OnStop()
@@ -70,13 +115,12 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		totalScheduleDriftMsec += msg->scheduledriftmsec();
 	if (msg->has_scheduledurationmsec())
 		totalScheduleDurationMsec += msg->scheduledurationmsec();
+	if (msg->has_hz())
+		LOG(INFO) << "Current Hz: " << msg->hz();
+
 	totalSampleDurationMsec += msg->sampledurationmsec();
 	minSampleDurationMsec = min(minSampleDurationMsec, msg->sampledurationmsec());
 	maxSampleDurationMsec = max(maxSampleDurationMsec, msg->sampledurationmsec());
-
-
-	LOG_EVERY_N(INFO, 100) << "min: " << minSampleDurationMsec << " | max: " << maxSampleDurationMsec;
-
 
 	for (int i = 0; i < _message.processmessage_size(); i++) {
 		ProcMsg *procMsg = _message.mutable_processmessage(i);
@@ -109,7 +153,12 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		maxNetOutBytes = max(maxNetOutBytes, procMsg->networkoutbytes());
 		totalNetOutBytes += procMsg->networkoutbytes();
 
-		LOG_EVERY_N(INFO, 10) << "Memory: " << procMsg->memoryutilization();
+		if (msg->hostname().compare("ice.cs.uit.no") == 0 && msg->samplefrequencymsec() != currentSampleFrequency) {
+			print_statistics(true);
+			reset_statistics();
+			currentSampleFrequency = msg->samplefrequencymsec();
+		}
+
 		NUM_SAMPLES += 1;
 		LOG_EVERY_N(INFO, 500) << "Sampling status: " << NUM_SAMPLES<< "/" << TOTAL_NUM_SAMPLES << " | " << msg->hostname();
 		if (NUM_SAMPLES == TOTAL_NUM_SAMPLES) {
@@ -120,31 +169,16 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 				v->erase(v->begin(), v->begin() + get_num_samples(0));
 			}
 
-			LOG(INFO) << "----------------------------------";
 			LOG(INFO) << "all samples received (" << NUM_SAMPLES << "), generating charts...";
-			LOG(INFO) << "Average schedule duration msec: " << totalScheduleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
-			LOG(INFO) << "Average total schedule drift msec: " << totalScheduleDriftMsec / (double)NUM_NODES;
-			LOG(INFO) << "----------------------------------";
-			LOG(INFO) << "Min sample duration msec: " << minSampleDurationMsec;
-			LOG(INFO) << "Max sample duration msec: " << maxSampleDurationMsec;
-			LOG(INFO) << "Average sample duration msec: " << totalSampleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
-			LOG(INFO) << "Average total sample duration msec: " << totalSampleDurationMsec / (double)NUM_NODES;
-			LOG(INFO) << "----------------------------------";
-			LOG(INFO) << "Min memory: " << minMemory;
-			LOG(INFO) << "Max memory: " << maxMemory;
-			LOG(INFO) << "Avg memory: " << totalMemory / (double)(NUM_NODES * NUM_SAMPLES);
-			LOG(INFO) << "----------------------------------";
-			LOG(INFO) << "Min net out: " << minNetOutBytes;
-			LOG(INFO) << "Max net out: " << maxNetOutBytes;
-			LOG(INFO) << "Avg net out: " << totalNetOutBytes / (double)(NUM_NODES * NUM_SAMPLES);
-			LOG(INFO) << "----------------------------------";
 
+			print_statistics(false);
 
 			_GenerateCpuChart();
 			LOG(INFO) << "charts generated, exiting";
 			exit(0);
 		}
 	}
+
 }
 
 void GnuplotHandler::_GenerateCpuChart()
@@ -195,7 +229,7 @@ void GnuplotHandler::_GenerateCpuChart()
 	_plot << "set style fill solid 1.00 border -1";
 	_plot << "set style histogram rowstacked";
 	_plot << "set style data histograms";
-	_plot << "set ylabel \"Average CPU Utilization\"";
+	_plot << "set ylabel \"Average CPU Consumption in Percent\"";
 	_plot << "set xlabel \"Hz (Number of samples per second)\"";
 	_plot << "plot \"tmp.dat\" using 2 t \"system-level\", '' using 3:xtic(1) t \"user-level\"";
 	System::RunCommand("ps2pdf cpu_chart.ps");

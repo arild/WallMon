@@ -5,8 +5,6 @@ using namespace std;
 
 #define KEY					"gnuplot"
 #define MESSAGE_BUF_SIZE	4096
-#define TARGET_PROCESS		"wallmond"
-
 
 typedef struct
 {
