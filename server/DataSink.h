@@ -8,7 +8,7 @@
 #ifndef NETWORK_H_
 #define NETWORK_H_
 
-#include <set>
+#include <map>
 #include <boost/thread.hpp>
 #include <ev++.h>
 #include "PracticalSocket.h"
@@ -16,6 +16,7 @@
 #include "IoLogger.h"
 
 using namespace std;
+typedef map<ev::io *, string> WatcherMap;
 
 class DataSink {
 public:
@@ -28,7 +29,7 @@ private:
 	boost::thread _thread;
 	struct ev_loop *_loop;
 	int _acceptSockfd;
-	static set<ev::io *> _watcherSet;
+	static WatcherMap _watcherMap;
 	static DataRouter *_router;
 	static unsigned int _numConnectedClients;
 	static IoLogger *_ioLogger;

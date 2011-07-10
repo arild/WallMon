@@ -14,6 +14,6 @@ wallmons: $(SRC)
 	$(CC) $(CFLAGS) -D $(PLATFORM) -o $@ $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON) $(LIB_LOCAL)
 
 clean:
-	rm -f *.o
+	${CLEAN}
 	rm -f wallmons
 

@@ -9,6 +9,8 @@
 
 #include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h> // inet_ntoa()
+#include <boost/foreach.hpp>
 #include <glog/logging.h>
 #include "DataSink.h"
 #include "Config.h"
@@ -18,7 +20,7 @@
 // Declared static variables. Static because there are some scope
 // problems with libev during the socket read callback
 
-set<ev::io *> DataSink::_watcherSet;
+WatcherMap DataSink::_watcherMap;
 DataRouter *DataSink::_router;
 IoLogger *DataSink::_ioLogger;
 unsigned int DataSink::_numConnectedClients;
@@ -54,10 +56,11 @@ DataSink::DataSink(DataRouter *router)
 	_loop = ev_default_loop(0);
 	ev::io *accept_watcher = new ev::io(_loop);
 	accept_watcher->set<DataSink, &DataSink::_AcceptCallback> (this);
+	accept_watcher->data = NULL;
 	accept_watcher->start(sockfd, EV_READ);
 
 	// Book-keeping for cleanup
-	pair<set<ev::io *>::iterator,bool> retval = _watcherSet.insert(accept_watcher);
+	_watcherMap[accept_watcher] = "";
 }
 
 DataSink::~DataSink()
@@ -73,9 +76,8 @@ void DataSink::Start()
 void DataSink::Stop()
 {
 	LOG(INFO) << "stopping DataSink...";
-	set<ev::io *>::iterator it;
-	for (it = _watcherSet.begin(); it != _watcherSet.end(); it++)
-		_DeleteAndCleanupWatcher(*(*it));
+	BOOST_FOREACH (WatcherMap::value_type &item, _watcherMap)
+		_DeleteAndCleanupWatcher(*item.first);
 	ev_break(_loop, EVBREAK_ALL);
 	//_thread.join(); // Can take up to several seconds
 	LOG(INFO) << "DataSink stopped";
@@ -102,14 +104,16 @@ void DataSink::_AcceptCallback(ev::io &watcher, int revents)
 		LOG(WARNING) << "socket accept() failed";
 		return;
 	}
-	LOG(INFO) << ++_numConnectedClients << " client(s) connected";
+	string clientIpAddress = (string)inet_ntoa(client_addr.sin_addr);
+	LOG(INFO) << "client connected: " << clientIpAddress <<  " -> "
+			<< ++_numConnectedClients << " client(s) connected";
 
 	// Initialize and start watcher to read client requests
 	ev::io *clientWatcher = new ev::io(watcher.loop);
 	clientWatcher->set<DataSink, &DataSink::_ReadCallback> (this);
 	clientWatcher->data = new ByteBuffer(RECEIVE_BUF_START_SIZE); // Buffer for saving concatenated messages
 	clientWatcher->start(clientSockfd, EV_READ);
-	_watcherSet.insert(clientWatcher);
+	_watcherMap[clientWatcher] = clientIpAddress;
 }
 
 void DataSink::_ReadCallback(ev::io &watcher, int revents)
@@ -130,8 +134,9 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 
 	if (numBytesReceived <= 0) {
 		// Stop and free watcher if client socket is closing
+		LOG(INFO) << "client disconnected: " << _watcherMap[&watcher] << " -> "
+				<< --_numConnectedClients << " client(s) connected";
 		_DeleteAndCleanupWatcher(watcher);
-		LOG(INFO) << --_numConnectedClients << " client(s) connected";
 		return;
 	}
 
@@ -167,7 +172,7 @@ void DataSink::_DeleteAndCleanupWatcher(ev::io &watcher)
 {
 	watcher.stop(); // Make watcher inactive
 	close(watcher.fd); // Close associated socket
-	int numWatchersRemoved = _watcherSet.erase(&watcher);
+	int numWatchersRemoved = _watcherMap.erase(&watcher);
 	CHECK(numWatchersRemoved == 1);
 	delete &watcher; // Release memory
 }
