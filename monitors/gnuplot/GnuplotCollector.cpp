@@ -10,7 +10,7 @@
 #include "ProcessCollector.h"
 #include "Common.h"
 
-#define SERVER				"129.242.19.56"//"localhost"
+#define SERVER				"ice.cs.uit.no"//"localhost"
 using namespace std;
 
 class Controller: public IProcessCollectorController {
@@ -53,11 +53,6 @@ void Controller::AfterSample(Context *ctx)
 extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector(new Controller);
-
-	//	list<string> processNames;
-	//	processNames.push_back(WALLMON_DAEMON);
-	//	processNames.push_back(WALLMON_SERVER);
-	//	p->SetProcesses(processNames);
 
 	p->context->key = KEY;
 	p->context->AddServer(SERVER);

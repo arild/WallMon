@@ -10,5 +10,6 @@ message WallmonMessage
 	optional double sampleDurationMsec = 6;
 	optional double scheduleDriftMsec = 7;
 	optional double scheduleDurationMsec = 8;
-	optional uint32 networkMessageSizeBytes = 9;
+	optional uint32 hz = 9;
+	optional uint32 networkMessageSizeBytes = 10;
 }

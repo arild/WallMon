@@ -24,12 +24,14 @@ public:
 	vector< tuple<string, int> > servers;
 	int sampleFrequencyMsec;
 	bool concurrentExecution;
+	bool includeStatistics;
 
 	Context()
 	{
 		key = "";
 		sampleFrequencyMsec = 1000;
 		concurrentExecution = false;
+		includeStatistics = false;
 	}
 
 	~Context()

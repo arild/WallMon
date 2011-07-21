@@ -70,7 +70,7 @@ void ControlPanel::OnRender()
 
 	_font->RenderText("Tail", 15.5, 88);
 
-	glColor3f(0, 1, 0);
+	glColor3f(1, 1, 1);
 	_fontLarge->RenderText("Metric Types", 50, 192);
 	_fontLarge->RenderText("Data Views", 50, 152);
 	_fontLarge->RenderText("Configuration", 50, 112);

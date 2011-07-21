@@ -18,7 +18,7 @@
 
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
-#define FILTER_THRESHOLD 			3.0
+#define FILTER_THRESHOLD 			2.0
 
 int numUniqueProcesses = 0;
 
@@ -47,9 +47,13 @@ void Handler::OnInit(Context *ctx)
 	 * the 'entire' display wall is used, and coordinates are mapped thereafter. Also,
 	 * the single screen is told to show everything.
 	 */
-	_wallView = new WallView(0, 0, 7, 4);
+	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
-	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
+//	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
+//	_boidsApp = new BoidsApp(1280, 800, _eventSystem);
+	_boidsApp = new BoidsApp(1600, 1200, _eventSystem);
+
+
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif
 	// Common operations
@@ -105,8 +109,8 @@ void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg
 	_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
 	// CPU
-	double user = proc->stat->userCpuUtilization;
-	double system = proc->stat->systemCpuUtilization;
+	double user = proc->stat->userCpuUtilization * 32;
+	double system = proc->stat->systemCpuUtilization * 32;
 	double totalCpuUtilization = user + system;
 	double userCpuRelativeShare = 50;
 	if (totalCpuUtilization > 0)

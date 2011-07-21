@@ -101,7 +101,7 @@ void Button::OnRender()
 		float widthSave = width;
 		float txSave = tx;
 
-		glColor3f(0, 1, 0);
+		glColor3ub(0, 100, 0);
 		width = _offset;
 		DrawEntityShape();
 
@@ -114,7 +114,7 @@ void Button::OnRender()
 		tx = txSave;
 	} else {
 		if (_isActivated)
-			glColor3f(0, 1, 0);
+			glColor3ub(0, 100, 0);
 		else
 			glColor3f(1, 1, 1);
 		DrawEntityShape();

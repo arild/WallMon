@@ -56,6 +56,11 @@ float Fps::GetSpeedFactor()
 	return _speedFactor;
 }
 
+unsigned int Fps::GetCurrentTimeInMsec()
+{
+	return _currentTime;
+}
+
 float Fps::GetMaxIterationsPerTimeUnit(float msec)
 {
 	return msec / (float)MAX_FPS;

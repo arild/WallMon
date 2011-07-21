@@ -31,15 +31,20 @@ public:
 	IDataCollector *collector; // The collector implementation itself
 	IDataCollectorProtobuf *collectorProtobuf;
 
-	double previousTsBeforeSampleSec;
-	double scheduleDurationSec;
+	double scheduleDurationSec; // The actual time it takes for a collector to be invoked over again
+	double previousTsBeforeSampleSec; // Used to calculate scheduleDurationSec
 	unsigned int numSamples; // Number of times the collector has been invoked
+	unsigned int numSamplesLastSecond;
+
+	double tsNumSamplesPerSecond; // Time stamp used for calculating the number of samples for the last second
 
 	CollectorTimerEvent()
 	{
-		previousTsBeforeSampleSec = -1;
 		scheduleDurationSec = -1;
+		previousTsBeforeSampleSec = -1;
 		numSamples = 0;
+		numSamplesLastSecond = 0;
+		tsNumSamplesPerSecond = ev_time();
 	}
 };
 
@@ -142,6 +147,7 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 	double tsBeforeSampleSec = ev_now(loop);
 
 	WallmonMessage msg;
+	msg.set_key(event->ctx->key);
 	if (event->collector) {
 		void *data;
 		int dataLen = event->collector->Sample(&data);
@@ -156,7 +162,8 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 		LOG(WARNING) << "negative sample frequency of key: " << event->ctx->key;
 	}
 
-	double sampleDurationSec = ev_time() - tsBeforeSampleSec;
+	double tsAfterSampleSec = ev_time();
+	double sampleDurationSec = tsAfterSampleSec - tsBeforeSampleSec;
 	if (event->ctx->sampleFrequencyMsec != oldSampleFrequencyMsec) {
 		// Tell libev about new frequency
 		double repeat = event->ctx->sampleFrequencyMsec / (double) 1000;
@@ -169,39 +176,56 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 		}
 		ev_timer_set(timer, again, repeat); // Modifies internal values
 		ev_timer_again(loop, timer); // Restarts the timer (loading new values)
+
+		if (event->ctx->includeStatistics) {
+			// Reset hz tracker
+			event->numSamplesLastSecond = 0;
+			event->tsNumSamplesPerSecond = tsAfterSampleSec;
+		}
 	}
 
-	event->numSamples += 1;
-	msg.set_key(event->ctx->key);
-	msg.set_timestampmsec(tsBeforeSampleSec * (double)1000);
-	msg.set_hostname(System::GetHostname());
-	msg.set_samplefrequencymsec(event->ctx->sampleFrequencyMsec);
-	msg.set_sampledurationmsec(sampleDurationSec * (double)1000);
-	if (event->previousTsBeforeSampleSec > 0) {
-		double actualFrequencyMsec = (tsBeforeSampleSec - event->previousTsBeforeSampleSec) * (double)1000;
-		msg.set_scheduledriftmsec(actualFrequencyMsec - oldSampleFrequencyMsec);
-	}
-	if (event->scheduleDurationSec > 0)
-		msg.set_scheduledurationmsec(event->scheduleDurationSec * (double)1000);
+	if (event->ctx->includeStatistics) {
+		event->numSamples += 1;
+		event->numSamplesLastSecond += 1;
+		msg.set_timestampmsec(tsBeforeSampleSec * (double)1000);
+		msg.set_hostname(System::GetHostname());
+		msg.set_samplefrequencymsec(oldSampleFrequencyMsec);
+		msg.set_sampledurationmsec(sampleDurationSec * (double)1000);
+		if (event->previousTsBeforeSampleSec > 0) {
+			double actualFrequencyMsec = (tsBeforeSampleSec - event->previousTsBeforeSampleSec) * (double)1000;
+			msg.set_scheduledriftmsec(actualFrequencyMsec - oldSampleFrequencyMsec);
+		}
+		if (event->scheduleDurationSec > 0)
+			msg.set_scheduledurationmsec(event->scheduleDurationSec * (double)1000);
 
+		double diff = tsAfterSampleSec - (double)event->tsNumSamplesPerSecond;
+		if (tsAfterSampleSec - (double)event->tsNumSamplesPerSecond > 1.) {
+			msg.set_hz(event->numSamplesLastSecond);
+			event->numSamplesLastSecond = 0;
+			event->tsNumSamplesPerSecond = tsAfterSampleSec;
+		}
+	}
 	// Compose network message
 	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
 
-	// Send message to defined hosts
+	// Associate defined destinations (socket file descriptors) with composed message
 	for (int i = 0; i < event->ctx->servers.size(); i++) {
 		string serverAddress = event->ctx->servers[i].get<0> ();
 		int serverPort = event->ctx->servers[i].get<1> ();
-		LOG_EVERY_N(INFO, 1000) << "Streaming to: " << serverAddress << " | " << serverPort;
 		int sockfd = streamer->SetupStream(serverAddress, serverPort);
 		if (sockfd > -1)
 			item.serversSockFd.push_back(sockfd);
 		else
 			LOG(ERROR) << "invalid sockfd for: " << serverAddress;
 	}
+
 	// Queue message for transmission
 	Scheduler::streamer->Stream(item);
-	event->previousTsBeforeSampleSec = tsBeforeSampleSec; // Save timestamp until next schedule
-	event->scheduleDurationSec = ev_time() - tsBeforeSampleSec;
+
+	if (event->ctx->includeStatistics) {
+		event->previousTsBeforeSampleSec = tsBeforeSampleSec; // Save timestamp until next schedule
+		event->scheduleDurationSec = ev_time() - tsBeforeSampleSec;
+	}
 }
 

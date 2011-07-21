@@ -22,7 +22,7 @@ extern "C" ProcessCollector *create_collector()
 	}
 	else {
 		// Currently assumed to be ice cluster
-		p->context->AddServer("129.242.19.56");
+		p->context->AddServer("129.242.19.61");
 		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	}
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;

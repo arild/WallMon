@@ -39,10 +39,8 @@ int main(int argc, char *argv[])
 		switch (c)
 		{
 		case 'd':
-#ifdef Linux // On OS X (Darwin) Daemonize() becomes an unknown symbol...
 			LOG(INFO) << "Daemonizing...";
 			System::Daemonize();
-#endif
 			break;
 		default:
 			;

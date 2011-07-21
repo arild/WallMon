@@ -12,11 +12,13 @@ public:
 	void OnLoop();
 	int GetFps();
 	float GetSpeedFactor();
+	unsigned int GetCurrentTimeInMsec();
 	static float GetMaxIterationsPerTimeUnit(float msec);
 
 private:
-	int _oldTime;
-	int _lastTime;
+	unsigned int _oldTime;
+	unsigned int _lastTime;
+	unsigned int _currentTime;
 	float _speedFactor;
 	int _numFrames;
 	int _frames;

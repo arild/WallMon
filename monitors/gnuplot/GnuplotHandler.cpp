@@ -14,11 +14,13 @@
 
 #define TARGET_PROCESS		"wallmond"
 
-int TOTAL_NUM_SAMPLES;
-int NUM_SAMPLES = 0;
+int EXPECTED_TOTAL_NUM_SAMPLES;
+int CURRENT_NUM_SAMPLES = 0;
 int currentSampleFrequency = -1;
 
 
+//double minScheduleDurationMsec;
+//double maxScheduleDurationMsec;
 double totalScheduleDurationMsec;
 double totalScheduleDriftMsec;
 
@@ -38,6 +40,7 @@ int NUM_NODES = 0;
 
 void reset_statistics()
 {
+
 	totalScheduleDurationMsec = 0;
 	totalScheduleDriftMsec = 0;
 
@@ -54,27 +57,26 @@ void reset_statistics()
 	totalNetOutBytes = 0;
 }
 
-void print_statistics(bool perInterval)
+void print_statistics()
 {
-
 	LOG(INFO) << "";
-	LOG(INFO) << "***** " << "Statistics at " << currentSampleFrequency << " frequency *****";
+	LOG(INFO) << "***** Statistics for session: *****";
 	LOG(INFO) << "----------------------------------";
-	LOG(INFO) << "Avg schedule duration msec: " << totalScheduleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Avg schedule duration msec: " << totalScheduleDurationMsec / (double)(CURRENT_NUM_SAMPLES);
 	LOG(INFO) << "Avg total schedule drift msec: " << totalScheduleDriftMsec / (double)NUM_NODES;
 	LOG(INFO) << "----------------------------------";
 	LOG(INFO) << "Min sample duration msec: " << minSampleDurationMsec;
 	LOG(INFO) << "Max sample duration msec: " << maxSampleDurationMsec;
-	LOG(INFO) << "Average sample duration msec: " << totalSampleDurationMsec / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Average sample duration msec: " << totalSampleDurationMsec / (double)(CURRENT_NUM_SAMPLES);
 	LOG(INFO) << "Average total sample duration msec: " << totalSampleDurationMsec / (double)NUM_NODES;
 	LOG(INFO) << "----------------------------------";
 	LOG(INFO) << "Min memory: " << minMemory;
 	LOG(INFO) << "Max memory: " << maxMemory;
-	LOG(INFO) << "Avg memory: " << totalMemory / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Avg memory: " << totalMemory / (double)(CURRENT_NUM_SAMPLES);
 	LOG(INFO) << "----------------------------------";
 	LOG(INFO) << "Min net out: " << minNetOutBytes;
 	LOG(INFO) << "Max net out: " << maxNetOutBytes;
-	LOG(INFO) << "Avg net out: " << totalNetOutBytes / (double)(NUM_NODES * NUM_SAMPLES);
+	LOG(INFO) << "Avg net out: " << totalNetOutBytes / (double)(CURRENT_NUM_SAMPLES);
 	LOG(INFO) << "----------------------------------";
 	LOG(INFO) << "";
 }
@@ -90,6 +92,45 @@ vector<string> _ToString(vector<T> v)
 		ss.str("");
 	}
 	return ret;
+}
+
+/**
+ *
+ */
+template <typename T>
+vector<T> _ComputeAverage(vector< vector<T> > &samples)
+{
+	vector<T> average;
+	// Go through the different sample intervals
+	// i starts at 1 in order to skip warm-up interval
+	for (int i = 1, resultIndex = 0; i < NUM_SAMPLE_INTERVALS; i++) {
+
+		// Go through each sample (one for each node) within current sample interval
+		int numSamplesForInterval = get_num_samples(i);
+		double sumAllNodes = 0;
+		for (int j = 0; j < NUM_NODES; j++) {
+
+			// Within each sample, compute the average value for given sample interval
+			for (int k = 0; k < numSamplesForInterval; k++) {
+				sumAllNodes += samples[j][resultIndex + k];
+			}
+		}
+		T avg = (T)(sumAllNodes / (T)(numSamplesForInterval * NUM_NODES));
+		average.push_back(avg);
+		resultIndex += numSamplesForInterval;
+	}
+	return average;
+}
+
+template <typename T>
+vector<T> _AverageToPerSecond(vector<T> &average)
+{
+	vector<T> averagePerSec(average.size());
+	vector<int> hz = get_sample_frequencies_in_hz_exclude_warmup();
+	for (int i = 0; i < hz.size(); i++) {
+		averagePerSec[i] = average[i] * hz[i];
+	}
+	return averagePerSec;
 }
 
 void GnuplotHandler::OnInit(Context *ctx)
@@ -108,6 +149,7 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 	const char *data = msg->data().c_str();
 	int length = msg->data().length();
 
+
 	if (_message.ParseFromArray(data, length) == false)
 		LOG(FATAL) << "Protocol buffer parsing failed: ";
 
@@ -118,9 +160,9 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 	if (msg->has_hz())
 		LOG(INFO) << "Current Hz: " << msg->hz();
 
-	totalSampleDurationMsec += msg->sampledurationmsec();
 	minSampleDurationMsec = min(minSampleDurationMsec, msg->sampledurationmsec());
 	maxSampleDurationMsec = max(maxSampleDurationMsec, msg->sampledurationmsec());
+	totalSampleDurationMsec += msg->sampledurationmsec();
 
 	for (int i = 0; i < _message.processmessage_size(); i++) {
 		ProcMsg *procMsg = _message.mutable_processmessage(i);
@@ -132,7 +174,7 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		if (it == _data.end()) {
 			v = new vector<ProcMsg>;
 			NUM_NODES += 1;
-			TOTAL_NUM_SAMPLES = _expectedNumSamplesPerNode * NUM_NODES;
+			EXPECTED_TOTAL_NUM_SAMPLES = _expectedNumSamplesPerNode * NUM_NODES;
 			_data[msg->hostname()] = v;
 		} else {
 			v = it->second;
@@ -145,6 +187,9 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 
 		v->push_back(*procMsg);
 
+		unsigned int in = procMsg->networkinbytes();
+		LOG(INFO) << "out: " << procMsg->networkoutbytes() << " | in: " << in;
+
 		minMemory = min(minMemory, procMsg->memoryutilization());
 		maxMemory = max(maxMemory, procMsg->memoryutilization());
 		totalMemory += (double)procMsg->memoryutilization();
@@ -153,27 +198,13 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		maxNetOutBytes = max(maxNetOutBytes, procMsg->networkoutbytes());
 		totalNetOutBytes += procMsg->networkoutbytes();
 
-		if (msg->hostname().compare("ice.cs.uit.no") == 0 && msg->samplefrequencymsec() != currentSampleFrequency) {
-			print_statistics(true);
-			reset_statistics();
-			currentSampleFrequency = msg->samplefrequencymsec();
-		}
+		CURRENT_NUM_SAMPLES += 1;
+		LOG_EVERY_N(INFO, 500) << "Sampling status: " << CURRENT_NUM_SAMPLES<< "/" << EXPECTED_TOTAL_NUM_SAMPLES << " | " << msg->hostname();
+		if (CURRENT_NUM_SAMPLES == EXPECTED_TOTAL_NUM_SAMPLES) {
+			LOG(INFO) << "all samples received (" << CURRENT_NUM_SAMPLES << "), generating charts...";
+			print_statistics();
+			_GenerateCharts();
 
-		NUM_SAMPLES += 1;
-		LOG_EVERY_N(INFO, 500) << "Sampling status: " << NUM_SAMPLES<< "/" << TOTAL_NUM_SAMPLES << " | " << msg->hostname();
-		if (NUM_SAMPLES == TOTAL_NUM_SAMPLES) {
-
-			// Discard the warm-up interval
-			BOOST_FOREACH (DataContainer::value_type &item, _data) {
-				vector<ProcMsg> *v = item.second;
-				v->erase(v->begin(), v->begin() + get_num_samples(0));
-			}
-
-			LOG(INFO) << "all samples received (" << NUM_SAMPLES << "), generating charts...";
-
-			print_statistics(false);
-
-			_GenerateCpuChart();
 			LOG(INFO) << "charts generated, exiting";
 			exit(0);
 		}
@@ -181,30 +212,48 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 
 }
 
-void GnuplotHandler::_GenerateCpuChart()
+void GnuplotHandler::_GenerateCharts()
 {
-	// Extract user- and system-cpu from map of vectors to vector of vectors
-	vector<vector<double> *> userCpu, systemCpu;
+	// Discard the warm-up interval
 	BOOST_FOREACH (DataContainer::value_type &item, _data) {
-		vector<ProcMsg> *procMsgVector = item.second;
-		userCpu.push_back(new vector<double>);
-		systemCpu.push_back(new vector<double>);
-
-		BOOST_FOREACH (ProcMsg procMsg, *procMsgVector) {
-			userCpu.back()->push_back(procMsg.usercpuutilization());
-			systemCpu.back()->push_back(procMsg.systemcpuutilization());
-		}
+		vector<ProcMsg> *v = item.second;
+		v->erase(v->begin(), v->begin() + get_num_samples(0));
 	}
 
-	// Validate that there are the same amount of samples in the results
-	BOOST_FOREACH (vector<double> *item, systemCpu)
-		if (item->size() != get_total_num_samples_exclude_warmup())
-			LOG(FATAL) << "number of samples do not match: expected="
-					<< get_total_num_samples_exclude_warmup() << " | actual: " << item->size();
+	// Extract user- and system-cpu from map of vectors to vector of vectors
+	int numSamples = get_total_num_samples_exclude_warmup();
+	vector<vector<double> > userCpu(NUM_NODES), systemCpu(NUM_NODES), memory(NUM_NODES);
+	vector<vector<unsigned int> > network(NUM_NODES);
 
+	int i = 0;
+	BOOST_FOREACH (DataContainer::value_type &item, _data) {
+		vector<ProcMsg> *procMsgVector = item.second;
+		userCpu[i].resize(numSamples);
+		systemCpu[i].resize(numSamples);
+		memory[i].resize(numSamples);
+		network[i].resize(numSamples);
+		int j = 0;
+		BOOST_FOREACH (ProcMsg procMsg, *procMsgVector) {
+			userCpu[i][j] = procMsg.usercpuutilization();
+			systemCpu[i][j] = procMsg.systemcpuutilization();
+			memory[i][j] = procMsg.memoryutilization();
+			network[i][j] = (unsigned int)(procMsg.networkoutbytes() / (double)1024); // Convert to KB
+			j += 1;
+		}
+		i += 1;
+	}
+
+	_GenerateCpuChart(systemCpu, userCpu);
+	_GenerateMemoryChart(memory);
+	_GenerateNetworkChart(network);
+}
+
+void GnuplotHandler::_GenerateCpuChart(vector<vector<double> > &systemCpu, vector<vector<double> > &userCpu)
+{
 	vector<int> xValues = get_sample_frequencies_in_hz_exclude_warmup();
-	vector<double> yValues1 = _ComputeAverage(systemCpu);
-	vector<double> yValues2 = _ComputeAverage(userCpu);
+
+	vector<double> yValues1 = _ComputeAverage<double>(systemCpu);
+	vector<double> yValues2 = _ComputeAverage<double>(userCpu);
 
 	vector<string> x = _ToString<int>(xValues);
 	vector<string> y1 = _ToString<double>(yValues1);
@@ -218,7 +267,7 @@ void GnuplotHandler::_GenerateCpuChart()
 	xy.push_back(x);
 	xy.push_back(y1);
 	xy.push_back(y2);
-	_SaveToFile(xy, "frequency  system  user");
+	_SaveToFile(xy, "frequency  kernel  user");
 
 	_plot.reset_all();
 	_plot << "set terminal postscript enhanced color";
@@ -231,33 +280,68 @@ void GnuplotHandler::_GenerateCpuChart()
 	_plot << "set style data histograms";
 	_plot << "set ylabel \"Average CPU Consumption in Percent\"";
 	_plot << "set xlabel \"Hz (Number of samples per second)\"";
-	_plot << "plot \"tmp.dat\" using 2 t \"system-level\", '' using 3:xtic(1) t \"user-level\"";
-	System::RunCommand("ps2pdf cpu_chart.ps");
-	System::RunCommand("rm cpu_chart.ps");
+	_plot << "plot \"tmp.dat\" using 2 t \"kernel-level\", '' using 3:xtic(1) t \"user-level\"";
+	System::RunCommand((string)"ps2pdf cpu_chart.ps");
+	System::RunCommand((string)"rm cpu_chart.ps");
 	LOG(INFO) << "cpu chart generated";
 }
 
-vector<double> GnuplotHandler::_ComputeAverage(vector< vector<double> *> samples)
+void GnuplotHandler::_GenerateMemoryChart(vector<vector<double> > & memory)
 {
-	vector<double> average;
-	// Go through the different sample intervals
-	// i starts at 1 in order to skip warm-up interval
-	for (int i = 1, resultIndex = 0; i < NUM_SAMPLE_INTERVALS; i++) {
+	vector<int> xValues = get_sample_frequencies_in_hz_exclude_warmup();
+	vector<double> yValues= _ComputeAverage<double>(memory);
 
-		// Go through each sample (one for each node) within current sample interval
-		int numSamplesForInterval = get_num_samples(i);
-		double sumAllNodes = 0;
-		for (int j = 0; j < NUM_NODES; j++) {
+	vector<string> x = _ToString<int>(xValues);
+	vector<string> y = _ToString<double>(yValues);
 
-			// Within each sample, compute the average value for given sample interval
-			for (int k = 0; k < numSamplesForInterval; k++) {
-				sumAllNodes += (*samples[j])[resultIndex + k];
-			}
-		}
-		average.push_back(sumAllNodes / (double)(numSamplesForInterval * NUM_NODES));
-		resultIndex += numSamplesForInterval;
-	}
-	return average;
+	vector< vector<string> > xy;
+	xy.push_back(x);
+	xy.push_back(y);
+	_SaveToFile(xy, "Hz  memory_utilization");
+
+	_plot.reset_all();
+	_plot << "set terminal postscript enhanced color";
+	_plot << "set grid noxtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics";
+	_plot << "set output \"memory_chart.ps\"";
+	_plot << "set boxwidth 0.75 absolute";
+	_plot << "set style fill solid 1.00 border -1";
+	_plot << "set style data histogram";
+	_plot << "set ylabel \"Average Memory Utilization in Percent\"";
+	_plot << "set xlabel \"Hz (Number of samples per second)\"";
+	_plot << "plot \"tmp.dat\" usi 2:xtic(1) w boxes title \"\"";
+	System::RunCommand((string)"ps2pdf memory_chart.ps");
+	System::RunCommand((string)"rm memory_chart.ps");
+	LOG(INFO) << "memory chart generated";
+}
+
+void GnuplotHandler::_GenerateNetworkChart(vector<vector<unsigned int> > & network)
+{
+	vector<int> xValues = get_sample_frequencies_in_hz_exclude_warmup();
+	vector<unsigned int> yValues = _ComputeAverage<unsigned int>(network);
+	yValues = _AverageToPerSecond(yValues);
+
+	vector<string> x = _ToString<int>(xValues);
+	vector<string> y = _ToString<unsigned int>(yValues);
+
+	vector< vector<string> > xy;
+	xy.push_back(x);
+	xy.push_back(y);
+	_SaveToFile(xy, "Hz  network_in_kb");
+
+	_plot.reset_all();
+	_plot << "set terminal postscript enhanced color";
+	_plot << "set grid noxtics nomxtics ytics nomytics noztics nomztics nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics";
+	_plot << "set output \"network_chart.ps\"";
+	_plot << "set boxwidth 0.75 absolute";
+	_plot << "set style fill solid 1.00 border -1";
+	_plot << "set style data histogram";
+	_plot << "set ylabel \"Average Network Consumption in KB\"";
+	_plot << "set xlabel \"Hz (Number of samples per second)\"";
+	_plot << "plot \"tmp.dat\" usi 2:xtic(1) w boxes title \"\"";
+	System::RunCommand((string)"ps2pdf network_chart.ps");
+	System::RunCommand((string)"rm network_chart.ps");
+	LOG(INFO) << "network chart generated";
+
 }
 
 void GnuplotHandler::_SaveToFile(vector< vector<string> > xy, string firstLineComment)
@@ -288,6 +372,11 @@ extern "C" void destroy_handler(GnuplotHandler *p)
 {
 	delete p;
 }
+
+
+
+
+
 
 
 

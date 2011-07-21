@@ -9,6 +9,8 @@ then
 FORK_CMD="rocks run host"
 fi
 
-#cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
 ${FORK_CMD} "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
+cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
+#cd ${DAEMON_DIR} && "GLOG_logtostderr=1 ./wallmond"
+#cd ${DAEMON_DIR} && "./wallmond"
 

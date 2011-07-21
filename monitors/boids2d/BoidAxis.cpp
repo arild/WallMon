@@ -48,15 +48,11 @@ void BoidAxis::OnRender()
 {
 	glColor3ub(0, 255, 0);
 
-	float s = 0.3; // width and height of axises
+	float s = 0.3; // width and height of axes
 	float x = -1 - s;
 	float y = -1 - s;
 	float w = 102 + s;
 	float h = 102 + s;
-
-	int numTicks = (_stop - _start) / _tickSize;
-	float tw = 0.7;
-	float th = 2.0;
 
 	// Left
 	glBegin(GL_QUADS);
@@ -82,27 +78,6 @@ void BoidAxis::OnRender()
 	glVertex2f(x, y+s);
 	glEnd();
 
-	for (int i = 0; i <= numTicks; i++) {
-		float tx = (i * _tickSize) - tw/2;
-		glBegin(GL_QUADS);
-		glVertex2f(tx, y-th);
-		glVertex2f(tx+tw, y-th);
-		glVertex2f(tx+tw, y);
-		glVertex2f(tx, y);
-		glEnd();
-
-		glColor3f(1, 0, 0);
-		stringstream ss;
-		ss << i * _tickSize;
-		_font->RenderText(ss.str(), tx + tw/(float)2, -9);
-		glColor3f(0, 1, 0);
-	}
-
-	_font->RenderText("Metric Utilization", 50, -15);
-
-	glRotatef(90, 0, 0, 1);
-	_font->RenderText("Metric Specific", -30, 50);
-
 	// Top
 	glBegin(GL_QUADS);
 	glVertex2f(x, y+h);
@@ -110,6 +85,45 @@ void BoidAxis::OnRender()
 	glVertex2f(x+w+s, y+h+s);
 	glVertex2f(x, y+h+s);
 	glEnd();
+
+	// Ticks along x-axis and y-axis
+	int numTicks = (_stop - _start) / _tickSize;
+	w = 0.7;
+	h = 2.0;
+	float b = y;
+	float l = x;
+	for (int i = 0; i <= numTicks; i++) {
+
+		// Render tick markers
+		x = y =(i * _tickSize) - w/2;
+		glColor3f(0, 1, 0);
+		glBegin(GL_QUADS);
+		glVertex2f(x, b-h);
+		glVertex2f(x+w, b-h);
+		glVertex2f(x+w, b);
+		glVertex2f(x, b);
+		glEnd();
+
+		glBegin(GL_QUADS);
+		glVertex2f(l, y+w);
+		glVertex2f(l-h, y+w);
+		glVertex2f(l-h, y);
+		glVertex2f(l, y);
+		glEnd();
+
+		// Render tick sizes
+		glColor3f(1, 0, 0);
+		stringstream ss;
+		ss << i * _tickSize;
+		_font->RenderText(ss.str(), x + w/(float)2, -9);
+		_font->RenderText(ss.str(), -10, y + w, false, true);
+	}
+
+	glColor3f(0, 1, 0);
+	glRotatef(40.0f,0,0,1.0f);
+	_font->RenderText("Metric Utilization", 50, -15);
+//	_font->RenderText("Metric Specific", -30, 50, false, false);
+
 }
 
 

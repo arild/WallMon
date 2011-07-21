@@ -30,8 +30,10 @@ private:
 	ProcessCollectorMessage _message;
 	Gnuplot _plot;
 	DataContainer _data;
-	void _GenerateCpuChart();
-	vector<double> _ComputeAverage(vector< vector<double> *> results);
+	void _GenerateCharts();
+	void _GenerateCpuChart(vector<vector<double> > &systemCpu, vector<vector<double> > &userCpu);
+	void _GenerateMemoryChart(vector<vector<double> > &memory);
+	void _GenerateNetworkChart(vector<vector<unsigned int> > &network);
 	void _SaveToFile(vector< vector<string> > xy, string firstLineComment);
 	int _expectedNumSamplesPerNode;
 };

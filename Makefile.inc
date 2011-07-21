@@ -1,4 +1,4 @@
-CC=g++ -O4
+CC=g++ -g
 
 LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lwSystem -lWallmonMessage -lIoLogger
 
@@ -25,4 +25,5 @@ WALLMON=$(HOME_PATH)/WallMon
 SYSTEM=$(HOME_PATH)
 
 INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
-LIB_PATH=-L$(SYSTEM)/lib -L$(SYSTEM)/lib32 -L$(SYSTEM)/lib64 -L$(WALLMON)/lib
+LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib
+CLEAN=rm -f *.o ; rm -f *.gch ; rm -f *.a

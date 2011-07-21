@@ -9,8 +9,14 @@
 #include <glog/logging.h>
 
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1, 2}, {100, 2}, {1, 2}, {100, 2}};//{{2,6}, {1,5}, {2,10}, {4,20}, {10,40}, {20,40}, {40,40}, {60,40}};//, {100, 100}};
-//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{10, 20}, {1,10}, {2,10}, {4,20}, {8,40}, {16,40}, {32,40}, {64,40}, {128,80}};//, {200, 200}, {300, 300}, {500, 400}};
-const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{10, 20}, {16,20}, {32,20}, {64,50}, {128,100}, {256, 100}, {512, 200}};
+
+// Ice cluster
+const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{20, 20}, {1,10}, {2,10}, {4,20}, {8,60}, {16,80}, {32,100}, {64,100}};//, {128,200}};//, {200, 200}, {300, 300}, {500, 400}};
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{32, 10}, {64,20}, {128, 30}};
+
+
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{10, 20}, {16,20}, {32,20}, {64,50}, {128,100}, {256, 100}, {512, 200}};
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1, 2}, {64,100}, {128,200}, {256, 300}, {512, 400}};
 
 
 const int NUM_SAMPLE_INTERVALS = sizeof(SAMPLE_INTERVALS) / sizeof(SAMPLE_INTERVAL);

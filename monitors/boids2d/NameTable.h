@@ -43,12 +43,17 @@ public:
 
 private:
 	boost::mutex _mutex;
-	vector<TableItem *> _items;
+	vector<TableItem *> _itemsAll, _itemsDisplay;
 	int _current; // index of item residing on top of displayed list
 	int _selected; // index of item currently marked and active
 	Font *_font;
+	Font *_fontLarge;
 	int _maxNumItemsToDisplay;
+	double _tsLastUpdate;
 	void _DrawAllItems();
+	vector<TableItem *> _GetTopRankedUniqueDisplayNameItems(int numItems);
+	bool _HasDisplayName(vector<TableItem *> &items, string &displayName);
+	bool _PerformUpdate();
 };
 
 #endif /* TABLE_H_ */

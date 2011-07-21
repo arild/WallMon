@@ -55,23 +55,27 @@ NameTable::~NameTable()
 void NameTable::Add(TableItem *item)
 {
 	scoped_lock lock(_mutex);
-	_items.push_back(item);
+	_itemsAll.push_back(item);
 }
 
 void NameTable::OnInit()
 {
+	_tsLastUpdate = 0;
 	_font = new Font(FONT_SIZE);
+	_fontLarge = new Font(FONT_SIZE + 1);
 }
 
 void NameTable::OnLoop()
 {
-//	scoped_lock lock(_mutex);
-//	_items.sort(TableItemCompare());
+	if (_PerformUpdate()) {
+		scoped_lock lock(_mutex);
+		sort(_itemsAll.begin(), _itemsAll.end(), TableItemCompare());
+		_itemsDisplay = _GetTopRankedUniqueDisplayNameItems(10);
+	}
 }
 
 void NameTable::OnRender()
 {
-	scoped_lock lock(_mutex);
 	_DrawAllItems();
 }
 
@@ -97,17 +101,19 @@ void NameTable::_DrawAllItems()
 {
 	float y = TABLE_ITEMS_TOP;
 
-	for (int i = _current; i < _items.size(); i++) {
+	glColor3ub(255,255,255);
+	_fontLarge->RenderText("Processes", 3, TABLE_ITEMS_TOP);
+
+	for (int i = _current; i < _itemsDisplay.size(); i++) {
 		if (y <= TABLE_ITEMS_BOTTOM)
 			break;
 		y -= TABLE_ITEM_HEIGHT;
 
-		TableItem *item = _items[i];
+		TableItem *item = _itemsDisplay[i];
 		glColor3ub(item->r, item->g, item->b);
 		if (i == _selected) {
-
-			float y_ = y - (TABLE_ITEM_HEIGHT - FONT_SIZE) / 2;
-			//y_ -= (_selected - _current) * TABLE_ITEM_HEIGHT;
+			// Draw the rectagular marker for selected entry
+			float y_ = y - TABLE_ITEM_HEIGHT / 4;
 
 			glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
@@ -115,17 +121,53 @@ void NameTable::_DrawAllItems()
 			glVertex3f(30, y_, 0);
 			glVertex3f(30, y_ + TABLE_ITEM_HEIGHT, 0);
 			glVertex3f(0, y_ + TABLE_ITEM_HEIGHT, 0);
+			glVertex3f(0, y_, 0);
+
 			glEnd();
 		}
 
 		glBegin(GL_QUADS);
-		glVertex2f(0, y);
 		glVertex2f(3, y);
+		glVertex2f(6, y);
+		glVertex2f(6, y + 3);
 		glVertex2f(3, y + 3);
-		glVertex2f(0, y + 3);
 		glEnd();
 
-		_font->RenderText(item->displayName, 6, y);
+		_font->RenderText(item->displayName, 9, y);
 	}
 }
+
+vector<TableItem*> NameTable::_GetTopRankedUniqueDisplayNameItems(int numItems)
+{
+	vector<TableItem *> retval;
+	for (int i = 0; i < _itemsAll.size() && retval.size() < numItems; i++) {
+		if (_HasDisplayName(retval, _itemsAll[i]->displayName) == false)
+			retval.push_back(_itemsAll[i]);
+	}
+	return retval;
+}
+
+bool NameTable::_HasDisplayName(vector<TableItem *> & items, string &displayName)
+{
+	for (int i = 0; i < items.size(); i++)
+		if (items[i]->displayName.compare(displayName) == 0)
+			return true;
+	return false;
+}
+
+bool NameTable::_PerformUpdate()
+{
+	double tsCurrent = System::GetTimeInSec();
+	if (tsCurrent - _tsLastUpdate > 2) {
+		_tsLastUpdate = tsCurrent;
+		return true;
+	}
+	return false;
+}
+
+
+
+
+
+
 
