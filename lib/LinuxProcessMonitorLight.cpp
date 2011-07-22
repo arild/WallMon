@@ -34,6 +34,9 @@ LinuxProcessMonitorLight::~LinuxProcessMonitorLight()
 
 bool LinuxProcessMonitorLight::Open(int pid)
 {
+	if (pid == -1)
+		pid = getpid();
+
 	stringstream sstat, sstatm, sio;
 
 	sstat << "/proc/" << pid << "/stat";
@@ -75,6 +78,11 @@ void LinuxProcessMonitorLight::Update()
 	rewind(_procio);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procio);
 	sscanf(_buffer, "%*s %lu %*s %lu", &_rchar, &_wchar);
+}
+
+double LinuxProcessMonitorLight::SecondsSinceLastUpdate()
+{
+	return System::GetTimeInSec() - _updateTime;
 }
 
 double LinuxProcessMonitorLight::GetUserTime()

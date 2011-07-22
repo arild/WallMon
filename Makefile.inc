@@ -1,4 +1,4 @@
-CC=g++ -g
+CC=g++ -O2
 
 LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lwSystem -lWallmonMessage -lIoLogger
 

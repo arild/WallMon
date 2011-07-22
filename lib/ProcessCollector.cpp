@@ -57,6 +57,7 @@ void ProcessCollector::OnInit(Context *ctx)
 		_FindAllNewProcesses();
 	else
 		_AddDefinedProcesses();
+	_processesMsg.Clear();
 
 	LOG(INFO) << "num cores detected: " << _numCores;
 	LOG(INFO) << "total memory detected: " << _totalMemoryMb << " MB";
@@ -75,12 +76,11 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 //	if (_processNames.size() == 0)
 //		_FindAllNewProcesses();
 
-	ProcessCollectorMessage processesMsg;
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (vector<LinuxProcessMonitorLight *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitorLight *monitor = (*it);
 		monitor->Update();
-		ProcessCollectorMessage::ProcessMessage *processMsg = processesMsg.add_processmessage();
+		ProcessCollectorMessage::ProcessMessage *processMsg = _processesMsg.add_processmessage();
 
 		double util;
 		if (filter->has_processname()) {
@@ -113,9 +113,10 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		}
 	}
 
-	if (processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
+	if (_processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
 		LOG(ERROR) << "Protocol buffer serialization failed";
-	msg->set_data(_buffer, processesMsg.ByteSize());
+	msg->set_data(_buffer, _processesMsg.ByteSize());
+	_processesMsg.Clear();
 
 	if (_controller != NULL)
 		_controller->AfterSample(context);

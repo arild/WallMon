@@ -10,7 +10,6 @@
 #include "ProcessCollector.h"
 #include "Common.h"
 
-#define SERVER				"ice.cs.uit.no"//"localhost"
 using namespace std;
 
 class Controller: public IProcessCollectorController {
@@ -42,6 +41,8 @@ void Controller::AfterSample(Context *ctx)
 
 		// Change frequency if we are not on last sample
 		if (_sampleIntervalIndex != NUM_SAMPLE_INTERVALS) {
+			// At interval change, wait some in order to increase the probability of
+			// synchronizing all collectors
 			LOG(INFO) << "changing sample frequency from " << get_frequency_in_msec(
 					_sampleIntervalIndex - 1) << " to " << get_frequency_in_msec(
 					_sampleIntervalIndex);
@@ -54,10 +55,15 @@ extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector(new Controller);
 
+	if (System::GetHostname().compare(0, 5, "arild") == 0)
+		p->context->AddServer("localhost");
+	else
+		// Assume ice cluster
+		p->context->AddServer("ice.cs.uit.no");
+
 	p->context->key = KEY;
-	p->context->AddServer(SERVER);
 	p->context->sampleFrequencyMsec = get_frequency_in_msec(0);
-	p->context->includeStatistics = true;
+	p->context->includeStatistics = false;
 	p->filter->set_processname("");
 	p->filter->set_pid(0);
 	p->filter->set_usercpuutilization(0);

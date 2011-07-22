@@ -31,8 +31,9 @@ public:
 	LinuxProcessMonitorLight();
 	virtual ~LinuxProcessMonitorLight();
 
-	bool Open(int pid);
+	bool Open(int pid=-1);
 	void Update();
+	double SecondsSinceLastUpdate();
 
 	// stat
 	double GetUserTime();

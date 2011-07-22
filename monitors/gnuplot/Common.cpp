@@ -11,8 +11,13 @@
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1, 2}, {100, 2}, {1, 2}, {100, 2}};//{{2,6}, {1,5}, {2,10}, {4,20}, {10,40}, {20,40}, {40,40}, {60,40}};//, {100, 100}};
 
 // Ice cluster
-const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{20, 20}, {1,10}, {2,10}, {4,20}, {8,60}, {16,80}, {32,100}, {64,100}};//, {128,200}};//, {200, 200}, {300, 300}, {500, 400}};
-//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{32, 10}, {64,20}, {128, 30}};
+// wallmond
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{20, 10}, {1,10}, {2,10}, {4,10}, {8,10}, {16,10}, {32,20}, {64,40}, {128,40}, {256, 40}};
+
+// wallmons
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1, 10}, {1,10}, {2,10}, {4,10}, {8,30}, {16,30}, {32,50}, {64,50}, {128,50}, {256, 50}};
+const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{4, 4}, {1, 1}, {2, 2}, {4, 4}, {8,8}, {16,16}, {32,32}, {64,64}, {128,128}, {256, 256}};
+//const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{3,3}, {3,3}, {3, 3}, {3, 3}};
 
 
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{10, 20}, {16,20}, {32,20}, {64,50}, {128,100}, {256, 100}, {512, 200}};
