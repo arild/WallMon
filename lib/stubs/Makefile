@@ -1,26 +1,26 @@
 include ../../Makefile.inc
 
-CFLAGS = -c -fPIC $(INC_PATH) $(LIB_PATH)
+%.o:%.cc
+	$(CC) -c -fPIC -o $@ $(INC_PATH) $<
+
+MAKE_PROTOBUF_MESSAGE_LIB=ar cru lib$@Message.a $@.pb.o
 
 all: GenerateStubs MonitorDispatcher ProcessCollector Wallmon
 	mv *.a ..
 
 clean:
-	rm *.h
-	rm *.cc
-	rm *.o
+	${CLEAN}
 	
-GenerateStubs: *.proto
-	protoc --cpp_out=. *.proto 
+GenerateStubs:
+	protoc --cpp_out=. *.proto
 
-MonitorDispatcher:
-	$(CC) $(CFLAGS) $@.pb.cc
-	ar rcs lib$@Message.a $@.pb.o
-	
-ProcessCollector:
-	$(CC) $(CFLAGS) $@.pb.cc
-	ar rcs lib$@Message.a $@.pb.o
+MonitorDispatcher: GenerateStubs MonitorDispatcher.pb.o
+	${MAKE_PROTOBUF_MESSAGE_LIB}
+		
+ProcessCollector: GenerateStubs ProcessCollector.pb.o
+	${MAKE_PROTOBUF_MESSAGE_LIB}
 
-Wallmon:
-	$(CC) $(CFLAGS) $@.pb.cc
-	ar rcs lib$@Message.a $@.pb.o
+Wallmon: GenerateStubs Wallmon.pb.o
+	${MAKE_PROTOBUF_MESSAGE_LIB}
+
+include ../../Makefile.dep.inc

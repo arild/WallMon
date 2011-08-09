@@ -1,19 +1,15 @@
 include ../Makefile.inc
 
-SRC=*.cpp *.h
-CFLAGS= -Wno-multichar -rdynamic
-
-LIB_LOCAL=-lByteBuffer -lMonitorDispatcher
-ifeq ($(PLATFORM), Darwin)	
-	LIB_LOCAL+=-framework OpenGL `sdl-config --libs`
-endif
+CFLAGS= -rdynamic
+LIBS=-lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher
 
 all: wallmons
 
-wallmons: $(SRC)
-	$(CC) $(CFLAGS) -D $(PLATFORM) -o $@ $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON) $(LIB_LOCAL)
+wallmons: $(OBJS)
+	$(CC) -o $@ $(CFLAGS) $^ $(INC_PATH) $(LIB_PATH) $(LIBS)
 
 clean:
 	${CLEAN}
 	rm -f wallmons
 
+include ../Makefile.dep.inc

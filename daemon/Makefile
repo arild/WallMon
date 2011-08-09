@@ -1,15 +1,15 @@
 include ../Makefile.inc
 
-EXECUTABLE_NAME=wallmond
-SRC=*.cpp *.h
-CFLAGS= -Wno-multichar -rdynamic
+CFLAGS=-rdynamic
+LIBS= -lMonitorDispatcherMessage -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
 
 all: wallmond
 
-wallmond: $(SRC)
-	$(CC) $(CFLAGS) -o $@ $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_COMMON)
-
 clean:
-	rm -f *.o
-	rm -f $(EXECUTABLE_NAME)
+	${CLEAN}
+	rm -f wallmond
 
+wallmond: $(OBJS)
+	$(CC) -o $@ $(CFLAGS) $(INC_PATH) $(LIB_PATH) $^ $(LIBS)
+
+include ../Makefile.dep.inc

@@ -8,7 +8,7 @@ using namespace std;
 
 class LocalSampler {
 public:
-	LocalSampler();
+	LocalSampler(vector<int> intervalTimeMsec);
 	virtual ~LocalSampler();
 	void Start();
 	void Stop();
@@ -18,8 +18,8 @@ private:
 	bool _running;
 	LinuxProcessMonitorLight _monitor;
 	vector<unsigned int> _networkUsageBytes;
+	vector<int> _intervalTimeMsec;
 	void _RunForever();
-	void _UpdateServerNetworkUsage();
 };
 
 #endif /* LocalSampler_H_ */

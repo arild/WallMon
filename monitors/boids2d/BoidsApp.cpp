@@ -25,9 +25,6 @@
 #include "TouchEvent.h"
 #include "Button.h"
 #include "ControlPanel.h"
-#ifdef Darwin
-#include "WMAutorelease.h"
-#endif
 
 boost::condition mainLoopThreadCondition;
 boost::mutex mainLoopThreadMutex;
@@ -87,9 +84,6 @@ void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
 
 void BoidsApp::_RenderForever()
 {
-#ifdef Darwin
-	updateAutoreleasePool();
-#endif
 	_InitSdlAndOpenGl();
 	//mainLoopThreadCondition.notify_one();
 	LOG(INFO) << "BoidsApp entering infinite loop";
@@ -111,10 +105,9 @@ void BoidsApp::_RenderForever()
 		char Buffer[255];
 		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), 0);
 		SDL_WM_SetCaption(Buffer, Buffer);
-#ifdef Darwin
-		updateAutoreleasePool();
-#endif
 	}
+
+
 }
 
 /**
@@ -151,21 +144,10 @@ void BoidsApp::_SetupScenes()
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-//	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
-//	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
-//	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
-//	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
-
-//	double s = 1024/(double)1600;
-//	_controlPanelScene = new Scene(0, 0, (w * 3)*s, (h * 4)*s, 100, 200);
-//	_boidScene = new Scene((w * 3)*s, (h/2 + 75)*s, (w * 3.5)*s, (h * 3.3)*s, 100, 100);
-//	_tableScene = new Scene((w * 7)*s, 0, (w * 4)*s,(h * 3.5)*s, 50, 100);
-
-	float sh = h;
-	_controlPanelScene = new Scene(0, 200, 800, 800, 100, 200);
-	_boidScene = new Scene(500, 300, 700, 700, 100, 100);
-	_tableScene = new Scene(1300, 300, 700, 700, 50, 100);
-
+	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
+	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
+	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
+	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
 
 	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);

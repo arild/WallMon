@@ -63,7 +63,7 @@ extern "C" ProcessCollector *create_collector()
 
 	p->context->key = KEY;
 	p->context->sampleFrequencyMsec = get_frequency_in_msec(0);
-	p->context->includeStatistics = false;
+	p->context->includeStatistics = true;
 	p->filter->set_processname("");
 	p->filter->set_pid(0);
 	p->filter->set_usercpuutilization(0);

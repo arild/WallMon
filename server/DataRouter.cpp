@@ -18,6 +18,7 @@ DataRouter::DataRouter()
 	_queue = new Queue<RouterItem *> (100);
 	_handlers = new handlerMap();
 	_msg = new WallmonMessage();
+	_messageNumber = 0;
 }
 
 DataRouter::~DataRouter()
@@ -95,6 +96,7 @@ void DataRouter::_RouteForever()
 		}
 		else {
 			_msg->set_networkmessagesizebytes(item->length);
+			_msg->set_messagenumber(_messageNumber++);
 			HandlerEvent *event = it->second;
 			if (event->handler)
 				event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());

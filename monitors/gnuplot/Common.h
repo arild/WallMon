@@ -20,6 +20,7 @@ int get_total_num_samples();
 int get_total_num_samples_exclude_warmup();
 vector<int> get_sample_frequencies_in_hz();
 vector<int> get_sample_frequencies_in_hz_exclude_warmup();
+vector<int> get_intervals_durations_in_msec();
 int get_frequency_in_msec(int idx);
 int get_frequency_in_hz(int idx);
 int get_num_samples(int idx);

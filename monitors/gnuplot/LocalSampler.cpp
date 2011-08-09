@@ -2,9 +2,10 @@
 #include <boost/foreach.hpp>
 #include "LocalSampler.h"
 
-LocalSampler::LocalSampler()
+LocalSampler::LocalSampler(vector<int> intervalTimeMsec)
 {
 	CHECK(_monitor.Open() == true);
+	_intervalTimeMsec = intervalTimeMsec;
 }
 
 LocalSampler::~LocalSampler()
@@ -36,16 +37,14 @@ vector<double> LocalSampler::GetNetworkUsageInMb()
 void LocalSampler::_RunForever()
 {
 	_monitor.Update();
-	while (_running) {
-		usleep(1000 * 970);
+	while (_running && _intervalTimeMsec.size() > 0) {
+		int intervalMsec = _intervalTimeMsec[0];
+		usleep(intervalMsec * 1000);
 		LOG(INFO) << "UPDATE";
 		_monitor.Update();
-		_UpdateServerNetworkUsage();
-	}
-}
+		_intervalTimeMsec.erase(_intervalTimeMsec.begin());
 
-void LocalSampler::_UpdateServerNetworkUsage()
-{
-	unsigned int usage = (_monitor.GetNetworkInInBytes() + _monitor.GetNetworkOutInBytes());
-	_networkUsageBytes.push_back(usage);
+		unsigned int avgPerSec = (unsigned int)(_monitor.GetNetworkInInBytes() / (double)(intervalMsec / (double)1000));
+		_networkUsageBytes.push_back(avgPerSec);
+	}
 }

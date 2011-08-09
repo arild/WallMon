@@ -1,44 +1,24 @@
-include ../Makefile.inc
 include ../../Makefile.inc
-
-SRC = $(shell find . -name \*.cpp)
-OBJS = $(SRC:.cpp=.o)
 
 # Take display wall into account on Rocksvv cluster
 HOSTNAME = $(shell hostname)
 ifeq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
-ROCKSVV += -D ROCKSVV
+ROCKSVV = -D ROCKSVV
 endif
 
-LDFLAGS=-lm -lConfig -lwSystem -lTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs`
-ifeq ($(PLATFORM), Darwin)	
-	LDFLAGS+=-framework OpenGL
-	OBJS+=WMAutorelease.o
-else
-	LDFLAGS+=-lGL
-endif
-LDFLAGS+= -lProcessCollector -lshout
-
-libboids2d.so: $(OBJS)
-	$(CC) -D $(PLATFORM) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LDFLAGS)
-	mv *.so ../bin
+LIBS=-lm -lConfig -lSystem -lSTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs` -lGL -lProcessCollector -lshout
 
 all: libboids2d.so
 			
 clean:
-	rm -f *.o
-	rm -f *.gch
-	rm -f *.so
-
+	${CLEAN}
+	
 %.o:%.cpp
-	$(CC) -D $(PLATFORM) -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
+	$(CC) -o $@ $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) $<
 
-%.o:%.mm
-	$(CC) -D $(PLATFORM) -Wno-multichar -framework Cocoa $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -c -o $@ $<
-        
-depend: .depend
-.depend:
-	$(CC) -g -Wno-multichar $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) -MM $(SRC) > $@
+libboids2d.so: $(OBJS)
+	$(CC) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LIBS)
+	mv *.so ../bin
 
--include .depend
+include ../../Makefile.dep.inc
         

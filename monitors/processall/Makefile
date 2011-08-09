@@ -1,7 +1,7 @@
 include ../Makefile.inc
 include ../../Makefile.inc
 
-LIB=-lLinuxProcessMonitor -lwSystem
+LIB=-lLinuxProcessMonitor -lSystem
 SRC=*.cpp *.cc
 
 # Do not compile with graphics on rocksvv 

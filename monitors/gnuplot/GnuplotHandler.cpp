@@ -35,6 +35,9 @@ double totalMemory;
 unsigned int minNetBytes;
 unsigned int maxNetBytes;
 unsigned int totalNetBytes;
+double avgNetBytes;
+
+unsigned int sumProcessMessageBytes;
 
 int NUM_NODES = 0;
 
@@ -55,6 +58,7 @@ void reset_statistics()
 	minNetBytes = 999999;
 	maxNetBytes = 0;
 	totalNetBytes = 0;
+	avgNetBytes = 0;
 }
 
 void print_statistics()
@@ -74,9 +78,9 @@ void print_statistics()
 	LOG(INFO) << "Max memory: " << maxMemory;
 	LOG(INFO) << "Avg memory: " << totalMemory / (double)(CURRENT_NUM_SAMPLES);
 	LOG(INFO) << "----------------------------------";
-	LOG(INFO) << "Min net out: " << minNetBytes;
-	LOG(INFO) << "Max net out: " << maxNetBytes;
-	LOG(INFO) << "Avg net out: " << totalNetBytes / (double)(CURRENT_NUM_SAMPLES);
+	LOG(INFO) << "Min net: " << minNetBytes;
+	LOG(INFO) << "Max net: " << maxNetBytes;
+	LOG(INFO) << "Avg net: " << avgNetBytes;
 	LOG(INFO) << "----------------------------------";
 	LOG(INFO) << "";
 }
@@ -163,7 +167,7 @@ void GnuplotHandler::OnInit(Context *ctx)
 	ctx->key = "gnuplot";
 	_expectedNumSamplesPerNode = get_total_num_samples();
 	reset_statistics();
-	_localSampler = new LocalSampler();
+	_localSampler = new LocalSampler(get_intervals_durations_in_msec());
 	_localSampler->Start();
 }
 
@@ -189,6 +193,12 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 	minSampleDurationMsec = min(minSampleDurationMsec, msg->sampledurationmsec());
 	maxSampleDurationMsec = max(maxSampleDurationMsec, msg->sampledurationmsec());
 	totalSampleDurationMsec += msg->sampledurationmsec();
+
+	unsigned int net = msg->networkmessagesizebytes();
+	minNetBytes = min(minNetBytes, net);
+	maxNetBytes = max(maxNetBytes, net);
+	totalNetBytes += net;
+
 
 	for (int i = 0; i < _message.processmessage_size(); i++) {
 		ProcMsg *procMsg = _message.mutable_processmessage(i);
@@ -218,20 +228,13 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		maxMemory = max(maxMemory, procMsg->memoryutilization());
 		totalMemory += (double)procMsg->memoryutilization();
 
-
-		unsigned int net = procMsg->networkoutbytes() + procMsg->networkinbytes();
-//		LOG(INFO) << "External: " << net << " | Internal: " << msg->networkmessagesizebytes();
-		minNetBytes = min(minNetBytes, net);
-		maxNetBytes = max(maxNetBytes, net);
-		totalNetBytes += net;
-
 		CURRENT_NUM_SAMPLES += 1;
 		LOG_EVERY_N(INFO, 500) << "Sampling status: " << CURRENT_NUM_SAMPLES<< "/" << EXPECTED_TOTAL_NUM_SAMPLES << " | " << msg->hostname();
 		if (CURRENT_NUM_SAMPLES == EXPECTED_TOTAL_NUM_SAMPLES) {
 			LOG(INFO) << "all samples received (" << CURRENT_NUM_SAMPLES << "), generating charts...";
 
-			sleep(2);
 			_localSampler->Stop();
+			avgNetBytes = totalNetBytes / msg->messagenumber();
 			print_statistics();
 			_GenerateCharts();
 
@@ -277,8 +280,8 @@ void GnuplotHandler::_GenerateCharts()
 	}
 
 	_GenerateCpuChart(systemCpu, userCpu);
-	_GenerateMemoryChart(memory);
-	_GenerateServerNetworkChart(network, serverBandwidthMb);
+	//_GenerateMemoryChart(memory);
+//	_GenerateServerNetworkChart(network, serverBandwidthMb);
 }
 
 void GnuplotHandler::_GenerateCpuChart(vector<vector<double> > &systemCpu, vector<vector<double> > &userCpu)
@@ -311,7 +314,7 @@ void GnuplotHandler::_GenerateCpuChart(vector<vector<double> > &systemCpu, vecto
 	_plot << "set style fill solid 1.00 border -1";
 	_plot << "set style histogram rowstacked";
 	_plot << "set style data histograms";
-	_plot << "set ylabel \"Average CPU Consumption in Percent\"";
+	_plot << "set ylabel \"CPU Load\"";
 	_plot << "set xlabel \"Hz (Number of samples per second)\"";
 	_plot << "plot \"tmp.dat\" using 2 t \"kernel-level\", '' using 3:xtic(1) t \"user-level\"";
 	System::RunCommand((string)"ps2pdf cpu_chart.ps");
@@ -379,9 +382,17 @@ void GnuplotHandler::_GenerateNetworkChart(vector<vector<unsigned int> > & netwo
 
 void GnuplotHandler::_GenerateServerNetworkChart(vector<vector<double > > &networkCollector, vector<double> &networkHandler)
 {
+	//vector<string> y2 = _ToString<double>(_ComputeSum<double>(networkCollector));
+	vector<double> expectedMb;
+
+	avgNetBytes *= 5;
+	for (int i = 1; i < NUM_SAMPLE_INTERVALS; i++) {
+		double val = (get_frequency_in_hz(i) * avgNetBytes) / (double)(1<<20);
+		expectedMb.push_back(val);
+	}
 	vector<string> x = _ToString<int>(get_sample_frequencies_in_hz_exclude_warmup());
 	vector<string> y1 = _ToString<double>(networkHandler);
-	vector<string> y2 = _ToString<double>(_ComputeSum<double>(networkCollector));
+	vector<string> y2 =  _ToString<double>(expectedMb);
 
 	if (y1.size() != x.size()) {
 		LOG(WARNING) << "num elements in handler sampled data do not match: " << y1.size() << " | " << x.size();
@@ -405,7 +416,7 @@ void GnuplotHandler::_GenerateServerNetworkChart(vector<vector<double > > &netwo
 	_plot << "set style histogram cluster gap 1";
 	_plot << "set ylabel \"Bandwidth (Mbytes/s)\"";
 	_plot << "set xlabel \"Hz (Number of samples per second)\"";
-	_plot << "plot \"tmp.dat\" using 2:xtic(1) t \"actual usage\", '' using 3 t \"expected usage\"";
+	_plot << "plot \"tmp.dat\" using 2:xtic(1) t \"actual bandwidth\", '' using 3 t \"expected bandwidth\"";
 
 	System::RunCommand((string)"ps2pdf server_network_chart.ps");
 	System::RunCommand((string)"rm server_network_chart.ps");

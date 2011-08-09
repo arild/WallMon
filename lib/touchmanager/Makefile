@@ -1,12 +1,15 @@
 include ../../Makefile.inc
 
-all: TouchManager
+%.o:%.cpp
+	$(CC) -o $@ -c -fPIC $(INC_PATH) $<
+
+all: STouchManager
 	
 clean:
-	rm -f *.o
-	rm -f *.gch
-
-TouchManager: STouchManager.h STouchManager.cpp WVGeometry.h WVGeometry.cpp
-	$(CC) -c -fPIC -Wno-multichar $(INC_PATH) $(LIB_PATH) $?
-	ar rcs lib$@.a STouchManager.o WVGeometry.o
+	${CLEAN}
+	
+STouchManager: STouchManager.o WVGeometry.o
+	${MAKE_STATIC_LIB}
 	mv *.a ..
+	
+include ../../Makefile.dep.inc

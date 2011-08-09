@@ -1,17 +1,16 @@
-include ../Makefile.inc
 include ../../Makefile.inc
 
-LIB=-lwSystem -lProcessCollector
-SRC=*.cpp *.h
+LIBs=-lSystem -lProcessCollector
 
-all: $(SRC)
-	protoc --cpp_out=. *.proto
-	$(CC) $(CFLAGS_SO_PREPARE) $(INC_PATH) $(SRC)
-	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o gnuplot.so *.o $(LIB)
-	cp *.so ../bin
+all: gnuplot.so
 			
+%.o:%.cpp
+	$(CC) -o $@ $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) $<
+
+gnuplot.so: $(OBJS)
+	$(CC) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^ $(LIBS)
+	mv *.so ../bin
+	
 clean:
-	rm -f *.o
-	rm -f *.so
-	rm -f *.gch
+	${CLEAN}
 

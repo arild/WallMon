@@ -49,9 +49,7 @@ void Handler::OnInit(Context *ctx)
 	 */
 	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
-//	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
-//	_boidsApp = new BoidsApp(1280, 800, _eventSystem);
-	_boidsApp = new BoidsApp(1600, 1200, _eventSystem);
+	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
 
 
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);

@@ -11,23 +11,14 @@
 #include <vector>
 #include <string>
 
-//#define TILE_SCREEN_WIDTH		1024
-//#define TILE_SCREEN_HEIGHT		768
-//
-//#define WALL_WIDHT				7
-//#define WALL_HEIGHT				4
-//
-//#define WALL_SCREEN_WIDTH		7168
-//#define WALL_SCREEN_HEIGHT		3072
+#define TILE_SCREEN_WIDTH		1024
+#define TILE_SCREEN_HEIGHT		768
 
-#define TILE_SCREEN_WIDTH		1600
-#define TILE_SCREEN_HEIGHT		1200
+#define WALL_WIDHT				7
+#define WALL_HEIGHT				4
 
-#define WALL_WIDHT				1
-#define WALL_HEIGHT				1
-
-#define WALL_SCREEN_WIDTH		1600
-#define WALL_SCREEN_HEIGHT		1200
+#define WALL_SCREEN_WIDTH		7168
+#define WALL_SCREEN_HEIGHT		3072
 
 
 using namespace std;

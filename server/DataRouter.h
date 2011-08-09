@@ -64,6 +64,7 @@ private:
 	Queue<RouterItem *> *_queue;
 	handlerMap *_handlers;
 	WallmonMessage *_msg;
+	unsigned int _messageNumber;
 	void _RouteForever();
 };
 

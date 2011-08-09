@@ -16,7 +16,7 @@
 
 // wallmons
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1, 10}, {1,10}, {2,10}, {4,10}, {8,30}, {16,30}, {32,50}, {64,50}, {128,50}, {256, 50}};
-const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{4, 4}, {1, 1}, {2, 2}, {4, 4}, {8,8}, {16,16}, {32,32}, {64,64}, {128,128}, {256, 256}};
+const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = { { 5, 10 }, { 1, 5 }, { 2, 5 }, { 4, 8 }, { 8, 16 }, {16, 16 }, { 32, 32 }, { 64, 64 }, { 128, 128 }, { 256, 256 }, {512, 512} };
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{3,3}, {3,3}, {3, 3}, {3, 3}};
 
 
@@ -51,6 +51,14 @@ vector<int> get_sample_frequencies_in_hz_exclude_warmup()
 {
 	vector<int> v = get_sample_frequencies_in_hz();
 	v.erase(v.begin());
+	return v;
+}
+
+vector<int> get_intervals_durations_in_msec()
+{
+	vector<int> v;
+	for (int i = 0; i < NUM_SAMPLE_INTERVALS; i++)
+		v.push_back(get_frequency_in_msec(i) * get_num_samples(i));
 	return v;
 }
 

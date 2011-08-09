@@ -1,6 +1,4 @@
-CC=g++ -O2
-
-LIB_COMMON= -lMonitorDispatcher -lConfig -lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lwSystem -lWallmonMessage -lIoLogger
+CC=g++ -O2 -Wno-multichar
 
 # Determine the path to the home directory
 USER = $(shell whoami)
@@ -13,6 +11,22 @@ ifeq ($(PLATFORM), Darwin)
 endif
 HOME_PATH=/$(HOME_DIR)/$(USER)
 
+# Global paths for libraries required by Wallmon
+WALLMON=$(HOME_PATH)/WallMon
+SYSTEM=$(HOME_PATH)
+INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
+LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib
+
+# Default target for compiling single source files to object files (no linking)
+# If this target is not suitable, simply overwrite it
+%.o:%.cpp
+	$(CC) -c -o $@ $(INC_PATH) $<
+
+# Convenient variables
+SRC = $(shell find . -name \*.cpp)
+OBJS = $(SRC:.cpp=.o)
+CLEAN=rm -f *.o ; rm -f *.gch ; rm -f *.a ; rm -f *.so
+
 # Flags for building dynamic libraries
 CFLAGS_SO_PREPARE = -c -fPIC
 CFLAGS_SO_CREATE = -shared
@@ -20,10 +34,7 @@ ifeq ($(PLATFORM), Darwin)
 	CFLAGS_SO_CREATE+=-undefined dynamic_lookup
 endif
 
-# Global paths for libraries required by Wallmon
-WALLMON=$(HOME_PATH)/WallMon
-SYSTEM=$(HOME_PATH)
 
-INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
-LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib
-CLEAN=rm -f *.o ; rm -f *.gch ; rm -f *.a
+# Commands for building stating and shared libraries
+MAKE_STATIC_LIB=ar cru lib$@.a $^
+MAKE_SHARED_LIB=$(CC) -o lib$@.so $(CFLAGS_SO_CREATE) $(LIB_PATH) $^
