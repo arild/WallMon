@@ -1,16 +1,3 @@
-#!/bin/bash
-DAEMON_DIR=~/WallMon/daemon
-DAEMON_EXECUTE="./wallmond -d"
-FORK_CMD="cluster-fork --bg"
-
-# Escaping how-to: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html
-if ["`$HOSTNAME`" == "`ice.cs.uit.no`"];
-then
-FORK_CMD="rocks run host"
-fi
-
-${FORK_CMD} "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
+. $(dirname $0)/incl.sh
+${CLUSTER_FORK} "cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
 cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} && cd -
-#cd ${DAEMON_DIR} && "GLOG_logtostderr=1 ./wallmond"
-#cd ${DAEMON_DIR} && "./wallmond"
-

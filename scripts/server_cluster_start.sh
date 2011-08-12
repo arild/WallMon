@@ -1,7 +1,3 @@
-#!/bin/bash
-SERVER_DIR=~/WallMon/server
-SERVER_EXECUTE="./wallmons -d"
-DISPLAY="DISPLAY=localhost:0"
-
-cluster-fork --bg "cd ${SERVER_DIR} && ${DISPLAY} ${SERVER_EXECUTE}"
-
+. $(dirname $0)/incl.sh
+${CLUSTER_FORK} "cd ${SERVER_DIR} && ${SERVER_EXECUTE}"
+cd ${SERVER_DIR} && ${SERVER_EXECUTE} && cd -

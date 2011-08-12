@@ -1,4 +1,4 @@
-WMON=~/WallMon
-cd $WMON/daemon ; ./wallmond -d ; cd -
-cd $WMON/server ; ./wallmons -d ; cd -
-cd $WMON/dispatcher ; python main.py init ; cd -
+. $(dirname $0)/incl.sh
+cd $DAEMON_DIR ; $DAEMON_EXECUTE ; cd -
+cd $SERVER_DIR ; $SERVER_EXECUTE ; cd -
+cd $DISPATCHER_DIR ; python main.py init ; cd -

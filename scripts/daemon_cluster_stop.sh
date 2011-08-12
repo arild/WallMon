@@ -1,11 +1,3 @@
-NAME="wallmond"
-FORK_CMD="cluster-fork --bg"
-
-# Escaping how-to: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html
-if ["`$HOSTNAME`" == "`ice.cs.uit.no`"];
-then
-FORK_CMD="rocks run host"
-fi
-
-${FORK_CMD} "pkill -SIGTERM $NAME"
-pkill -SIGTERM $NAME
+. $(dirname $0)/incl.sh
+${CLUSTER_FORK} "$DAEMON_KILL"
+$DAEMON_KILL
