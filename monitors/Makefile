@@ -1,5 +1,6 @@
-DIRS = 	boids2d \
-		gnuplot
+DIRS = 	gnuplot
+#boids2d \
+		#gnuplot
 		#processall
 		#fastlogger \
 		#slowlogger

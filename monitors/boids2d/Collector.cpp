@@ -13,7 +13,7 @@ extern "C" ProcessCollector *create_collector()
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 
-	if (System::IsRocksvvCluster()) {
+	if (System::IsRocksvvCluster() && false) {
 		vector<string> servers = WallView(2, 1, 3, 3).GetGrid();
 		p->context->AddServers(servers);
 	}
@@ -21,8 +21,8 @@ extern "C" ProcessCollector *create_collector()
 		p->context->AddServer("localhost");
 	}
 	else {
-		// Currently assumed to be ice cluster
-		p->context->AddServer("129.242.19.61");
+		// Forward to desktop
+		p->context->AddServer("arild.dyndns-work.com");
 		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	}
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;

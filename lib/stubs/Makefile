@@ -5,7 +5,10 @@ include ../../Makefile.inc
 
 MAKE_PROTOBUF_MESSAGE_LIB=ar cru lib$@Message.a $@.pb.o
 
-all: GenerateStubs MonitorDispatcher ProcessCollector Wallmon
+all: GenerateStubs
+	make _all
+	
+_all: MonitorDispatcher ProcessCollector Wallmon
 	mv *.a ..
 
 clean:
@@ -14,13 +17,13 @@ clean:
 GenerateStubs:
 	protoc --cpp_out=. *.proto
 
-MonitorDispatcher: GenerateStubs MonitorDispatcher.pb.o
+MonitorDispatcher: MonitorDispatcher.pb.o
 	${MAKE_PROTOBUF_MESSAGE_LIB}
 		
-ProcessCollector: GenerateStubs ProcessCollector.pb.o
+ProcessCollector: ProcessCollector.pb.o
 	${MAKE_PROTOBUF_MESSAGE_LIB}
 
-Wallmon: GenerateStubs Wallmon.pb.o
+Wallmon:  Wallmon.pb.o
 	${MAKE_PROTOBUF_MESSAGE_LIB}
 
 include ../../Makefile.dep.inc

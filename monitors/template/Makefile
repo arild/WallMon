@@ -1,16 +1,15 @@
-include ../Makefile.inc
 include ../../Makefile.inc
 
-SRC=*.cpp *.h
+%.o:%.cpp
+	$(CC) -o $@ $(ROCKSVV) $(CFLAGS_SO_PREPARE) $(INC_PATH) $<
 
 all: test.so
 
-test.so: $(SRC)
-	$(CC) $(CFLAGS_SO_PREPARE) $(INC_PATH) $(SRC)
-	$(CC) $(CFLAGS_SO_CREATE) $(LIB_PATH) -o $@ *.o
+test.so: $(OBJS)
+	$(CC) -o $@ $(CFLAGS_SO_CREATE) $(LIB_PATH) $^
 	mv $@ ../bin
 			
 clean:
-	rm -f *.o
-	rm -f *.so
+	${CLEAN}
 
+include ../../Makefile.dep.inc

@@ -36,5 +36,5 @@ endif
 
 
 # Commands for building stating and shared libraries
-MAKE_STATIC_LIB=ar cru lib$@.a $^
-MAKE_SHARED_LIB=$(CC) -o lib$@.so $(CFLAGS_SO_CREATE) $(LIB_PATH) $^
+MAKE_STATIC_LIB=ar cru lib$@.a $@.o
+MAKE_SHARED_LIB=$(CC) -o lib$@.so $(CFLAGS_SO_CREATE) $(LIB_PATH) $@.o

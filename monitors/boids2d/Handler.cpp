@@ -34,11 +34,11 @@ void Handler::OnInit(Context *ctx)
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
 	_wallView = new WallView(2, 1, 3, 3);
-	if (w.IsTileWithin() == false)
+	if (_wallView->IsTileWithin() == false)
 		return;
 	double x, y, width, height;
 	_eventSystem = new ShoutEventSystem();
-	w.GetDisplayArea(&x, &y, &width, &height);
+	_wallView->GetDisplayArea(&x, &y, &width, &height);
 	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, _eventSystem);
 	_boidsApp->SetDisplayArea(x, y, width, height);
 #else
