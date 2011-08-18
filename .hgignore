@@ -1,0 +1,24 @@
+syntax: glob
+*.o
+*.a
+*.so
+*.c
+*.d
+*.mk
+.*
+*.orig
+Debug/**
+*.cc
+*.gch
+*.pb.cc
+*.pb.h
+*.pyc
+*_
+wallmons
+wallmond
+*test/test
+**google/*
+**_pb2.py
+*.pdf
+*.prof
+*.dat

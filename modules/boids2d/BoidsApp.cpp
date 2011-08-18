@@ -146,7 +146,7 @@ void BoidsApp::_SetupScenes()
 
 	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
 	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
-	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
+//	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
 	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
 
 	Scene::AddScene(_controlPanelScene);

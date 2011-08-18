@@ -1,6 +1,6 @@
 
 DIRS = 	lib \
-		monitors \
+		modules \
 		daemon \
 		server
 

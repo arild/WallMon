@@ -20,10 +20,12 @@ ROCKSVV=arild@${ROCKSVV_ADDR}:.
 ICE_ADDR=ice.cs.uit.no
 ICE=ani027@${ICE_ADDR}:.
 
+LOCAL_DISPLAY=DISPLAY=localhost:0
+
 # Escaping how-to: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html
 if [ $HOSTNAME = $ICE_ADDR ]; then
 	CLUSTER_FORK="rocks run host"	
-else
+elif [ $HOSTNAME = $ROCKSVV_ADDR ]; then
 	CLUSTER_FORK=cf
 	# Use displays at display wall and locally
 	SERVER_EXECUTE="$LOCAL_DISPLAY $SERVER_EXECUTE"
@@ -38,7 +40,6 @@ else
 	SERVER_KILL="pkill $@ $SERVER_PROC_NAME"
 fi
 
-LOCAL_DISPLAY=DISPLAY=localhost:0
 RSYNC_EXCLUDE_FILE=${WMON_DIR}/scripts/rsync_exclude
 RSYNC="rsync -rvu --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
 

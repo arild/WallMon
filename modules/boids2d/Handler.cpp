@@ -33,7 +33,7 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(2, 1, 3, 3);
+	_wallView = new WallView(2, 1, 2, 2);
 	if (_wallView->IsTileWithin() == false)
 		return;
 	double x, y, width, height;

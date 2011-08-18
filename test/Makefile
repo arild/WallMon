@@ -1,16 +1,13 @@
-
-
 include ../Makefile.inc
 
-LIB_LOCAL=-lpthread -lboost_thread -lgtest -lConfig -lByteBuffer -lwSystem -lWallView -lglog -lPidMonitor
-EXECUTABLE_NAME=test
-SRC=*.cpp
+LIBS=-lpthread -lgtest -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher -lWallView -lPidMonitor
 
 all: test
 
-test: $(SRC)
-	$(CC) $(CFLAGS_COMMON) -o $(EXECUTABLE_NAME) $(SRC) $(INC_PATH) $(LIB_PATH) $(LIB_LOCAL)
+test: $(OBJS)
+	$(CC) -o $@ $^ $(LIB_PATH) $(LIBS)
 
 clean:
-	rm -f *.o
-	rm -f $(EXECUTABLE_NAME)
+	${CLEAN} ; rm -f test
+
+include ../Makefile.dep.inc
