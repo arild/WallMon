@@ -16,7 +16,7 @@ Entity::Entity()
 {
 	tx, ty, width, height = 0;
 	if (automaticallyAddToCurrentScene)
-		Scene::AddEntityToCurrent(this);
+		Scene::AddEntityCurrent(this);
 }
 
 void Entity::HandleHit(TouchEvent &event)

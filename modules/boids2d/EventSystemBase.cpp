@@ -14,7 +14,7 @@
 
 EventSystemBase::EventSystemBase()
 {
-	eventQueue = new Queue<TouchEventQueueItem> (10000);
+	eventQueue = new Queue<TouchEvent> (10000);
 }
 
 EventSystemBase::~EventSystemBase()
@@ -72,28 +72,26 @@ void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
 
 	TouchEvent event;
 	event.isDown = isDown;
-	event.realX = x;
-	event.realY = y;
+	event.x = x;
+	event.y = y;
 	event.movedDistance = obj->movedDistance;
 	event.radius = obj->radius;
 	event.timestampSec = obj->time;
 	event.timestampPreviousSec = (float)obj->lastUpdated;
 
-	Scene *scene = Scene::TestForSceneHit(event.realX, event.realY);
-	if (scene == NULL)
-		// Coordinates not within any scene
-		return;
-	TouchEventQueueItem item;
+//	Scene *scene = Scene::TestForSceneHit(event.realX, event.realY);
+//	if (scene == NULL)
+//		// Coordinates not within any scene
+//		return;
 	event.visualizeOnly = true;
-	item = make_tuple((Scene *)NULL, event);
-	eventQueue->Push(item);
+	eventQueue->Push(event);
 	event.visualizeOnly = false;
 
 	// Transform global coordinates within the application to match coordinate
 	// system used within the relevant scene, which could be anything
-	scene->RealToVirtualCoords(event.realX, event.realY, &event.x, &event.y);
-	item = make_tuple(scene, event);
-	eventQueue->Push(item);
+//	scene->RealToVirtualCoords(event.realX, event.realY, &event.x, &event.y);
+//	item = make_tuple(scene, event);
+//	eventQueue->Push(item);
 }
 
 

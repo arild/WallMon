@@ -97,7 +97,7 @@ void BoidsApp::_RenderForever()
 			_updateOrtho = false;
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		Scene::RunAllScenes();
+		_mainScene->Run();
 		_HandleTouchEvents();
 
 		SDL_GL_SwapBuffers();
@@ -144,14 +144,16 @@ void BoidsApp::_SetupScenes()
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
-	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
-//	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
-	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
+	_mainScene = new Scene(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
+	_controlPanelScene = _mainScene->CreateSubScene(0, 0, w * 3, h * 4, 100, 200);
+	_boidScene = _mainScene->CreateSubScene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
+	_tableScene = _mainScene->CreateSubScene(w * 7, 0, w * 4, h * 3.5, 50, 100);
 
-	Scene::AddScene(_controlPanelScene);
-	Scene::AddScene(_boidScene);
-	Scene::AddScene(_tableScene);
+//	_mainScene = new Scene(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT, 230, 100);
+//	_controlPanelScene = _mainScene->CreateSubScene(0, 0, 80, 100, 100, 200);
+//	_boidScene = _mainScene->CreateSubScene(80, 20, 80, 60, 100, 100);
+//	_tableScene = _mainScene->CreateSubScene(170, 0, 60, 90, 50, 100);
+
 }
 
 void BoidsApp::_PopulateScenes()
@@ -171,18 +173,14 @@ void BoidsApp::_HandleTouchEvents()
 {
 	_eventSystem->PollEvents();
 	while (_eventSystem->eventQueue->GetSize() > 0) {
-		TouchEventQueueItem item = _eventSystem->eventQueue->Pop();
-		Scene *scene = item.get<0> ();
-		TouchEvent event = item.get<1> ();
-		if (event.visualizeOnly)
-			_VisualizeShoutEvent(event.realX, event.realY);
-		else {
-			vector<Entity *> entities = scene->TestForEntityHits(event.x, event.y);
-			if (entities.size() == 0)
-				// No entity hits within scene
-				continue;
-			entities[0]->HandleHit(event);
-		}
+		TouchEvent event = _eventSystem->eventQueue->Pop();
+		_VisualizeShoutEvent(event.x, event.y);
+		vector<Entity *> entities = _mainScene->TestForEntityHits(event.x, event.y);
+		LOG(INFO) << "Num entity hits: " << entities.size();
+		if (entities.size() == 0)
+			// No entity hits within scene
+			continue;
+		entities[0]->HandleHit(event);
 	}
 }
 
@@ -212,11 +210,12 @@ void BoidsApp::_VisualizeShoutEvent(float x, float y)
 
 int BoidsApp::_CountTotalNumObjects()
 {
-	int numObjects = 0;
-	BOOST_FOREACH(Scene *s, Scene::scenes)
-				{
-					numObjects += s->entityList.size();
-				}
-	return numObjects;
+	return 1;
+//	int numObjects = 0;
+//	BOOST_FOREACH(Scene *s, Scene::scenes)
+//				{
+//					numObjects += s->entityList.size();
+//				}
+//	return numObjects;
 }
 

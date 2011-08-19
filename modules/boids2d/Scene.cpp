@@ -11,9 +11,7 @@
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
-vector<Scene *> Scene::scenes;
 Scene *Scene::current = NULL;
-boost::mutex Scene::_sceneMutex;
 
 
 /**
@@ -41,16 +39,34 @@ boost::mutex Scene::_sceneMutex;
  * It does, if one draws a square, the output should be a square, and not a rectangle (as would be
  * the case if the whole screen had been filled).
  *
+ * The virtual coordinate system has a virtual width and height, however,
+ * its base point (bottom-left) is always in (0, 0).
  */
-Scene::Scene(float x_, float y_, float w_, float h_, float virtualW_, float virtualH_) : x(x_), y(y_), w(w_), h(h_)
+Scene::Scene(float x, float y, float w, float h, float virtualW, float virtualH) : _x(x), _y(y), _w(w), _h(h), _virtualW(virtualW), _virtualH(virtualH)
 {
-	float scaleX = w_ / (float)virtualW_;
-	float scaleY = h_ / (float) virtualH_;
-	scale = std::min(scaleX, scaleY);
+	float scaleX = w / (float)virtualW;
+	float scaleY = h / (float) virtualH;
+	_scale = std::min(scaleX, scaleY);
 }
 
 Scene::~Scene()
 {
+}
+
+/**
+ * Creates a scene within the given scene.
+ *
+ * The new sub-scene must have its "real" coordinates within the virtual width and
+ * height of the given scene, otherwise the call will fail. The provided coordinates
+ * defines a new virtual coordinate system on top of the already existing virtual coordinate system
+ */
+Scene *Scene::CreateSubScene(float x, float y, float w, float h, float virtualW, float virtualH)
+{
+	scoped_lock(_sceneMutex);
+	CHECK(x >= 0 && x <= _virtualW && y >= 0 && y <= _virtualH);
+	Scene *scene = new Scene(x, y, w, h, virtualW, virtualH);
+	_subScenes.push_back(scene);
+	return scene;
 }
 
 /**
@@ -60,8 +76,8 @@ Scene::~Scene()
 void Scene::LoadVirtual()
 {
 	glPushMatrix();
-	glTranslatef(x, y, 0);
-	glScalef(scale, scale, 1);
+	glTranslatef(_x, _y, 0);
+	glScalef(_scale, _scale, 1);
 }
 
 /**
@@ -71,7 +87,7 @@ void Scene::LoadVirtual()
 void Scene::LoadReal()
 {
 	glPushMatrix();
-	glTranslatef(x, y, 0);
+	glTranslatef(_x, _y, 0);
 	glScalef(1., 1., 1.);
 }
 
@@ -80,12 +96,24 @@ void Scene::Unload()
 	glPopMatrix();
 }
 
+float Scene::GetScale()
+{
+	return _scale;
+}
+
 void Scene::RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY)
 {
-	float localX = realX - x;
-	float localY = realY - y;
-	*virtX = localX * (1 / (float)scale);
-	*virtY = localY * (1 / (float)scale);
+	float localX = realX - _x;
+	float localY = realY - _y;
+	*virtX = localX * (1 / (float)_scale);
+	*virtY = localY * (1 / (float)_scale);
+}
+
+void Scene::VirtualToRealCoords(float virtX, float virtY, float *realX, float *realY)
+{
+	CHECK(virtX >= 0 && virtX <= _virtualW && virtY >= 0 && virtY <= _virtualH);
+	*realX = virtX * _scale;
+	*realY = virtY * _scale;
 }
 
 /**
@@ -93,8 +121,9 @@ void Scene::RealToVirtualCoords(float realX, float realY, float *virtX, float *v
  */
 void Scene::Visualize()
 {
-	LoadReal();
-	float s = 5;
+	float s = 1 / _virtualW;
+	float w = _virtualW;
+	float h = _virtualH;
 
 	glColor3f(0, 0, 1);
 
@@ -129,24 +158,23 @@ void Scene::Visualize()
 	glVertex2f(w, h);
 	glVertex2f(s, h);
 	glEnd();
-
-	Unload();
 }
 
 void Scene::AddEntity(Entity *entity)
 {
 	scoped_lock(_entityMutex);
-	entityListInit.push_back(entity);
+	_entityListInit.push_back(entity);
 }
 
-void Scene::AddEntityToCurrent(Entity *entity)
+void Scene::AddEntityCurrent(Entity *entity)
 {
 	if (current == NULL)
 		return;
 	current->_entityMutex.lock();
-	current->entityListInit.push_back(entity);
+	current->_entityListInit.push_back(entity);
 	current->_entityMutex.unlock();
 }
+
 
 /**
  * Takes coordinates according to scene coordinate system and returns all
@@ -154,65 +182,70 @@ void Scene::AddEntityToCurrent(Entity *entity)
  */
 vector<Entity *> Scene::TestForEntityHits(float x, float y)
 {
-	scoped_lock(_entityMutex);
-	LoadVirtual();
-	vector<Entity *> v;
-	for (int i = 0; i < entityList.size(); i++)
-		if (entityList[i]->IsHit(x, y))
-			v.push_back(entityList[i]);
-	Unload();
-	return v;
+	vector<Entity *> result;
+	if (_IsSceneHit(x, y) == false)
+		return result;
+
+	// In this scenario, we do not need to load the virtual scene, only provide
+	// entities with coordinates in their virtual coordinate system
+	RealToVirtualCoords(x, y, &x, &y);
+
+	// Test for hits within scene
+	_entityMutex.lock();
+	for (int i = 0; i < _entityList.size(); i++)
+		if (_entityList[i]->IsHit(x, y))
+			result.push_back(_entityList[i]);
+	_entityMutex.unlock();
+
+	// Test for hits within sub-scenes
+	_sceneMutex.lock();
+	for (int i = 0; i < _subScenes.size(); i++) {
+		vector<Entity *> resultSubScene = _subScenes[i]->TestForEntityHits(x, y);
+		// Combine results
+		BOOST_FOREACH (Entity *e, resultSubScene)
+			result.push_back(e);
+	}
+	_sceneMutex.unlock();
+
+	return result;
 }
 
 void Scene::Run()
 {
+	LoadVirtual();
+	_RunEntities();
+	_RunSubScenes();
+	Unload();
+}
+
+void Scene::_RunEntities()
+{
 	scoped_lock(_entityMutex);
 	current = this;
-	LoadVirtual();
-	while (entityListInit.size() > 0) {
-		Entity *e = entityListInit.back();
-		entityListInit.pop_back();
-		entityList.push_back(e);
+	while (_entityListInit.size() > 0) {
+		Entity *e = _entityListInit.back();
+		_entityListInit.pop_back();
+		_entityList.push_back(e);
 		e->OnInit();
 	}
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnLoop();
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnRender();
-	Unload();
-//	Visualize();
+	for (int i = 0; i < _entityList.size(); i++)
+		_entityList[i]->OnLoop();
+	for (int i = 0; i < _entityList.size(); i++)
+		_entityList[i]->OnRender();
 }
 
-void Scene::AddScene(Scene *scene)
+void Scene::_RunSubScenes()
 {
 	scoped_lock(_sceneMutex);
-	scenes.push_back(scene);
-}
-
-/**
- * Takes coordinates according to global coordinate system and returns
- * at maximum one scene that overlaps with given coordinates
- *
- * Assumes that coordinates are within scene of the instantiated object
- */
-Scene *Scene::TestForSceneHit(float x, float y)
-{
-	scoped_lock(_sceneMutex);
-	BOOST_FOREACH(Scene *s, Scene::scenes)
-	{
-		if (x >= s->x && x <= s->x + s->w && y >= s->y && y <= s->y + s->h)
-			return s;
-	}
-	return NULL;
-}
-
-void Scene::RunAllScenes()
-{
 	Entity::automaticallyAddToCurrentScene = true;
-	scoped_lock(_sceneMutex);
-	for (int i = 0; i < Scene::scenes.size(); i++)
-		Scene::scenes[i]->Run();
+	for (int i = 0; i < Scene::_subScenes.size(); i++)
+		Scene::_subScenes[i]->Run();
 	Entity::automaticallyAddToCurrentScene = false;
 }
 
-
+bool Scene::_IsSceneHit(float x, float y)
+{
+	if (x >= _x && x <= _x + _w && y >= _y && y <= _y + _h)
+		return true;
+	return false;
+}

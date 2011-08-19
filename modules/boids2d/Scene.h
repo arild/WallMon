@@ -10,32 +10,30 @@ using namespace std;
 
 class Scene {
 public:
-	static vector<Scene *> scenes;
 	static Scene *current;
 
-	float x, y, w, h, scale;
-	vector<Entity *> entityList;
-	vector<Entity *> entityListInit;
-
-	Scene(float x_, float y_, float w_, float h_, float virtualW, float virtualH);
+	Scene(float x, float y, float w, float h, float virtualW, float virtualH);
 	virtual ~Scene();
+	Scene *CreateSubScene(float x, float y, float w, float h, float virtualW, float virtualH);
 	void LoadVirtual();
 	void LoadReal();
 	void Unload();
+	float GetScale();
 	void RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY);
+	void VirtualToRealCoords(float virtX, float virtY, float *realX, float *realY);
 	void Visualize();
-
 	void AddEntity(Entity *entity);
-	static void AddEntityToCurrent(Entity *entity);
+	static void AddEntityCurrent(Entity *entity);
 	vector<Entity *> TestForEntityHits(float x, float y);
 	void Run();
-
-	static void AddScene(Scene *scene);
-	static Scene *TestForSceneHit(float x, float y);
-	static void RunAllScenes();
-
 private:
-	boost::mutex _entityMutex;
-	static boost::mutex _sceneMutex;
+	float _x, _y, _w, _h, _virtualW, _virtualH, _scale;
+	vector<Entity *> _entityList, _entityListInit;
+	vector<Scene *> _subScenes;
+
+	void _RunEntities();
+	void _RunSubScenes();
+	bool _IsSceneHit(float x, float y);
+	boost::mutex _entityMutex, _sceneMutex;
 };
 #endif /* SCENE_H_ */

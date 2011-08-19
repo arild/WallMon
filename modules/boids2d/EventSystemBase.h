@@ -21,12 +21,11 @@
 
 using namespace std;
 using namespace boost::tuples;
-typedef tuple<Scene *, TouchEvent> TouchEventQueueItem;
 
 
 class EventSystemBase {
 public:
-	Queue<TouchEventQueueItem> *eventQueue;
+	Queue<TouchEvent> *eventQueue;
 
 	// Methods intended for external use (API)
 	EventSystemBase();

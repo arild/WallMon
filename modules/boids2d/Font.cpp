@@ -5,6 +5,9 @@
  *
  * Provides a font render API that uses FTGL and takes the resolution of
  * the current scene into account in order to scale FTGL fonts correctly.
+ *
+ * Without this wrapper, the rendered text is likely to become blurry,
+ * since it is automatically scaled according to some value set in glScalef().
  */
 
 #include <GL/gl.h>
@@ -17,7 +20,7 @@ Font::Font(int size, bool centerHorizontal, bool centerVertical)
 {
 	string fontPath = Config::GetFontPath();
 	_font = new FTTextureFont(fontPath.c_str());
-	_font->FaceSize((unsigned int)(size * Scene::current->scale));
+	_font->FaceSize((unsigned int)(size * Scene::current->GetScale()));
 	_centerHorizontal = centerHorizontal;
 	_centerVertical = centerVertical;
 }
@@ -43,12 +46,14 @@ void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bo
 	float verticalAlignment = 0;
 	if (centerVertical)
 		verticalAlignment = _font->FaceSize() / (float)2;
-
-	glTranslatef(tx * s->scale - horizontalAlignment, ty * s->scale - verticalAlignment, 0);
+	LOG(INFO) << "TX: " << tx * s->GetScale();
+	glTranslatef(tx * s->GetScale() - horizontalAlignment, ty * s->GetScale() - verticalAlignment, 0);
 	_font->Render(text.c_str());
 	s->Unload();
 	s->LoadVirtual();
 }
+
+
 
 
 
