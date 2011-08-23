@@ -131,7 +131,7 @@ void Button::OnCleanup()
 {
 }
 
-void Button::HandleHit(TT_touch_state_t &event)
+void Button::HandleHit(TouchEvent &event)
 {
 	if (_slowActivation) {
 		if (_animationOn == false && System::GetTimeInSec() - _timestampSec < 1.0)

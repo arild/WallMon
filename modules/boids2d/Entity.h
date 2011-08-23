@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "touchmanager/STouchManager.h"
+#include "TouchEvent.h"
 
 enum Shape {
 	QUAD,
@@ -27,7 +28,7 @@ public:
 	virtual void OnCleanup() = 0;
 
 	virtual bool IsHit(float x, float y);
-	virtual void HandleHit(TT_touch_state_t &event);
+	virtual void HandleHit(TouchEvent &event);
 };
 
 class EntityShape : virtual Entity {
@@ -37,6 +38,18 @@ public:
 	EntityShape();
 	virtual ~EntityShape() {}
 	void DrawEntityShape();
+};
+
+class EntityEvent : public virtual Entity {
+public:
+	EntityEvent();
+	virtual ~EntityEvent() {}
+	void HandleHit(TouchEvent &event);
+	virtual void Up(float x, float y) = 0;
+//	virtual void ScrollUp() = 0;
+//	virtual void ScrollDown() = 0;
+//	virtual void SwipeLeft() = 0;
+//	virtual void SwipeRight() = 0;
 };
 
 #endif /* IENTITY_H_ */

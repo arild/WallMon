@@ -98,7 +98,7 @@ void BoidsApp::_RenderForever()
 			_updateOrtho = false;
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		_mainScene->Run();
+		Scene::RunAllScenes();
 		_HandleTouchEvents();
 
 		SDL_GL_SwapBuffers();
@@ -145,19 +145,14 @@ void BoidsApp::_SetupScenes()
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-	_mainScene = new Scene(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
-	_controlPanelScene = _mainScene->CreateSubScene(0, 0, w * 3, h * 4, 100, 200);
-	_boidScene = _mainScene->CreateSubScene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
-	_tableScene = _mainScene->CreateSubScene(w * 7, 0, w * 4, h * 3.5, 50, 100);
+	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
+	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
+//-/	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
+	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
 
-	// The event system will recursively check scenes within the provided scene
-	_eventSystem->AddScene(_mainScene);
-
-//	_mainScene = new Scene(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT, 230, 100);
-//	_controlPanelScene = _mainScene->CreateSubScene(0, 0, 80, 100, 100, 200);
-//	_boidScene = _mainScene->CreateSubScene(80, 20, 80, 60, 100, 100);
-//	_tableScene = _mainScene->CreateSubScene(170, 0, 60, 90, 50, 100);
-
+	Scene::AddScene(_controlPanelScene);
+	Scene::AddScene(_boidScene);
+	Scene::AddScene(_tableScene);
 }
 
 void BoidsApp::_PopulateScenes()
@@ -180,9 +175,9 @@ void BoidsApp::_HandleTouchEvents()
 	while (_eventSystem->eventQueue->GetSize() > 0) {
 		EventQueueItem item = _eventSystem->eventQueue->Pop();
 		Entity *entity = item.get<0>();
-		TT_touch_state_t event = item.get<1>();
+		TouchEvent event = item.get<1>();
 
-		_VisualizeShoutEvent(event.loc.x, event.loc.y);
+		_VisualizeShoutEvent(event.realX, event.realY);
 		if (++numEventesProcessed == 5) {
 			// Process no more than 5 events at a time, and
 			// discard remaining events

@@ -14,7 +14,7 @@
 
 SdlMouseEventFetcher::SdlMouseEventFetcher()
 {
-	_queue = new Queue<TT_touch_state_t *> (100);
+	_queue = new Queue<TouchEvent *> (100);
 	_timestamp = System::GetTimeInMsec();
 	_isEventStreamActive = false;
 }
@@ -33,9 +33,9 @@ void SdlMouseEventFetcher::PollEvents()
 {
 	int mx, my;
 	SDL_GetMouseState(&mx, &my);
-	TT_touch_state_t *obj = new TT_touch_state_t();
-	obj->loc.x = mx * (float) (WALL_SCREEN_WIDTH / (float) 1600);
-	obj->loc.y = my * (float) (WALL_SCREEN_HEIGHT / (float) 768);
+	TouchEvent *obj = new TouchEvent();
+	obj->x = mx * (float) (WALL_SCREEN_WIDTH / (float) 1600);
+	obj->y = my * (float) (WALL_SCREEN_HEIGHT / (float) 768);
 
 	SDL_Event event;
 	SDL_PumpEvents();
@@ -69,6 +69,6 @@ void SdlMouseEventFetcher::PollEvents()
 
 void SdlMouseEventFetcher::WaitAndHandleNextEvent()
 {
-	TT_touch_state_t *event = _queue->Pop();
-	FilterAndRouteEvent(event);
+	TouchEvent *event = _queue->Pop();
+	FilterAndRouteEvent(*event);
 }

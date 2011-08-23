@@ -59,33 +59,34 @@ void EventSystemBase::_HandleEventsForever()
 	}
 }
 
-void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *event)
+void EventSystemBase::FilterAndRouteEvent(TouchEvent &event)
 {
-	float x = (float)event->loc.x;
-	float y = (float)event->loc.y;
-
 	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
-	event->loc.y = WALL_SCREEN_HEIGHT - event->loc.y;
-	event->delta.y = WALL_SCREEN_HEIGHT - event->delta.y;
+	event.y = WALL_SCREEN_HEIGHT - event.y;
 
-	if (_wallView->IsCordsWithin(event->loc.x, event->loc.y) == false)
+	if (_wallView->IsCordsWithin(event.x, event.y) == false)
 		return;
 
 	// Transform the global display wall coordinates from shout into global
 	// coordinates within the application, which uses the same coordinate system,
 	// however, might be (significantly) smaller in physical screen size (.e.g 2x2 tiles)
-	_wallView->GlobalToGridCoords((float *)&event->loc.x, (float *)&event->loc.y);
-	_wallView->GlobalToGridCoords((float *)&event->delta.x, (float *)&event->delta.y);
+	_wallView->GlobalToGridCoords((float *)&event.x, (float *)&event.y);
 
 	// Find all entities that the event "hits"
-	vector<EntityHit> entityHits = _scenes[0]->TestForEntityHits(event->loc.x, event->loc.y);
+	vector<EntityHit> entityHits = Scene::GetAllEntityHits(event.x, event.y);
 
 	LOG(INFO) << "Num entity hits: " << entityHits.size();
 	if (entityHits.size() == 0)
 		// No entity hits within scene
 		return;
 
-	eventQueue->Push(make_tuple(entityHits[0].entity, *event));
+	// Convert to virtual coordinates and save the real coordinates
+	event.realX = event.x;
+	event.realY = event.y;
+	event.x = entityHits[0].virtX;
+	event.y = entityHits[0].virtY;
+
+	eventQueue->Push(make_tuple(entityHits[0].entity, event));
 }
 
 

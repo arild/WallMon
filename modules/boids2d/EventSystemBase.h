@@ -22,7 +22,7 @@
 using namespace std;
 using namespace boost::tuples;
 
-typedef tuple<Entity *, TT_touch_state_t> EventQueueItem;
+typedef tuple<Entity *, TouchEvent> EventQueueItem;
 
 class EventSystemBase {
 public:
@@ -46,7 +46,7 @@ public:
 	virtual void WaitAndHandleNextEvent() = 0;
 
 	// Methods intended to be used by child class
-	void FilterAndRouteEvent(TT_touch_state_t *event);
+	void FilterAndRouteEvent(TouchEvent &event);
 private:
 	boost::thread _thread;
 	bool _running;

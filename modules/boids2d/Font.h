@@ -14,6 +14,7 @@ public:
 	void RenderText(string text, float tx, float ty);
 	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
 private:
+	int _fontSize;
 	bool _centerHorizontal, _centerVertical;
 	FTFont *_font;
 };

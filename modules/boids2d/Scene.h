@@ -3,48 +3,52 @@
 
 #include <vector>
 #include <string>
-#include <boost/thread/mutex.hpp>
 #include "Entity.h"
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 
 class Scene;
 class EntityHit {
 public:
-	float virtX, virtY;
-	Scene *scene;
-	Entity *entity;
+        float virtX, virtY;
+        Scene *scene;
+        Entity *entity;
 
-	EntityHit(float virtX_, float virtY_, Scene *scene_, Entity *entity_) :
-		virtX(virtX_), virtY(virtY_), scene(scene_), entity(entity_) {}
+        EntityHit(float virtX_, float virtY_, Scene *scene_, Entity *entity_) :
+                virtX(virtX_), virtY(virtY_), scene(scene_), entity(entity_) {}
 };
 
 class Scene {
 public:
+	static vector<Scene *> scenes;
 	static Scene *current;
+	vector<Entity *> entityList, entityListInit;
 
 	Scene(float x, float y, float w, float h, float virtualW, float virtualH);
 	virtual ~Scene();
-	Scene *CreateSubScene(float x, float y, float w, float h, float virtualW, float virtualH);
+
+	// Intended as public API
+	float GetScale();
+	static void AddScene(Scene *scene);
+	void AddEntity(Entity *entity);
+	static void AddEntityCurrent(Entity *entity);
+	static vector<EntityHit> GetAllEntityHits(float x, float y);
+	static void RunAllScenes();
+
+	// API intended to be used by the Scene class itself
+	// (Not made private due to the public static API)
 	void LoadVirtual();
 	void LoadReal();
 	void Unload();
-	float GetScale();
 	void RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY);
-	void VirtualToRealCoords(float virtX, float virtY, float *realX, float *realY);
 	void Visualize();
-	void AddEntity(Entity *entity);
-	static void AddEntityCurrent(Entity *entity);
-	vector<EntityHit> TestForEntityHits(float x, float y);
+	bool IsSceneHit(float x, float y);
+	vector<EntityHit> GetEntityHits(float x, float y);
 	void Run();
 private:
-	float _x, _y, _w, _h, _virtualW, _virtualH, _scale;
-	vector<Entity *> _entityList, _entityListInit;
-	vector<Scene *> _subScenes;
-
-	void _RunEntities();
-	void _RunSubScenes();
-	bool _IsSceneHit(float x, float y);
-	boost::mutex _entityMutex, _sceneMutex;
+	float _x, _y, _w, _h, _scale;
+	boost::mutex _entityMutex;
+	static boost::mutex _sceneMutex;
 };
 #endif /* SCENE_H_ */

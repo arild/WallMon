@@ -20,7 +20,7 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	void HandleHit(TT_touch_state_t &event);
+	void HandleHit(TouchEvent &event);
 
 private:
 	bool _slowActivation;

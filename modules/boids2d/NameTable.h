@@ -1,4 +1,3 @@
-
 #ifndef TABLE_H_
 #define TABLE_H_
 
@@ -10,26 +9,25 @@
 
 using namespace std;
 
-
 class TableItem {
 public:
 	string displayName;
 	int r, g, b;
 	double timestampMsec;
 	float score;
-//	list<TableItem *> _items;
+	//	list<TableItem *> _items;
 	TableItem(string displayName_, int r_, int g_, int b_);
 };
 
 //typedef list<TableItem *> ItemContainerType;
 struct TableItemCompare {
-	bool operator()(TableItem * const  a, TableItem * const b)
+	bool operator()(TableItem * const a, TableItem * const b)
 	{
 		return a->score > b->score;
 	}
 };
 
-class NameTable : public Entity {
+class NameTable: public EntityEvent {
 public:
 	NameTable();
 	virtual ~NameTable();
@@ -39,7 +37,7 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	void HandleHit(TT_touch_state_t &event);
+	virtual void Up(float x, float y);
 
 private:
 	boost::mutex _mutex;

@@ -80,20 +80,13 @@ void NameTable::OnCleanup()
 {
 }
 
-void NameTable::HandleHit(TT_touch_state_t & event)
+void NameTable::Up(float x, float y)
 {
-	LOG(INFO) << "Name table hit. isUp=" << event.isUp << " | x=" << event.loc.x << " | y=" << event.loc.y;
-	if (event.isUp && event.loc.y <= TABLE_TOP && event.loc.y >= TABLE_BOTTOM) {
-		LOG(INFO) << "IS UP";
-		// Find item to be visually marked
-		_selectedPixelIndex = _currentPixelIndex + (100 - event.loc.y);
-		LOG(INFO) << "selected index" << _selectedPixelIndex;
-		return;
-	}
+	LOG(INFO) << "IS UP: x=" << x << " | y=" << y;
+	// Find item to be visually marked
+	_selectedPixelIndex = _currentPixelIndex + (100 - y);
+	LOG(INFO) << "selected index" << _selectedPixelIndex;
 
-//	// Logic for sliding
-//	LOG(INFO) << "Radius: " << event.radius;
-//	LOG(INFO) << "Moved : " << event.movedDistance;
 }
 
 void NameTable::_DrawAllItems()

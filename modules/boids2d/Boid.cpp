@@ -136,7 +136,7 @@ void Boid::_DrawBoid()
 	DrawEntityShape();
 }
 
-void Boid::HandleHit(TT_touch_state_t & event)
+void Boid::HandleHit(TouchEvent & event)
 {
 	ctx->red = 255;
 	ctx->green = 255;

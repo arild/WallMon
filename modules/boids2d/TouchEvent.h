@@ -10,10 +10,10 @@
 
 class TouchEvent {
 public:
-	int touchId;
-	bool isDown;
-	float x, y;
-	float radius, movedDistance;
+	int id;
+	bool isUp;
+	float x, y, realX, realY;
+	float radius;
 	float timestampSec, timestampPreviousSec;
 	virtual ~TouchEvent() {}
 };
