@@ -12,7 +12,6 @@ class TouchEvent {
 public:
 	int touchId;
 	bool isDown;
-	bool visualizeOnly;
 	float x, y;
 	float radius, movedDistance;
 	float timestampSec, timestampPreviousSec;

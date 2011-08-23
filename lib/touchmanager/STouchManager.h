@@ -20,7 +20,7 @@ typedef struct {
 	uint32_t oid;
 	float radius, movedDistance, time;
 	double lastUpdated;
-	bool wasUpdated, remove;
+	bool wasUpdated, remove, isUp;
 } TT_touch_state_t;
 
 typedef std::map<uint32_t, TT_touch_state_t*> oidTouchMap_t;

@@ -21,7 +21,7 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	void HandleHit(TouchEvent &event);
+	void HandleHit(TT_touch_state_t &event);
 private:
 	float speedx, speedy;
 	float _oldDestx, _oldDesty;

@@ -13,9 +13,9 @@
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
-const float TABLE_ITEMS_TOP = 85.;
-const float TABLE_ITEMS_BOTTOM = 15.;
-const float TABLE_ITEM_HEIGHT = 6.;
+const float TABLE_TOP = 85.;
+const float TABLE_BOTTOM = 15.;
+const float ITEM_HEIGHT = 6.;
 const float FONT_SIZE = 4.;
 
 TableItem::TableItem(string displayName_, int r_, int g_, int b_)
@@ -28,18 +28,15 @@ TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 	score = 0;
 }
 
-NameTable::NameTable(int maxNumItemsToDisplay)
+NameTable::NameTable()
 {
-	_maxNumItemsToDisplay = maxNumItemsToDisplay;
-
-	_current = 0;
-
-	_selected = -1;
+	_currentPixelIndex = 0;
+	_selectedPixelIndex = -1;
 	// Set up hit box
 	tx = 0;
-	ty = TABLE_ITEMS_BOTTOM;
+	ty = TABLE_BOTTOM;
 	width = 50;
-	height = TABLE_ITEMS_TOP;
+	height = TABLE_TOP;
 }
 
 NameTable::~NameTable()
@@ -67,7 +64,7 @@ void NameTable::OnInit()
 
 void NameTable::OnLoop()
 {
-	if (_PerformUpdate()) {
+	if (_PerformUpdate() && false) {
 		scoped_lock lock(_mutex);
 		sort(_itemsAll.begin(), _itemsAll.end(), TableItemCompare());
 		_itemsDisplay = _GetTopRankedUniqueDisplayNameItems(10);
@@ -83,58 +80,80 @@ void NameTable::OnCleanup()
 {
 }
 
-void NameTable::HandleHit(TouchEvent & event)
+void NameTable::HandleHit(TT_touch_state_t & event)
 {
-	if (event.isDown == false) {
+	LOG(INFO) << "Name table hit. isUp=" << event.isUp << " | x=" << event.loc.x << " | y=" << event.loc.y;
+	if (event.isUp && event.loc.y <= TABLE_TOP && event.loc.y >= TABLE_BOTTOM) {
+		LOG(INFO) << "IS UP";
 		// Find item to be visually marked
-		int offset = (TABLE_ITEMS_TOP - event.y) / TABLE_ITEM_HEIGHT;
-		_selected = _current + offset;
+		_selectedPixelIndex = _currentPixelIndex + (100 - event.loc.y);
+		LOG(INFO) << "selected index" << _selectedPixelIndex;
 		return;
 	}
 
-	// Logic for sliding
-	LOG(INFO) << "Radius: " << event.radius;
-	LOG(INFO) << "Moved : " << event.movedDistance;
+//	// Logic for sliding
+//	LOG(INFO) << "Radius: " << event.radius;
+//	LOG(INFO) << "Moved : " << event.movedDistance;
 }
 
 void NameTable::_DrawAllItems()
 {
-	float y = TABLE_ITEMS_TOP;
+	float y = 100;
 
-	glColor3ub(255,255,255);
-	_fontLarge->RenderText("Processes", 3, TABLE_ITEMS_TOP);
-
-	for (int i = _current; i < _itemsDisplay.size(); i++) {
-		if (y <= TABLE_ITEMS_BOTTOM)
+	int startIndex = _currentPixelIndex / ITEM_HEIGHT;
+	int selectedIndex = _selectedPixelIndex / ITEM_HEIGHT;
+	for (int i = startIndex; i < _itemsAll.size(); i++) {
+		if (y <= 0)
 			break;
-		y -= TABLE_ITEM_HEIGHT;
+		y -= ITEM_HEIGHT;
 
-		TableItem *item = _itemsDisplay[i];
+		TableItem *item = _itemsAll[i];
 		glColor3ub(item->r, item->g, item->b);
-		if (i == _selected) {
-			// Draw the rectagular marker for selected entry
-			float y_ = y - TABLE_ITEM_HEIGHT / 4;
+		if (i == selectedIndex) {
+			// Draw the rectangular marker for selected entry
+			float y_ = y - ITEM_HEIGHT / 4;
 
 			glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
-			glVertex3f(0, y_, 0);
-			glVertex3f(30, y_, 0);
-			glVertex3f(30, y_ + TABLE_ITEM_HEIGHT, 0);
-			glVertex3f(0, y_ + TABLE_ITEM_HEIGHT, 0);
-			glVertex3f(0, y_, 0);
+			glVertex2f(3, y_);
+			glVertex2f(35, y_);
+			glVertex2f(35, y_ + ITEM_HEIGHT);
+			glVertex2f(3, y_ + ITEM_HEIGHT);
+			glVertex2f(3, y_);
 
 			glEnd();
 		}
 
+		// Draw the rectangle in front of every entry
 		glBegin(GL_QUADS);
-		glVertex2f(3, y);
 		glVertex2f(6, y);
+		glVertex2f(9, y);
+		glVertex2f(9, y + 3);
 		glVertex2f(6, y + 3);
-		glVertex2f(3, y + 3);
 		glEnd();
 
-		_font->RenderText(item->displayName, 9, y);
+		_font->RenderText(item->displayName, 12, y);
 	}
+
+	// Black out the top and bottom which is not part of the table
+	glColor3ub(0,0,0);
+	glBegin(GL_QUADS);
+	glVertex2f(0, TABLE_TOP);
+	glVertex2f(50, TABLE_TOP);
+	glVertex2f(50, 100);
+	glVertex2f(0, 100);
+	glEnd();
+
+	glBegin(GL_QUADS);
+	glVertex2f(0, 0);
+	glVertex2f(50, 0);
+	glVertex2f(50, TABLE_BOTTOM);
+	glVertex2f(0, TABLE_BOTTOM);
+	glEnd();
+
+	glColor3ub(255,255,255);
+	_fontLarge->RenderText("Processes", 6, TABLE_TOP + 8);
+
 }
 
 vector<TableItem*> NameTable::_GetTopRankedUniqueDisplayNameItems(int numItems)

@@ -19,6 +19,7 @@ class Queue {
 public:
 	Queue(int capacity);
 	int GetSize();
+	void Clear();
 	void Push(T item);
 	T Pop();
 private:
@@ -44,6 +45,13 @@ int Queue<T>::GetSize()
 	return _queue.size();
 }
 
+template<class T>
+void Queue<T>::Clear()
+{
+	scoped_lock lock(_mutex);
+	while (_queue.size() > 0)
+		_queue.pop();
+}
 
 template<class T>
 void Queue<T>::Push(T item)

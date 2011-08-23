@@ -131,7 +131,7 @@ void Button::OnCleanup()
 {
 }
 
-void Button::HandleHit(TouchEvent &event)
+void Button::HandleHit(TT_touch_state_t &event)
 {
 	if (_slowActivation) {
 		if (_animationOn == false && System::GetTimeInSec() - _timestampSec < 1.0)
@@ -140,7 +140,7 @@ void Button::HandleHit(TouchEvent &event)
 		_animationOn = true;
 		_timestampSec = System::GetTimeInSec();//(double)event.timestampSec;
 	} else {
-		if (event.isDown == true)
+		if (event.isUp == false)
 			return;
 		ButtonClick();
 	}

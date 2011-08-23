@@ -19,7 +19,7 @@ Entity::Entity()
 		Scene::AddEntityCurrent(this);
 }
 
-void Entity::HandleHit(TouchEvent &event)
+void Entity::HandleHit(TT_touch_state_t &event)
 {
 
 }

@@ -23,7 +23,7 @@ public:
 	virtual void OnCleanup();
 
 	// Responsible generating slider events
-	void HandleHit(TouchEvent &event);
+	void HandleHit(TT_touch_state_t &event);
 
 	// Interface for entities inheriting, must be implemented
 	virtual void SlideUpCallback() = 0;

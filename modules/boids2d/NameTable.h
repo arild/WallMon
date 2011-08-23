@@ -31,7 +31,7 @@ struct TableItemCompare {
 
 class NameTable : public Entity {
 public:
-	NameTable(int maxNumItemsToDisplay=10);
+	NameTable();
 	virtual ~NameTable();
 	void Add(TableItem *item);
 
@@ -39,16 +39,15 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	void HandleHit(TouchEvent &event);
+	void HandleHit(TT_touch_state_t &event);
 
 private:
 	boost::mutex _mutex;
 	vector<TableItem *> _itemsAll, _itemsDisplay;
-	int _current; // index of item residing on top of displayed list
-	int _selected; // index of item currently marked and active
+	int _currentPixelIndex; // index of item residing on top of displayed list
+	int _selectedPixelIndex; // index of item currently marked and active
 	Font *_font;
 	Font *_fontLarge;
-	int _maxNumItemsToDisplay;
 	double _tsLastUpdate;
 	void _DrawAllItems();
 	vector<TableItem *> _GetTopRankedUniqueDisplayNameItems(int numItems);

@@ -180,12 +180,12 @@ void Scene::AddEntityCurrent(Entity *entity)
  * Takes coordinates according to scene coordinate system and returns all
  * entities within the scene that overlaps with given coordinates
  */
-vector<Entity *> Scene::TestForEntityHits(float x, float y)
+vector<EntityHit> Scene::TestForEntityHits(float x, float y)
 {
-	vector<Entity *> result;
+	vector<EntityHit> result;
 	if (_IsSceneHit(x, y) == false)
 		return result;
-
+	LOG(INFO) << "Scene hit";
 	// In this scenario, we do not need to load the virtual scene, only provide
 	// entities with coordinates in their virtual coordinate system
 	RealToVirtualCoords(x, y, &x, &y);
@@ -194,16 +194,16 @@ vector<Entity *> Scene::TestForEntityHits(float x, float y)
 	_entityMutex.lock();
 	for (int i = 0; i < _entityList.size(); i++)
 		if (_entityList[i]->IsHit(x, y))
-			result.push_back(_entityList[i]);
+			result.push_back(EntityHit(x, y, this, _entityList[i]));
 	_entityMutex.unlock();
 
 	// Test for hits within sub-scenes
 	_sceneMutex.lock();
 	for (int i = 0; i < _subScenes.size(); i++) {
-		vector<Entity *> resultSubScene = _subScenes[i]->TestForEntityHits(x, y);
+		vector<EntityHit> resultSubScene = _subScenes[i]->TestForEntityHits(x, y);
 		// Combine results
-		BOOST_FOREACH (Entity *e, resultSubScene)
-			result.push_back(e);
+		for (int j = 0; j < resultSubScene.size(); j++)
+			result.push_back(resultSubScene[j]);
 	}
 	_sceneMutex.unlock();
 

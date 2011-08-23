@@ -36,17 +36,17 @@ void Slider::OnCleanup()
 {
 }
 
-void Slider::HandleHit(TouchEvent & event)
+void Slider::HandleHit(TT_touch_state_t & event)
 {
-	if (event.isDown == false) {
-		// Find item to be visually marked
-		SelectCallback(event.x, event.y);
-		return;
-	}
-
-	// Logic for sliding
-	LOG(INFO) << "Radius: " << event.radius;
-	LOG(INFO) << "Moved : " << event.movedDistance;
+//	if (event.isDown == false) {
+//		// Find item to be visually marked
+//		SelectCallback(event.x, event.y);
+//		return;
+//	}
+//
+//	// Logic for sliding
+//	LOG(INFO) << "Radius: " << event.radius;
+//	LOG(INFO) << "Moved : " << event.movedDistance;
 
 }
 

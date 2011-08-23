@@ -14,7 +14,7 @@
 
 EventSystemBase::EventSystemBase()
 {
-	eventQueue = new Queue<TouchEvent> (10000);
+	eventQueue = new Queue<EventQueueItem> (10000);
 }
 
 EventSystemBase::~EventSystemBase()
@@ -25,6 +25,11 @@ EventSystemBase::~EventSystemBase()
 void EventSystemBase::SetWallView(WallView *wallView)
 {
 	_wallView = wallView;
+}
+
+void EventSystemBase::AddScene(Scene *scene)
+{
+	_scenes.push_back(scene);
 }
 
 void EventSystemBase::Start()
@@ -54,44 +59,33 @@ void EventSystemBase::_HandleEventsForever()
 	}
 }
 
-void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown)
+void EventSystemBase::FilterAndRouteEvent(TT_touch_state_t *event)
 {
-	float x = (float)obj->loc.x;
-	float y = (float)obj->loc.y;
+	float x = (float)event->loc.x;
+	float y = (float)event->loc.y;
 
 	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
-	y = WALL_SCREEN_HEIGHT - y;
+	event->loc.y = WALL_SCREEN_HEIGHT - event->loc.y;
+	event->delta.y = WALL_SCREEN_HEIGHT - event->delta.y;
 
-	if (_wallView->IsCordsWithin(x, y) == false)
+	if (_wallView->IsCordsWithin(event->loc.x, event->loc.y) == false)
 		return;
 
 	// Transform the global display wall coordinates from shout into global
 	// coordinates within the application, which uses the same coordinate system,
 	// however, might be (significantly) smaller in physical screen size (.e.g 2x2 tiles)
-	_wallView->GlobalToGridCoords(&x, &y);
+	_wallView->GlobalToGridCoords((float *)&event->loc.x, (float *)&event->loc.y);
+	_wallView->GlobalToGridCoords((float *)&event->delta.x, (float *)&event->delta.y);
 
-	TouchEvent event;
-	event.isDown = isDown;
-	event.x = x;
-	event.y = y;
-	event.movedDistance = obj->movedDistance;
-	event.radius = obj->radius;
-	event.timestampSec = obj->time;
-	event.timestampPreviousSec = (float)obj->lastUpdated;
+	// Find all entities that the event "hits"
+	vector<EntityHit> entityHits = _scenes[0]->TestForEntityHits(event->loc.x, event->loc.y);
 
-//	Scene *scene = Scene::TestForSceneHit(event.realX, event.realY);
-//	if (scene == NULL)
-//		// Coordinates not within any scene
-//		return;
-	event.visualizeOnly = true;
-	eventQueue->Push(event);
-	event.visualizeOnly = false;
+	LOG(INFO) << "Num entity hits: " << entityHits.size();
+	if (entityHits.size() == 0)
+		// No entity hits within scene
+		return;
 
-	// Transform global coordinates within the application to match coordinate
-	// system used within the relevant scene, which could be anything
-//	scene->RealToVirtualCoords(event.realX, event.realY, &event.x, &event.y);
-//	item = make_tuple(scene, event);
-//	eventQueue->Push(item);
+	eventQueue->Push(make_tuple(entityHits[0].entity, *event));
 }
 
 

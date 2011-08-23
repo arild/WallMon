@@ -46,7 +46,6 @@ void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bo
 	float verticalAlignment = 0;
 	if (centerVertical)
 		verticalAlignment = _font->FaceSize() / (float)2;
-	LOG(INFO) << "TX: " << tx * s->GetScale();
 	glTranslatef(tx * s->GetScale() - horizontalAlignment, ty * s->GetScale() - verticalAlignment, 0);
 	_font->Render(text.c_str());
 	s->Unload();

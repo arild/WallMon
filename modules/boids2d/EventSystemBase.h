@@ -22,15 +22,17 @@
 using namespace std;
 using namespace boost::tuples;
 
+typedef tuple<Entity *, TT_touch_state_t> EventQueueItem;
 
 class EventSystemBase {
 public:
-	Queue<TouchEvent> *eventQueue;
+	Queue<EventQueueItem> *eventQueue;
 
 	// Methods intended for external use (API)
 	EventSystemBase();
 	virtual ~EventSystemBase();
 	void SetWallView(WallView *wallView);
+	void AddScene(Scene *scene);
 	void Start();
 	void Stop();
 
@@ -44,16 +46,13 @@ public:
 	virtual void WaitAndHandleNextEvent() = 0;
 
 	// Methods intended to be used by child class
-	void FilterAndRouteEvent(TT_touch_state_t *obj, bool isDown);
+	void FilterAndRouteEvent(TT_touch_state_t *event);
 private:
 	boost::thread _thread;
 	bool _running;
 	WallView *_wallView;
-
+	vector<Scene *> _scenes;
 	void _HandleEventsForever();
-	Scene *_GlobalCoordsToScene(float x, float y);
-	void _VisualizeEvent(float x, float y);
-
 };
 
 #endif /* EVENTHANDLERBASE_H_ */

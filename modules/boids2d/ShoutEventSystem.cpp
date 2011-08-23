@@ -52,13 +52,15 @@ void ShoutEventSystem::HandleTouches(touchVector_t & down, touchVector_t & up)
 {
 	for (int i = 0; i < down.size(); i++) {
 		TT_touch_state_t *obj = down[i];
+		obj->isUp = false;
 		if (obj->wasUpdated)
-			FilterAndRouteEvent(obj, true);
+			FilterAndRouteEvent(obj);
 	}
 	for (int i = 0; i < up.size(); i++) {
 		TT_touch_state_t *obj = up[i];
+		obj->isUp = true;
 		if (obj->wasUpdated)
-			FilterAndRouteEvent(obj, false);
+			FilterAndRouteEvent(obj);
 	}
 }
 

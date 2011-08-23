@@ -23,7 +23,7 @@ public:
 	virtual void WaitAndHandleNextEvent();
 
 private:
-	Queue< tuple<TT_touch_state_t *, bool> > *_queue;
+	Queue<TT_touch_state_t *> *_queue;
 	double _timestamp;
 	bool _isEventStreamActive;
 };

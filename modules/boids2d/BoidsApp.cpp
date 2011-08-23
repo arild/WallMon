@@ -14,7 +14,8 @@
 #include <iostream>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
-#include "boost/foreach.hpp"
+#include <boost/foreach.hpp>
+#include <boost/tuple/tuple.hpp>
 #include "Config.h" // FONT_PATH
 #include "BoidsApp.h"
 #include "Fps.h"
@@ -149,6 +150,9 @@ void BoidsApp::_SetupScenes()
 	_boidScene = _mainScene->CreateSubScene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
 	_tableScene = _mainScene->CreateSubScene(w * 7, 0, w * 4, h * 3.5, 50, 100);
 
+	// The event system will recursively check scenes within the provided scene
+	_eventSystem->AddScene(_mainScene);
+
 //	_mainScene = new Scene(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT, 230, 100);
 //	_controlPanelScene = _mainScene->CreateSubScene(0, 0, 80, 100, 100, 200);
 //	_boidScene = _mainScene->CreateSubScene(80, 20, 80, 60, 100, 100);
@@ -172,16 +176,24 @@ void BoidsApp::_PopulateScenes()
 void BoidsApp::_HandleTouchEvents()
 {
 	_eventSystem->PollEvents();
+	int numEventesProcessed = 0;
 	while (_eventSystem->eventQueue->GetSize() > 0) {
-		TouchEvent event = _eventSystem->eventQueue->Pop();
-		_VisualizeShoutEvent(event.x, event.y);
-		vector<Entity *> entities = _mainScene->TestForEntityHits(event.x, event.y);
-		LOG(INFO) << "Num entity hits: " << entities.size();
-		if (entities.size() == 0)
-			// No entity hits within scene
-			continue;
-		entities[0]->HandleHit(event);
+		EventQueueItem item = _eventSystem->eventQueue->Pop();
+		Entity *entity = item.get<0>();
+		TT_touch_state_t event = item.get<1>();
+
+		_VisualizeShoutEvent(event.loc.x, event.loc.y);
+		if (++numEventesProcessed == 5) {
+			// Process no more than 5 events at a time, and
+			// discard remaining events
+			_eventSystem->eventQueue->Clear();
+			break;
+		}
+		entity->HandleHit(event);
+
 	}
+	if (numEventesProcessed > 0)
+		LOG(INFO) << "Num event processed: " << numEventesProcessed;
 }
 
 void BoidsApp::_VisualizeShoutEvent(float x, float y)
@@ -191,19 +203,13 @@ void BoidsApp::_VisualizeShoutEvent(float x, float y)
 	x -= (w / 2);
 	y -= (h / 2);
 
-	glPushMatrix();
-
-	glTranslatef(0, 0, 0);
-	glScalef(1, 1, 1);
 	glColor3f(255, 255, 0);
-
 	glBegin(GL_QUADS);
 	glVertex2f(x, y);
 	glVertex2f(x + w, y);
 	glVertex2f(x + w, y + h);
 	glVertex2f(x, y + h);
 	glEnd();
-	glPopMatrix();
 
 	SDL_GL_SwapBuffers();
 }

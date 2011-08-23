@@ -3,10 +3,21 @@
 
 #include <vector>
 #include <string>
-#include "Entity.h"
 #include <boost/thread/mutex.hpp>
+#include "Entity.h"
 
 using namespace std;
+
+class Scene;
+class EntityHit {
+public:
+	float virtX, virtY;
+	Scene *scene;
+	Entity *entity;
+
+	EntityHit(float virtX_, float virtY_, Scene *scene_, Entity *entity_) :
+		virtX(virtX_), virtY(virtY_), scene(scene_), entity(entity_) {}
+};
 
 class Scene {
 public:
@@ -24,7 +35,7 @@ public:
 	void Visualize();
 	void AddEntity(Entity *entity);
 	static void AddEntityCurrent(Entity *entity);
-	vector<Entity *> TestForEntityHits(float x, float y);
+	vector<EntityHit> TestForEntityHits(float x, float y);
 	void Run();
 private:
 	float _x, _y, _w, _h, _virtualW, _virtualH, _scale;

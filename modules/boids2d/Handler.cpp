@@ -49,6 +49,7 @@ void Handler::OnInit(Context *ctx)
 	 */
 	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
+//	_eventSystem = new ShoutEventSystem();
 	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
 
 

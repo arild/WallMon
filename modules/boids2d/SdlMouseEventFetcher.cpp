@@ -14,7 +14,7 @@
 
 SdlMouseEventFetcher::SdlMouseEventFetcher()
 {
-	_queue = new Queue<tuple<TT_touch_state_t *, bool> > (100);
+	_queue = new Queue<TT_touch_state_t *> (100);
 	_timestamp = System::GetTimeInMsec();
 	_isEventStreamActive = false;
 }
@@ -44,10 +44,12 @@ void SdlMouseEventFetcher::PollEvents()
 		{
 		case SDL_KEYDOWN:
 			_isEventStreamActive = true;
+			obj->isUp = false;
 			break;
 		case SDL_KEYUP:
 			_isEventStreamActive = false;
-			_queue->Push(make_tuple(obj, false));
+			obj->isUp = true;
+			_queue->Push(obj);
 			return;
 			break;
 		default:
@@ -62,11 +64,11 @@ void SdlMouseEventFetcher::PollEvents()
 	if (ts - _timestamp < 50)
 		return;
 	_timestamp = ts;
-	_queue->Push(make_tuple(obj, true));
+	_queue->Push(obj);
 }
 
 void SdlMouseEventFetcher::WaitAndHandleNextEvent()
 {
-	tuple<TT_touch_state_t *, bool> t = _queue->Pop();
-	FilterAndRouteEvent(t.get<0> (), t.get<1> ());
+	TT_touch_state_t *event = _queue->Pop();
+	FilterAndRouteEvent(event);
 }
