@@ -7,6 +7,7 @@
 
 #include "ShoutEventSystem.h"
 #include "touchmanager/STouchManager.h"
+#include <glog/logging.h>
 
 typedef void (ShoutEventSystem::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
 
@@ -50,9 +51,10 @@ void ShoutEventSystem::WaitAndHandleNextEvent()
 	if (parse_touch_location_event_v2(shoutEvent, &locFlags, &x, &y, &radius, 0, &senderID) == 0) {
 		event.x = x;
 		event.y = y;
-		event.radius = radius;
-		event.id = shoutEvent->refcon;
-		event.isUp = locFlags & kTouch_evt_last_detect_flag;
+		event.shoutEvent = shoutEvent;
+//		LOG(INFO) << "Shout size: " << sizeof(shoutEvent) << " | " << sizeof(shout_event_t);
+//		if (event.shoutEvent == NULL)
+//			LOG(INFO) << "SHOUT == NULL";
 		FilterAndRouteEvent(event);
 	}
 }

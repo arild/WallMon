@@ -9,7 +9,7 @@
 #include "DataContainers.h"
 
 BoidsApp  *VisualBase::boidsApp;
-NameTable *VisualBase::nameTable;
+Table *VisualBase::table;
 
 VisualBase::VisualBase()
 {
@@ -35,7 +35,7 @@ void VisualBase::InitBoids(string identifierString, BoidType boidType)
 	boidsApp->CreateBoid(cpu);
 	boidsApp->CreateBoid(memory);
 	boidsApp->CreateBoid(network);
-	nameTable->Add(tableItem);
+	table->Add(tableItem);
 }
 
 StatBase::StatBase()
@@ -95,7 +95,7 @@ ProcNameStat::~ProcNameStat()
 ProcNameVisual::ProcNameVisual(string processName)
 {
 	InitBoids(processName, BOID_TYPE_PROCESS_NAME);
-	VisualBase::nameTable->Add(tableItem);
+	VisualBase::table->Add(tableItem);
 }
 
 ProcNameVisual::~ProcNameVisual()

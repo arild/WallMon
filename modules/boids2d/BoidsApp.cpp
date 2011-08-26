@@ -69,7 +69,7 @@ void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 	_boidScene->AddEntity(new Boid(ctx));
 }
 
-NameTable *BoidsApp::GetNameTable()
+Table *BoidsApp::GetNameTable()
 {
 	return _nameTable;
 }
@@ -145,10 +145,10 @@ void BoidsApp::_SetupScenes()
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-	_controlPanelScene = new Scene(0, 0, w * 3, h * 4, 100, 200);
-	_boidScene = new Scene(w * 3, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
+	_controlPanelScene = new Scene(0, 0, w * 2, h * 4, 100, 200);
+	_boidScene = new Scene(w * 2.5, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
 //-/	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
-	_tableScene = new Scene(w * 7, 0, w * 4, h * 3.5, 50, 100);
+	_tableScene = new Scene(w * 6, 0, w * 4, h * 3.5, 100, 100);
 
 	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);
@@ -164,7 +164,7 @@ void BoidsApp::_PopulateScenes()
 	axis->Set(0, 100, 25);
 	_boidScene->AddEntity(axis);
 
-	_nameTable = new NameTable();
+	_nameTable = new Table();
 	_tableScene->AddEntity(_nameTable);
 }
 
@@ -178,6 +178,9 @@ void BoidsApp::_HandleTouchEvents()
 		TouchEvent event = item.get<1>();
 
 		_VisualizeShoutEvent(event.realX, event.realY);
+		if (event.visualizeOnly)
+			continue;
+
 		if (++numEventesProcessed == 5) {
 			// Process no more than 5 events at a time, and
 			// discard remaining events
@@ -187,8 +190,8 @@ void BoidsApp::_HandleTouchEvents()
 		entity->HandleHit(event);
 
 	}
-	if (numEventesProcessed > 0)
-		LOG(INFO) << "Num event processed: " << numEventesProcessed;
+//	if (numEventesProcessed > 0)
+//		LOG(INFO) << "Num event processed: " << numEventesProcessed;
 }
 
 void BoidsApp::_VisualizeShoutEvent(float x, float y)

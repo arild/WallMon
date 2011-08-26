@@ -1,10 +1,13 @@
 #ifndef IENTITY_H_
 #define IENTITY_H_
 
-using namespace std;
-
+#include <map>
+#include <shout/event-types/touch-events.h>
 #include "touchmanager/STouchManager.h"
 #include "TouchEvent.h"
+
+using namespace std;
+
 
 enum Shape {
 	QUAD,
@@ -45,11 +48,18 @@ public:
 	EntityEvent();
 	virtual ~EntityEvent() {}
 	void HandleHit(TouchEvent &event);
-	virtual void Up(float x, float y) = 0;
-//	virtual void ScrollUp() = 0;
-//	virtual void ScrollDown() = 0;
+	virtual void Tap(float x, float y) = 0;
+	virtual void ScrollDown(float deltaY) = 0;
+	virtual void ScrollUp(float deltaY) = 0;
 //	virtual void SwipeLeft() = 0;
 //	virtual void SwipeRight() = 0;
+private:
+	float _scrollThreshold, _swipeThreshold;
+	STouchManager *_touchManager;
+	void HandleTouchesCallback(touchVector_t & down, touchVector_t & up);
+	void HandleTouch(TT_touch_state_t &event);
+
+//	void _UpdateTouch(TouchEvent &event);
 };
 
 #endif /* IENTITY_H_ */

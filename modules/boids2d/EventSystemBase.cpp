@@ -75,14 +75,18 @@ void EventSystemBase::FilterAndRouteEvent(TouchEvent &event)
 	// Find all entities that the event "hits"
 	vector<EntityHit> entityHits = Scene::GetAllEntityHits(event.x, event.y);
 
-	LOG(INFO) << "Num entity hits: " << entityHits.size();
-	if (entityHits.size() == 0)
-		// No entity hits within scene
-		return;
-
-	// Convert to virtual coordinates and save the real coordinates
+//	LOG(INFO) << "Num entity hits: " << entityHits.size();
 	event.realX = event.x;
 	event.realY = event.y;
+
+	if (entityHits.size() == 0) {
+		// No entity hits within scene
+		event.visualizeOnly = true;
+		eventQueue->Push(make_tuple((Entity *)NULL, event));
+		return;
+	}
+
+	event.visualizeOnly = false;
 	event.x = entityHits[0].virtX;
 	event.y = entityHits[0].virtY;
 

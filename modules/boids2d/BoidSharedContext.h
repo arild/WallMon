@@ -22,20 +22,21 @@ enum BoidType {
 	BOID_TYPE_NODE
 };
 
+class BoidDisplayText {
+public:
+	string procName, hostName;
+};
+
 class BoidSharedContext {
 public:
 	int red, green, blue;
 	Shape boidShape;
 	BoidType boidType;
+	BoidDisplayText displayText;
 	static int tailLength;
-	static BoidType boidTypeToShow; // Simple filter for the different metrics
 
 	// Which type of boids to show within a metric
 	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
-
-	// Which type of metrics to show on the scrollable table
-	static BoidType tableFrom; // Left one
-	static BoidType tableTo; // Right one
 
 	BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidType boidType_);
 
@@ -45,9 +46,12 @@ public:
 	void SetTailLength(int length);
 	int GetTailLength();
 
+	void ShowDisplayText();
+	void DisableDisplayText();
 private:
 	float _destx, _desty;
 	int _tailLength;
+	bool _showDisplayText;
 	boost::mutex _mutex;
 };
 #endif /* BOIDSHAREDCONTEXT_H_ */

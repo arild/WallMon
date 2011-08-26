@@ -10,14 +10,10 @@
 #include "BoidSharedContext.h"
 
 int BoidSharedContext::tailLength = 0;
-BoidType BoidSharedContext::boidTypeToShow = BOID_TYPE_PROCESS_NAME;
 bool BoidSharedContext::showCpuBoid = false;
 bool BoidSharedContext::showMemoryBoid = false;
 bool BoidSharedContext::showNetworkBoid = false;
 bool BoidSharedContext::showStorageBoid = false;
-BoidType BoidSharedContext::tableFrom = BOID_TYPE_PROCESS_NAME;
-BoidType BoidSharedContext::tableTo = BOID_TYPE_PROCESS;
-
 
 
 BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidType boidType_)
@@ -27,6 +23,9 @@ BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shap
 	blue = blue_;
 	boidShape = shape_;
 	boidType = boidType_;
+	_showDisplayText = false;
+	displayText.procName = "proc name";
+	displayText.hostName = "host name";
 }
 
 void BoidSharedContext::SetDestination(float x, float y)
@@ -55,6 +54,18 @@ int BoidSharedContext::GetTailLength()
 	scoped_lock lock(_mutex);
 	return _tailLength;
 }
+
+void BoidSharedContext::ShowDisplayText()
+{
+	_showDisplayText = true;
+}
+
+void BoidSharedContext::DisableDisplayText()
+{
+	_showDisplayText = false;
+}
+
+
 
 
 

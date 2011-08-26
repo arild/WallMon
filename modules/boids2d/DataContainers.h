@@ -11,7 +11,7 @@
 #include <string>
 #include <boost/tuple/tuple.hpp>
 #include "BoidSharedContext.h"
-#include "NameTable.h"
+#include "Table.h"
 #include "BoidsApp.h"
 
 
@@ -30,13 +30,11 @@ using namespace boost::tuples;
 class VisualBase {
 public:
 	int red, green, blue;
-	BoidSharedContext *cpu;
-	BoidSharedContext *memory;
-	BoidSharedContext *network;
+	BoidSharedContext *cpu, *memory, *network;
 	TableItem *tableItem;
 
 	static BoidsApp *boidsApp;
-	static NameTable *nameTable;
+	static Table *table;
 
 	VisualBase();
 	~VisualBase();

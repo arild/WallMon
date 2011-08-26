@@ -33,7 +33,7 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(2, 1, 2, 2);
+	_wallView = new WallView(0, 1, 4, 3);
 	if (_wallView->IsTileWithin() == false)
 		return;
 	double x, y, width, height;
@@ -47,9 +47,10 @@ void Handler::OnInit(Context *ctx)
 	 * the 'entire' display wall is used, and coordinates are mapped thereafter. Also,
 	 * the single screen is told to show everything.
 	 */
+//	_wallView = new WallView(0, 1, 4, 3);
+//	_eventSystem = new ShoutEventSystem();
 	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
-//	_eventSystem = new ShoutEventSystem();
 	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
 
 
@@ -57,13 +58,13 @@ void Handler::OnInit(Context *ctx)
 #endif
 	// Common operations
 	_eventSystem->SetWallView(_wallView);
-	_nameTable = _boidsApp->GetNameTable();
+	_table = _boidsApp->GetNameTable();
 	_eventSystem->Start();
 	LOG(INFO) << "starting BoidsApp...";
 	_boidsApp->Start();
 	LOG(INFO) << "BoidsApp started";
 	VisualBase::boidsApp = _boidsApp;
-	VisualBase::nameTable = _nameTable;
+	VisualBase::table = _table;
 }
 
 void Handler::OnStop()

@@ -10,7 +10,7 @@
 #include "Boid.h"
 #include "EventSystemBase.h"
 #include "TouchEvent.h"
-#include "NameTable.h"
+#include "Table.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ public:
 	void Start();
 	void Stop();
 	void CreateBoid(BoidSharedContext *ctx);
-	NameTable *GetNameTable();
+	Table *GetNameTable();
 
 	void SetDisplayArea(double x, double y, double width, double height);
 private:
@@ -32,7 +32,7 @@ private:
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_tableScene, *_controlPanelScene;
-	NameTable *_nameTable;
+	Table *_nameTable;
 	EventSystemBase *_eventSystem;
 
 	void _InitSdlAndOpenGl();

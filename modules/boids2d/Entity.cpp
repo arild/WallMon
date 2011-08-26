@@ -1,4 +1,5 @@
 #include <GL/gl.h>
+#include <glog/logging.h>
 #include "Entity.h"
 #include "Scene.h"
 
@@ -78,9 +79,19 @@ void EntityShape::DrawEntityShape()
 	}
 }
 
+typedef void (EntityEvent::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
+
 EntityEvent::EntityEvent()
 {
+	HandleTouchesPtr handle = &EntityEvent::HandleTouchesCallback;
+	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
+	_touchManager = new STouchManager(this, callback);
 
+	// Policy for detecting scrolls and swipes:
+	// If the movement (delta) from previous touch exceeds 2 percent
+	// of the height (scroll) or width (swipe)
+	_scrollThreshold = height * 0.03;
+	_swipeThreshold = width * 0.03;
 }
 
 /**
@@ -89,7 +100,59 @@ EntityEvent::EntityEvent()
  */
 void EntityEvent::HandleHit(TouchEvent & event)
 {
-	if (event.isUp)
-		Up(event.x, event.y);
+	if (event.shoutEvent == NULL) {
+		TT_touch_state_t _event;
+		_event.loc = WVPoint2d(event.x, event.y);
+		_event.remove = event.isUp;
+		HandleTouch(_event);
+	}
+	else
+		_touchManager->handleEvent(event.shoutEvent, event.x, event.y);
 }
+
+void EntityEvent::HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
+{
+	for (int i = 0; i < down.size(); i++) {
+		TT_touch_state_t *obj = down[i];
+		if (obj->wasUpdated) {
+			obj->remove = false;
+			HandleTouch(*obj);
+		}
+	}
+	for (int i = 0; i < up.size(); i++) {
+		TT_touch_state_t *obj = up[i];
+		if (obj->wasUpdated) {
+			obj->remove = true;
+			HandleTouch(*obj);
+		}
+	}
+}
+
+void EntityEvent::HandleTouch(TT_touch_state_t & event)
+{
+	LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
+//	LOG(INFO) << "Time since last event: " event
+
+
+	if (event.remove) {
+		LOG(INFO) << "TAP DETECTED";
+		Tap(event.loc.x, event.loc.y);
+		return;
+	}
+	if (event.delta.y > _scrollThreshold) {
+		// User is moving hand upwards, which results
+		// in a scroll down
+		LOG(INFO) << "SCROLL DOWN DETECTED";
+		ScrollDown(event.delta.y);
+	}
+	else if (event.delta.y < -_scrollThreshold) {
+		LOG(INFO) << "SCROLL UP DETECTED";
+		ScrollUp(event.delta.y);
+	}
+
+}
+
+
+
+
 

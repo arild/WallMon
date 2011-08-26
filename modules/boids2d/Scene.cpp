@@ -87,7 +87,6 @@ vector<EntityHit> Scene::GetAllEntityHits(float x, float y)
     	Scene *s = Scene::scenes[i];
     	if (s->IsSceneHit(x, y) == false)
         	continue;
-		LOG(INFO) << "Scene hit";
 		// Test for entity hits within a single scene.
 		// In this scenario, we do not need to load the virtual scene, only provide
 		// entities with coordinates in their virtual coordinate system

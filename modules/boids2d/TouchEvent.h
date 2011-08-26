@@ -8,13 +8,13 @@
 #ifndef TOUCHEVENT_H_
 #define TOUCHEVENT_H_
 
+#include <shout/shout.h>
+
 class TouchEvent {
 public:
-	int id;
-	bool isUp;
 	float x, y, realX, realY;
-	float radius;
-	float timestampSec, timestampPreviousSec;
+	shout_event_t *shoutEvent;
+	bool isUp, visualizeOnly;
 	virtual ~TouchEvent() {}
 };
 

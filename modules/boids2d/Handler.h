@@ -20,7 +20,7 @@
 #include "BoidsApp.h"
 #include "BoidSharedContext.h"
 #include "EventSystemBase.h"
-#include "NameTable.h"
+#include "Table.h"
 #include "DataContainers.h"
 
 using namespace std;
@@ -37,7 +37,7 @@ private:
 	BoidsApp *_boidsApp;
 	Data *_data;
 	EventSystemBase *_eventSystem;
-	NameTable *_nameTable;
+	Table *_table;
 	void _HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg, string hostname);
 	void _UpdateCommonAggregatedStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat, StatBase &astat);
 	void _UpdateProcessStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat);

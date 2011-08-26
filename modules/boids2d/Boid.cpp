@@ -87,8 +87,8 @@ void Boid::OnLoop()
 void Boid::OnRender()
 {
 	// Filter for different metrics
-	if (ctx->boidType != BoidSharedContext::boidTypeToShow)
-		return;
+//	if (ctx->boidType != BoidSharedContext::boidTypeToShow)
+//		return;
 	// Domain specific filter, .e.g utilization less than a threshold
 	if (_visible == false)
 		return;
