@@ -13,8 +13,8 @@ using namespace std;
 class TableItem {
 public:
 	string displayName;
+	vector<string> subText;
 	int r, g, b;
-	double timestampMsec;
 	float score;
 	TableItem(string displayName_, int r_, int g_, int b_);
 	void AddRelatedBoid(BoidSharedContext *subItem);
@@ -33,7 +33,7 @@ struct TableItemCompare {
 
 class Table: public EntityEvent {
 public:
-	Table();
+	Table(bool isTopLevelTable=true);
 	virtual ~Table();
 	void Add(TableItem *item);
 
@@ -50,9 +50,10 @@ private:
 	vector<TableItem *> _items;
 	int _currentPixelIndex; // index of item residing on top of displayed list
 	int _selectedPixelIndex; // index of item currently marked and active
-	Font *_font;
-	Font *_fontLarge;
+	Font *_font, *_fontLarge;
 	double _tsLastUpdate;
+	Table *_subTable;
+	bool _isTopLevelTable;
 	void _DrawAllItems();
 	vector<TableItem *> _GetTopRankedUniqueDisplayNameItems(int numItems);
 	bool _HasDisplayName(vector<TableItem *> &items, string &displayName);

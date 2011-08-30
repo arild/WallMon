@@ -32,13 +32,12 @@ private:
 	bool _updateOrtho;
 	double _orthoLeft, _orthoRight, _orthoBottom, _orthoTop;
 	Scene *_boidScene, *_tableScene, *_controlPanelScene;
-	Table *_nameTable;
+	Table *_table;
 	EventSystemBase *_eventSystem;
 
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
-	void _SetupScenes();
-	void _PopulateScenes();
+	void _SetupAndPopulateScenes();
 	void _HandleTouchEvents();
 	void _VisualizeShoutEvent(float x, float y);
 	int _CountTotalNumObjects();

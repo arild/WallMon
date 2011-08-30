@@ -24,6 +24,11 @@ public:
 	static void NetworkBoidButtonCallback();
 	static void StorageBoidButtonCallback();
 
+	static void CoreViewButtonCallback();
+	static void ProcessViewButtonCallback();
+	static void ProcessNameViewButtonCallback();
+	static void NodeViewButtonCallback();
+
 	static void BoidTailCallback();
 private:
 	Font *_font, *_fontLarge;

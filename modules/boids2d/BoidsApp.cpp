@@ -27,15 +27,11 @@
 #include "Button.h"
 #include "ControlPanel.h"
 
-boost::condition mainLoopThreadCondition;
-boost::mutex mainLoopThreadMutex;
-
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
 	_eventSystem = eventSystem;
-	_SetupScenes();
-	_PopulateScenes();
+	_SetupAndPopulateScenes();
 }
 
 BoidsApp::~BoidsApp()
@@ -71,7 +67,7 @@ void BoidsApp::CreateBoid(BoidSharedContext *ctx)
 
 Table *BoidsApp::GetNameTable()
 {
-	return _nameTable;
+	return _table;
 }
 
 void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
@@ -98,6 +94,7 @@ void BoidsApp::_RenderForever()
 			_updateOrtho = false;
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glLoadIdentity();
 		Scene::RunAllScenes();
 		_HandleTouchEvents();
 
@@ -140,23 +137,19 @@ void BoidsApp::_InitSdlAndOpenGl()
 	glViewport(0, 0, _screenWidth, _screenHeight);
 }
 
-void BoidsApp::_SetupScenes()
+void BoidsApp::_SetupAndPopulateScenes()
 {
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-	_controlPanelScene = new Scene(0, 0, w * 2, h * 4, 100, 200);
-	_boidScene = new Scene(w * 2.5, h/2 + 75, w * 3.5, h * 3.3, 100, 100);
-//-/	_boidScene = new Scene(w * 3, h, w * 2, h * 2, 100, 100);
-	_tableScene = new Scene(w * 6, 0, w * 4, h * 3.5, 100, 100);
+	_tableScene = new Scene(0, 0, w * 3, h * 4, 100, 100);
+	_boidScene = new Scene(w * 4, h/2 + 75, w * 3, h * 3.3, 100, 100);
+	_controlPanelScene = new Scene(w * 7, 0, w * 2, h * 4, 100, 200);
 
 	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);
 	Scene::AddScene(_tableScene);
-}
 
-void BoidsApp::_PopulateScenes()
-{
 	ControlPanel *panel = new ControlPanel();
 	_controlPanelScene->AddEntity(panel);
 
@@ -164,8 +157,8 @@ void BoidsApp::_PopulateScenes()
 	axis->Set(0, 100, 25);
 	_boidScene->AddEntity(axis);
 
-	_nameTable = new Table();
-	_tableScene->AddEntity(_nameTable);
+	_table = new Table();
+	_tableScene->AddEntity(_table);
 }
 
 void BoidsApp::_HandleTouchEvents()

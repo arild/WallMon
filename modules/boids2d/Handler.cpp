@@ -33,7 +33,7 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(0, 1, 4, 3);
+	_wallView = new WallView(0, 1, 2, 2);
 	if (_wallView->IsTileWithin() == false)
 		return;
 	double x, y, width, height;
@@ -109,8 +109,8 @@ void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg
 	_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
 	// CPU
-	double user = proc->stat->userCpuUtilization * 32;
-	double system = proc->stat->systemCpuUtilization * 32;
+	double user = proc->stat->userCpuUtilization;
+	double system = proc->stat->systemCpuUtilization;
 	double totalCpuUtilization = user + system;
 	double userCpuRelativeShare = 50;
 	if (totalCpuUtilization > 0)

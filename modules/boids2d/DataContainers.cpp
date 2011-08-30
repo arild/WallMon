@@ -23,7 +23,7 @@ VisualBase::~VisualBase()
 	delete tableItem;
 }
 
-void VisualBase::InitBoids(string identifierString, BoidType boidType)
+void VisualBase::InitBoids(string identifierString, BoidView boidType)
 {
 	float red, green, blue;
 	Data::NameToRgbColor(identifierString, &red, &green, &blue);

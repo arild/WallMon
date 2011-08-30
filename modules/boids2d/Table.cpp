@@ -1,6 +1,8 @@
 /**
  * Implements a scrollable and touchable table that holds and displays
- * named entries.
+ * named entries. The implementation is highly general, however, tailored
+ * for having process names in the higher-level table, while specific processes
+ * in the lower-level table.
  */
 
 #include <GL/gl.h>
@@ -24,7 +26,6 @@ TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 	r = r_;
 	g = g_;
 	b = b_;
-	timestampMsec = System::GetTimeInMsec();
 	score = 0;
 }
 
@@ -40,15 +41,9 @@ vector<BoidSharedContext *> TableItem::GetRelatedBoids()
 	return _relatedBoids;
 }
 
-Table::Table()
+Table::Table(bool isTopLevelTable)
 {
-	_currentPixelIndex = 0;
-	_selectedPixelIndex = -1;
-	// Set up hit box
-	tx = 0;
-	ty = TABLE_BOTTOM;
-	width = 50;
-	height = TABLE_TOP;
+	_isTopLevelTable = isTopLevelTable;
 }
 
 Table::~Table()
@@ -69,6 +64,24 @@ void Table::Add(TableItem *item)
 
 void Table::OnInit()
 {
+	_currentPixelIndex = 0;
+	_selectedPixelIndex = -1;
+
+	// Set up hit box
+	tx = 0;
+	ty = TABLE_BOTTOM;
+	width = 50;
+	height = TABLE_TOP;
+
+	if (_isTopLevelTable) {
+		// Create and setup hitbox for the sub-table
+		_subTable = new Table(false);
+		_subTable->tx = 50;
+		_subTable->ty = ty;
+		_subTable->width = width;
+		_subTable->height = height;
+	}
+
 	_tsLastUpdate = 0;
 	_font = new Font(FONT_SIZE);
 	_fontLarge = new Font(FONT_SIZE + 1);
@@ -84,8 +97,11 @@ void Table::OnLoop()
 
 void Table::OnRender()
 {
+//	glPushMatrix();
+//	glTranslatef(tx, 0, 0);
 	_DrawAllItems();
 	_DrawArrows();
+//	glPopMatrix();
 }
 
 void Table::OnCleanup()

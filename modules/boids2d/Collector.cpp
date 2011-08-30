@@ -14,7 +14,7 @@ extern "C" ProcessCollector *create_collector()
 	p->context->key = KEY;
 
 	if (System::IsRocksvvCluster()) {
-		vector<string> servers = WallView(1, 1, 4, 3).GetGrid();
+		vector<string> servers = WallView(0, 1, 2, 2).GetGrid();
 		p->context->AddServers(servers);
 	}
 	else if (System::GetHostname().compare(0, 5, "arild") == 0) {
@@ -31,12 +31,9 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_usercpuutilization(0);
 	p->filter->set_systemcpuutilization(0);
 	p->filter->set_memoryutilization(0);
+	p->filter->set_networkinutilization(0);
+	p->filter->set_networkoututilization(0);
 
-	if (System::HasSupportForProcPidIo()) {
-		LOG(INFO) << "support for /proc/<pid>/io detected, monitoring it";
-		p->filter->set_networkinutilization(0);
-		p->filter->set_networkoututilization(0);
-	}
 	return p;
 }
 

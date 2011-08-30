@@ -155,18 +155,6 @@ int System::GetTotalMemory()
 	return atoi(RunCommand(cmd).c_str());
 }
 
-bool System::HasSupportForProcPidIo()
-{
-	ifstream file("/proc/1/io");
-	if (!file)
-		return false;
-	file.close();
-//	int pid = getpid();
-//	stringstream ss;
-//	ss << "/proc/" << pid << "/io";
-	return true;
-}
-
 bool System::IsRocksvvCluster()
 {
 	string hostname = RunCommand("hostname");;

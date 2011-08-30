@@ -46,7 +46,6 @@ void ProcessCollector::OnInit(Context *ctx)
 
 	_numCores = System::GetNumLogicalCores();
 	_totalMemoryMb = (double)System::GetTotalMemory() / 1024.;
-	_hasSupportForProcIo = System::HasSupportForProcPidIo();
 	// Create a process monitor for each pid on system
 	_monitors = new vector<LinuxProcessMonitorLight *>();
 	_pidMonitor = new PidMonitor;

@@ -29,6 +29,20 @@ void ControlPanel::OnInit()
 	b = new Button(77, 170, 15, 15, POLYGON);
 	b->SetCallback(&StorageBoidButtonCallback);
 
+	// Data views
+	b = new Button(8, 130, 15, 15, QUAD);
+	b->SetCallback(&CoreViewButtonCallback);
+
+	b = new Button(31, 130, 15, 15, QUAD);
+	b->SetCallback(&ProcessViewButtonCallback);
+	b->ButtonClick();
+
+	b = new Button(54, 130, 15, 15, QUAD);
+	b->SetCallback(&ProcessNameViewButtonCallback);
+
+	b = new Button(77, 130, 15, 15, QUAD);
+	b->SetCallback(&StorageBoidButtonCallback);
+
 	// Configuration
 	b = new Button(8, 90, 15, 15);
 	b->SetCallback(&BoidTailCallback);
@@ -49,10 +63,16 @@ void ControlPanel::OnRender()
 	_font->RenderText("Network", 61.5, 168);
 	_font->RenderText("Storage", 84.5, 168);
 
+	_font->RenderText("Core", 15.5, 128);
+	_font->RenderText("Process", 38.5, 128);
+	_font->RenderText("Process Name", 61.5, 128);
+	_font->RenderText("Node", 84.5, 128);
+
 	_font->RenderText("Tail", 15.5, 88);
 
 	glColor3f(1, 1, 1);
 	_fontLarge->RenderText("Metric Types", 50, 192);
+	_fontLarge->RenderText("Data Views", 50, 152);
 	_fontLarge->RenderText("Configuration", 50, 112);
 }
 
@@ -88,6 +108,26 @@ void ControlPanel::BoidTailCallback()
 {
 	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength = 75
 			: BoidSharedContext::tailLength = 0;
+}
+
+void ControlPanel::CoreViewButtonCallback()
+{
+	BoidSharedContext::boidViewToShow = BOID_TYPE_CORE;
+}
+
+void ControlPanel::ProcessViewButtonCallback()
+{
+	BoidSharedContext::boidViewToShow = BOID_TYPE_PROCESS;
+}
+
+void ControlPanel::ProcessNameViewButtonCallback()
+{
+	BoidSharedContext::boidViewToShow = BOID_TYPE_PROCESS_NAME;
+}
+
+void ControlPanel::NodeViewButtonCallback()
+{
+	BoidSharedContext::boidViewToShow = BOID_TYPE_NODE;
 }
 
 

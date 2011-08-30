@@ -38,7 +38,7 @@ public:
 
 	VisualBase();
 	~VisualBase();
-	void InitBoids(string identifierString, BoidType boidType);
+	void InitBoids(string identifierString, BoidView boidType);
 };
 
 /**

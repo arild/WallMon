@@ -120,10 +120,13 @@ void BoidAxis::OnRender()
 	}
 
 	glColor3f(0, 1, 0);
-	glRotatef(40.0f,0,0,1.0f);
 	_font->RenderText("Metric Utilization", 50, -15);
-//	_font->RenderText("Metric Specific", -30, 50, false, false);
 
+
+	glPushMatrix();
+	glRotatef(90.0f,0,0,1.0f);
+	_font->RenderText("Metric Specific", 50, 15, true, false);
+	glPopMatrix();
 }
 
 

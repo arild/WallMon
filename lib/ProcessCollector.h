@@ -41,7 +41,6 @@ private:
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
-	bool _hasSupportForProcIo;
 	ProcessCollectorMessage _processesMsg;
 	IProcessCollectorController *_controller;
 	void _FindAllNewProcesses();

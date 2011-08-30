@@ -14,18 +14,18 @@ bool BoidSharedContext::showCpuBoid = false;
 bool BoidSharedContext::showMemoryBoid = false;
 bool BoidSharedContext::showNetworkBoid = false;
 bool BoidSharedContext::showStorageBoid = false;
+BoidView BoidSharedContext::boidViewToShow = BOID_TYPE_PROCESS_NAME;
 
-
-BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidType boidType_)
+BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidView boidType_)
 {
 	red = red_;
 	green = green_;
 	blue = blue_;
 	boidShape = shape_;
-	boidType = boidType_;
+	boidView = boidType_;
 	_showDisplayText = false;
-	displayText.procName = "proc name";
-	displayText.hostName = "host name";
+	boidInfo.procName = "proc name";
+	boidInfo.hostName = "host name";
 }
 
 void BoidSharedContext::SetDestination(float x, float y)

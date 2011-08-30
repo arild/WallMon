@@ -24,7 +24,6 @@ public:
 	static int GetNumLogicalCores();
 	static int GetNumRealCores();
 	static int GetTotalMemory();
-	static bool HasSupportForProcPidIo();
 	static bool IsRocksvvCluster();
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
