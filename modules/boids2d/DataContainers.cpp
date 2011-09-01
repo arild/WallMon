@@ -27,11 +27,20 @@ void VisualBase::InitBoids(string identifierString, BoidView boidType)
 {
 	float red, green, blue;
 	Data::NameToRgbColor(identifierString, &red, &green, &blue);
+
+	// Create contexts of boids - used to manage them
 	cpu = new BoidSharedContext(red, green, blue, QUAD, boidType);
 	memory = new BoidSharedContext(red, green, blue, TRIANGLE, boidType);
 	network = new BoidSharedContext(red, green, blue, DIAMOND, boidType);
-	tableItem = new TableItem(identifierString, red, green, blue);
 
+	// Put the boids contexts into a table that presents them visually
+	// in another way, and allows for events
+	tableItem = new TableItem(identifierString, red, green, blue);
+	tableItem->AddBoid(cpu);
+	tableItem->AddBoid(memory);
+	tableItem->AddBoid(network);
+
+	// Create the boids, and associated the boids contexts with them
 	boidsApp->CreateBoid(cpu);
 	boidsApp->CreateBoid(memory);
 	boidsApp->CreateBoid(network);

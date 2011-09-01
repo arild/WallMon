@@ -37,24 +37,46 @@ void Font::RenderText(string text, float tx, float ty)
 
 void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical)
 {
-	Scene *s = Scene::current;
-	float actualFontSize = s->GetScale() * (float)_fontSize;
-	float fontScale = (actualFontSize/(float)STATIC_FONT_SIZE) * 0.05;
-
 	float horizontalAlignment = 0;
 	if (centerHorizontal)
-		horizontalAlignment = (_font->Advance(text.c_str()) * fontScale) / (float)2;
+		horizontalAlignment = GetVerticalPixelLength(text) / (float)2;
 	float verticalAlignment = 0;
 	if (centerVertical)
-		verticalAlignment = (_font->FaceSize() * fontScale) / (float)2;
+		verticalAlignment = GetVerticalPixelLength(text) / (float)2;
 
 	glPushMatrix();
 	glTranslatef(tx - horizontalAlignment, ty - verticalAlignment, 0);
+	float fontScale = _GetFontScale();
 	glScalef(fontScale, fontScale, 1.);
 	_font->Render(text.c_str());
 	glPopMatrix();
 }
 
+int Font::GetHorizontalPixelLength(string &text)
+{
+	return _font->Advance(text.c_str()) * _GetFontScale();
+}
 
+int Font::GetVerticalPixelLength(string &text)
+{
+	return _font->FaceSize() * _GetFontScale();
+}
 
+float Font::_GetFontScale()
+{
+	float actualFontSize = Scene::current->GetScale() * (float)_fontSize;
+	return actualFontSize/(float)STATIC_FONT_SIZE * 0.05;
+}
+
+string Font::TrimHorizontal(string text, int maxPixelLen)
+{
+	bool isTrimmed = false;
+	while (GetHorizontalPixelLength(text) > maxPixelLen) {
+		text.erase(text.length() - 2, 1);
+		isTrimmed = true;
+	}
+	if (isTrimmed)
+		text += ".";
+	return text;
+}
 

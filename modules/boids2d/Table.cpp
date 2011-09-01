@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "System.h"
 #include "Table.h"
+#include "Scene.h"
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
@@ -22,23 +23,23 @@ const float FONT_SIZE = 4.;
 
 TableItem::TableItem(string displayName_, int r_, int g_, int b_)
 {
-	displayName = displayName_;
+	key = displayName_;
 	r = r_;
 	g = g_;
 	b = b_;
 	score = 0;
 }
 
-void TableItem::AddRelatedBoid(BoidSharedContext *subItem)
+void TableItem::AddBoid(BoidSharedContext *subItem)
 {
 	scoped_lock(_mutex);
-	_relatedBoids.push_back(subItem);
+	_subItems.push_back(subItem);
 }
 
-vector<BoidSharedContext *> TableItem::GetRelatedBoids()
+vector<BoidSharedContext *> TableItem::GetBoids()
 {
 	scoped_lock(_mutex);
-	return _relatedBoids;
+	return _subItems;
 }
 
 Table::Table(bool isTopLevelTable)
@@ -48,18 +49,42 @@ Table::Table(bool isTopLevelTable)
 
 Table::~Table()
 {
-
+	delete _subTable;
 }
 
 /**
- * Adds an item to the table
+ * Adds an item to the table. It is assumed that the same
+ * item is not added more than once.
  *
- * It is assumed that the same item is not added more than once
+ * The hard-coded policy for grouping items are as follows:
+ * - The top-level table groups related items (same key) together,
+ *   and stores all specific items as sub-items
+ * - The bottom-level table does no grouping
  */
 void Table::Add(TableItem *item)
 {
-	scoped_lock lock(_mutex);
-	_items.push_back(item);
+	scoped_lock(_mutex);
+	vector<TableItem *> *itemGroup = _GetItemGroup_NoLock(item->key);
+	if (itemGroup == NULL || !_isTopLevelTable) {
+		// Group not present, create it
+		vector<TableItem *> v;
+		v.push_back(item);
+		_items.push_back(v);
+	}
+	else
+		itemGroup->push_back(item);
+}
+
+void Table::Add(vector<TableItem *> items)
+{
+	for (int i = 0; i < items.size(); i++)
+		Add(items[i]);
+}
+
+void Table::Clear()
+{
+	scoped_lock(_mutex);
+	_items.clear();
 }
 
 void Table::OnInit()
@@ -80,6 +105,7 @@ void Table::OnInit()
 		_subTable->ty = ty;
 		_subTable->width = width;
 		_subTable->height = height;
+		//Scene::current->AddEntityCurrent(_subTable);
 	}
 
 	_tsLastUpdate = 0;
@@ -91,17 +117,16 @@ void Table::OnLoop()
 {
 	if (_PerformUpdate()) {
 		scoped_lock lock(_mutex);
-		sort(_items.begin(), _items.end(), TableItemCompare());
+		sort(_items.begin(), _items.end(), TableGroupCompare());
 	}
 }
 
 void Table::OnRender()
 {
-//	glPushMatrix();
-//	glTranslatef(tx, 0, 0);
+	if (!_isTopLevelTable)
+		glTranslatef(50, 0, 0);
 	_DrawAllItems();
-	_DrawArrows();
-//	glPopMatrix();
+//	_DrawArrows();
 }
 
 void Table::OnCleanup()
@@ -114,6 +139,10 @@ void Table::Tap(float x, float y)
 	// Find item to be visually marked
 	_selectedPixelIndex = _currentPixelIndex + (100 - y);
 //	LOG(INFO) << "selected index" << _selectedPixelIndex;
+	int idx = _SelectedPixelToItemIndex();
+	vector<TableItem *> group = _items[idx];
+	_subTable->Clear();
+	_subTable->Add(group);
 
 }
 
@@ -136,39 +165,35 @@ void Table::ScrollUp(float deltaY)
 
 void Table::_DrawAllItems()
 {
-	int startIndex = _currentPixelIndex / ITEM_HEIGHT;
-	int selectedIndex = _selectedPixelIndex / ITEM_HEIGHT;
-	float y = 100 - (_currentPixelIndex % (int)ITEM_HEIGHT);
-	float offsetX = 8;
+	int startIndex = _CurrentPixelToItemIndex();
+	int selectedIndex = _SelectedPixelToItemIndex();
+	float y = _GetStartPixel();
+
+	float markerStartPixel;
+	TableItem *markedItem = NULL;
+
 	for (int i = startIndex; i < _items.size(); i++) {
 		if (y <= 0)
 			break;
 		y -= ITEM_HEIGHT;
 
-		TableItem *item = _items[i];
+		TableItem *item = _items[i][0];
 		glColor3ub(item->r, item->g, item->b);
 		if (i == selectedIndex) {
-			// Draw the rectangular marker for selected entry
-			float y_ = y - ITEM_HEIGHT / 4;
-			glLineWidth(2);
-			glBegin(GL_LINE_STRIP);
-			glVertex2f(offsetX, y_);
-			glVertex2f(offsetX + 35, y_);
-			glVertex2f(offsetX + 35, y_ + ITEM_HEIGHT);
-			glVertex2f(offsetX, y_ + ITEM_HEIGHT);
-			glVertex2f(offsetX, y_);
-			glEnd();
+			markerStartPixel = y - ITEM_HEIGHT / 4;
+			markedItem = _items[i][0];
 		}
 
 		// Draw the rectangle in front of every entry
 		glBegin(GL_QUADS);
-		glVertex2f(offsetX + 3, y);
-		glVertex2f(offsetX + 6, y);
-		glVertex2f(offsetX + 6, y + 3);
-		glVertex2f(offsetX + 3, y + 3);
+		glVertex2f(11, y);
+		glVertex2f(14, y);
+		glVertex2f(14, y + 3);
+		glVertex2f(11, y + 3);
 		glEnd();
 
-		_font->RenderText(item->displayName, offsetX + 9, y);
+		string s = _font->TrimHorizontal(item->key, 30);
+		_font->RenderText(s, 17, y);
 	}
 
 	// Black out the top and bottom which is not part of the table
@@ -187,32 +212,38 @@ void Table::_DrawAllItems()
 	glVertex2f(0, TABLE_BOTTOM);
 	glEnd();
 
-	glColor3ub(255,255,255);
-	_fontLarge->RenderText("Processes", offsetX + 3, TABLE_TOP + 8);
-}
-
-vector<TableItem*> Table::_GetTopRankedUniqueDisplayNameItems(int numItems)
-{
-	vector<TableItem *> retval;
-	for (int i = 0; i < _items.size() && retval.size() < numItems; i++) {
-		if (_HasDisplayName(retval, _items[i]->displayName) == false)
-			retval.push_back(_items[i]);
+	// Draw the rectangular marker for selected entry
+	if (markedItem != NULL) {
+		glColor3ub(markedItem->r, markedItem->g, markedItem->b);
+		y = markerStartPixel;
+		string s = _font->TrimHorizontal(markedItem->key, 30);
+		float w = _font->GetHorizontalPixelLength(s);
+		glLineWidth(2);
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(8, y);
+		glVertex2f(20 + w, y);
+		glVertex2f(20 + w, y + ITEM_HEIGHT);
+		glVertex2f(8, y + ITEM_HEIGHT);
+		glVertex2f(8, y);
+		glEnd();
 	}
-	return retval;
+
+	glColor3ub(255,255,255);
+	_fontLarge->RenderText("Processes", 3, TABLE_TOP + 8);
 }
 
-bool Table::_HasDisplayName(vector<TableItem *> & items, string &displayName)
+vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
 {
-	for (int i = 0; i < items.size(); i++)
-		if (items[i]->displayName.compare(displayName) == 0)
-			return true;
-	return false;
+	for (int i = 0; i < _items.size(); i++)
+		if (_items[i][0]->key.compare(itemKey) == 0)
+			return &_items[i];
+	return NULL;
 }
 
 bool Table::_PerformUpdate()
 {
 	double tsCurrent = System::GetTimeInSec();
-	if (tsCurrent - _tsLastUpdate > 10) {
+	if (tsCurrent - _tsLastUpdate > 3) {
 		_tsLastUpdate = tsCurrent;
 		return true;
 	}
@@ -260,9 +291,20 @@ void Table::_DrawArrows()
 	_font->RenderText(down.str(), 4.5, 33, true, true);
 }
 
+int Table::_SelectedPixelToItemIndex()
+{
+	if (_selectedPixelIndex == -1)
+		return -1;
+	return _selectedPixelIndex / ITEM_HEIGHT;
+}
 
+int Table::_CurrentPixelToItemIndex()
+{
+	return _currentPixelIndex / ITEM_HEIGHT;
+}
 
-
-
-
+int Table::_GetStartPixel()
+{
+	return 100 - (_currentPixelIndex % (int)ITEM_HEIGHT);
+}
 

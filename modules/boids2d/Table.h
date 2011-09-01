@@ -12,22 +12,22 @@ using namespace std;
 
 class TableItem {
 public:
-	string displayName;
+	string key;
 	vector<string> subText;
 	int r, g, b;
 	float score;
 	TableItem(string displayName_, int r_, int g_, int b_);
-	void AddRelatedBoid(BoidSharedContext *subItem);
-	vector<BoidSharedContext *> GetRelatedBoids();
+	void AddBoid(BoidSharedContext *subItem);
+	vector<BoidSharedContext *> GetBoids();
 private:
 	boost::mutex _mutex;
-	vector<BoidSharedContext *> _relatedBoids;
+	vector<BoidSharedContext *> _subItems;
 };
 
-struct TableItemCompare {
-	bool operator()(TableItem * const a, TableItem * const b)
+struct TableGroupCompare {
+	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
 	{
-		return a->score > b->score;
+		return a[0]->score > b[0]->score;
 	}
 };
 
@@ -36,7 +36,8 @@ public:
 	Table(bool isTopLevelTable=true);
 	virtual ~Table();
 	void Add(TableItem *item);
-
+	void Add(vector<TableItem *> items);
+	void Clear();
 	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
@@ -47,7 +48,7 @@ public:
 
 private:
 	boost::mutex _mutex;
-	vector<TableItem *> _items;
+	vector< vector<TableItem *> > _items;
 	int _currentPixelIndex; // index of item residing on top of displayed list
 	int _selectedPixelIndex; // index of item currently marked and active
 	Font *_font, *_fontLarge;
@@ -55,10 +56,12 @@ private:
 	Table *_subTable;
 	bool _isTopLevelTable;
 	void _DrawAllItems();
-	vector<TableItem *> _GetTopRankedUniqueDisplayNameItems(int numItems);
-	bool _HasDisplayName(vector<TableItem *> &items, string &displayName);
+	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
 	bool _PerformUpdate();
 	void _DrawArrows();
+	int _SelectedPixelToItemIndex();
+	int _CurrentPixelToItemIndex();
+	int _GetStartPixel();
 };
 
 #endif /* TABLE_H_ */
