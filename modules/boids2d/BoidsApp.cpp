@@ -30,12 +30,14 @@
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
+	Font::Init();
 	_eventSystem = eventSystem;
 	_SetupAndPopulateScenes();
 }
 
 BoidsApp::~BoidsApp()
 {
+	Font::Close();
 }
 
 /**

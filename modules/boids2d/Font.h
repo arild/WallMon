@@ -10,7 +10,11 @@ using namespace std;
 class Font {
 public:
 	Font(int size, bool centerHorizontal=false, bool centerVertical=false);
-	virtual ~Font();
+	virtual ~Font() {}
+
+	static void Init();
+	static void Close();
+
 	void RenderText(string text, float tx, float ty);
 	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
 	int GetHorizontalPixelLength(string &text);
@@ -19,7 +23,7 @@ public:
 private:
 	int _fontSize;
 	bool _centerHorizontal, _centerVertical;
-	FTFont *_font;
+	static FTFont *_font;
 	float _GetFontScale();
 };
 

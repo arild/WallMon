@@ -100,16 +100,12 @@ EntityEvent::EntityEvent()
  */
 void EntityEvent::HandleHit(TouchEvent & event)
 {
-	if (event.shoutEvent == NULL) {
-		TT_touch_state_t _event;
-		_event.loc = WVPoint2d(event.x, event.y);
-		_event.remove = event.isUp;
-		HandleTouch(_event);
-	}
-	else
-		_touchManager->handleEvent(event.shoutEvent, event.x, event.y);
+	_touchManager->handleEvent(event.shoutEvent, event.x, event.y);
 }
 
+/**
+ * Callback for the shout touch manager
+ */
 void EntityEvent::HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
 {
 	for (int i = 0; i < down.size(); i++) {
@@ -128,13 +124,14 @@ void EntityEvent::HandleTouchesCallback(touchVector_t & down, touchVector_t & up
 	}
 }
 
+/**
+ * Implements policy for entity event callbacks
+ */
 void EntityEvent::HandleTouch(TT_touch_state_t & event)
 {
-	LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
-//	LOG(INFO) << "Time since last event: " event
+	//LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
 
-
-	if (event.remove) {
+	if (event.remove){// && event.movedDistance < 5) {
 		LOG(INFO) << "TAP DETECTED";
 		Tap(event.loc.x, event.loc.y);
 		return;

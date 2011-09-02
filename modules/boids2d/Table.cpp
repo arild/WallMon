@@ -100,12 +100,13 @@ void Table::OnInit()
 
 	if (_isTopLevelTable) {
 		// Create and setup hitbox for the sub-table
+		// Note: Entities created by other entities are automatically
+		// added to current scene
 		_subTable = new Table(false);
 		_subTable->tx = 50;
-		_subTable->ty = ty;
-		_subTable->width = width;
-		_subTable->height = height;
-		//Scene::current->AddEntityCurrent(_subTable);
+		_subTable->ty = 0;
+		_subTable->width = 50;
+		_subTable->height = 100;
 	}
 
 	_tsLastUpdate = 0;
@@ -115,10 +116,11 @@ void Table::OnInit()
 
 void Table::OnLoop()
 {
-	if (_PerformUpdate()) {
-		scoped_lock lock(_mutex);
-		sort(_items.begin(), _items.end(), TableGroupCompare());
-	}
+//	if (_PerformUpdate()) {
+//		scoped_lock lock(_mutex);
+//		sort(_items.begin(), _items.end(), TableGroupCompare());
+//		_selectedPixelIndex = -1;
+//	}
 }
 
 void Table::OnRender()
@@ -139,11 +141,13 @@ void Table::Tap(float x, float y)
 	// Find item to be visually marked
 	_selectedPixelIndex = _currentPixelIndex + (100 - y);
 //	LOG(INFO) << "selected index" << _selectedPixelIndex;
-	int idx = _SelectedPixelToItemIndex();
-	vector<TableItem *> group = _items[idx];
-	_subTable->Clear();
-	_subTable->Add(group);
 
+	if (_isTopLevelTable) {
+		int idx = _SelectedPixelToItemIndex();
+		vector<TableItem *> group = _items[idx];
+		_subTable->Clear();
+		_subTable->Add(group);
+	}
 }
 
 void Table::ScrollDown(float deltaY)
@@ -186,14 +190,14 @@ void Table::_DrawAllItems()
 
 		// Draw the rectangle in front of every entry
 		glBegin(GL_QUADS);
-		glVertex2f(11, y);
-		glVertex2f(14, y);
-		glVertex2f(14, y + 3);
-		glVertex2f(11, y + 3);
+		glVertex2f(6, y);
+		glVertex2f(9, y);
+		glVertex2f(9, y + 3);
+		glVertex2f(6, y + 3);
 		glEnd();
 
 		string s = _font->TrimHorizontal(item->key, 30);
-		_font->RenderText(s, 17, y);
+		_font->RenderText(s, 12, y);
 	}
 
 	// Black out the top and bottom which is not part of the table
@@ -220,16 +224,19 @@ void Table::_DrawAllItems()
 		float w = _font->GetHorizontalPixelLength(s);
 		glLineWidth(2);
 		glBegin(GL_LINE_STRIP);
-		glVertex2f(8, y);
-		glVertex2f(20 + w, y);
-		glVertex2f(20 + w, y + ITEM_HEIGHT);
-		glVertex2f(8, y + ITEM_HEIGHT);
-		glVertex2f(8, y);
+		glVertex2f(3, y);
+		glVertex2f(15 + w, y);
+		glVertex2f(15 + w, y + ITEM_HEIGHT);
+		glVertex2f(3, y + ITEM_HEIGHT);
+		glVertex2f(3, y);
 		glEnd();
 	}
 
 	glColor3ub(255,255,255);
-	_fontLarge->RenderText("Processes", 3, TABLE_TOP + 8);
+	string heading = "Process Id";
+	if (_isTopLevelTable)
+		heading = "Process Name";
+	_fontLarge->RenderText(heading, 3, TABLE_TOP + 8);
 }
 
 vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)

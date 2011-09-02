@@ -13,19 +13,29 @@
 #include "Scene.h"
 #include <glog/logging.h>
 
-#define STATIC_FONT_SIZE	50
+#define STATIC_FONT_SIZE	75
+
+FTFont *Font::_font = NULL;
 
 Font::Font(int size, bool centerHorizontal, bool centerVertical)
 {
-	string fontPath = Config::GetFontPath();
-	_font = new FTTextureFont(fontPath.c_str());
-	_font->FaceSize(STATIC_FONT_SIZE);
 	_fontSize = size;
 	_centerHorizontal = centerHorizontal;
 	_centerVertical = centerVertical;
 }
 
-Font::~Font()
+/**
+ * Create a common font for all entities. The size of this font is large
+ * enough for all entities, and can be scaled down.
+ */
+void Font::Init()
+{
+	string fontPath = Config::GetFontPath();
+	_font = new FTTextureFont(fontPath.c_str());
+	_font->FaceSize(STATIC_FONT_SIZE);
+}
+
+void Font::Close()
 {
 	delete _font;
 }
@@ -39,7 +49,7 @@ void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bo
 {
 	float horizontalAlignment = 0;
 	if (centerHorizontal)
-		horizontalAlignment = GetVerticalPixelLength(text) / (float)2;
+		horizontalAlignment = GetHorizontalPixelLength(text) / (float)2;
 	float verticalAlignment = 0;
 	if (centerVertical)
 		verticalAlignment = GetVerticalPixelLength(text) / (float)2;

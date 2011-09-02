@@ -75,7 +75,6 @@ void EventSystemBase::FilterAndRouteEvent(TouchEvent &event)
 	// Find all entities that the event "hits"
 	vector<EntityHit> entityHits = Scene::GetAllEntityHits(event.x, event.y);
 
-//	LOG(INFO) << "Num entity hits: " << entityHits.size();
 	event.realX = event.x;
 	event.realY = event.y;
 

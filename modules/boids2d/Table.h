@@ -54,6 +54,7 @@ private:
 	Font *_font, *_fontLarge;
 	double _tsLastUpdate;
 	Table *_subTable;
+	TableItem *_markedItem;
 	bool _isTopLevelTable;
 	void _DrawAllItems();
 	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);

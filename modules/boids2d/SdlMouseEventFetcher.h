@@ -23,9 +23,11 @@ public:
 	virtual void WaitAndHandleNextEvent();
 
 private:
-	Queue<TouchEvent *> *_queue;
+	Queue<TouchEvent> _queue;
 	double _timestamp;
 	bool _isEventStreamActive;
+	int _eventId;
+	shout_event_t *CreateShoutEvent(int eventId);
 };
 
 #endif /* SDLMOUSEEVENTFETCHER_H_ */

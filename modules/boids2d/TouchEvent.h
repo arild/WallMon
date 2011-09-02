@@ -14,7 +14,7 @@ class TouchEvent {
 public:
 	float x, y, realX, realY;
 	shout_event_t *shoutEvent;
-	bool isUp, visualizeOnly;
+	bool visualizeOnly;
 	virtual ~TouchEvent() {}
 };
 

@@ -140,8 +140,6 @@ void Button::HandleHit(TouchEvent &event)
 		_animationOn = true;
 		_timestampSec = System::GetTimeInSec();//(double)event.timestampSec;
 	} else {
-		if (event.isUp == false)
-			return;
 		ButtonClick();
 	}
 }
