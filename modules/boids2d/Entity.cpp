@@ -80,23 +80,27 @@ void EntityShape::DrawEntityShape()
 }
 
 typedef void (EntityEvent::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
+vector<EntityEvent *> EntityEvent::_entities;
 
 EntityEvent::EntityEvent()
 {
-	HandleTouchesPtr handle = &EntityEvent::HandleTouchesCallback;
+	HandleTouchesPtr handle = &EntityEvent::_HandleTouchesCallback;
 	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
 	_touchManager = new STouchManager(this, callback);
 
 	// Policy for detecting scrolls and swipes:
 	// If the movement (delta) from previous touch exceeds 2 percent
 	// of the height (scroll) or width (swipe)
-	_scrollThreshold = height * 0.03;
-	_swipeThreshold = width * 0.03;
+	_maxScrollSpeed = -1;
+	LOG(INFO) << "MAX: " << _maxScrollSpeed;
+	_entities.push_back(this);
+	_isFirstTime = true;
 }
 
 /**
- * Default implementation that detects up, scroll up and down, and
- * swipe left and right events, and calls associated handlers.
+ * Default implementation for entities touch event handling.
+ *
+ * The implementation forwards all events to the touch manager.
  */
 void EntityEvent::HandleHit(TouchEvent & event)
 {
@@ -104,22 +108,54 @@ void EntityEvent::HandleHit(TouchEvent & event)
 }
 
 /**
+ * Carries out touch event callbacks, and updates physics variables
+ */
+void EntityEvent::RunCallbacks()
+{
+	if (_scrollSpeed > _minScrollSpeed) {
+	//LOG(INFO) << "SCROLL SPEED: " << _scrollSpeed;
+		ScrollDown(_scrollSpeed);
+		_scrollSpeed -= (_maxScrollSpeed * 0.05);
+		if (_scrollSpeed < 0)
+			_scrollSpeed = 0;
+	}
+	else if (_scrollSpeed < -_minScrollSpeed) {
+		//LOG(INFO) << "SCROLL SPEED: " << _scrollSpeed;
+		ScrollUp(-_scrollSpeed);
+		_scrollSpeed += (_maxScrollSpeed * 0.05);
+		if (_scrollSpeed > 0)
+			_scrollSpeed = 0;
+	}
+	else
+		_scrollSpeed = 0;
+}
+
+/**
+ * Intended to be called by the main loop
+ */
+void EntityEvent::RunAllCallbacks()
+{
+	for (int i = 0; i < _entities.size(); i++)
+		_entities[i]->RunCallbacks();
+}
+
+/**
  * Callback for the shout touch manager
  */
-void EntityEvent::HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
+void EntityEvent::_HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
 {
 	for (int i = 0; i < down.size(); i++) {
 		TT_touch_state_t *obj = down[i];
 		if (obj->wasUpdated) {
 			obj->remove = false;
-			HandleTouch(*obj);
+			_HandleTouch(*obj);
 		}
 	}
 	for (int i = 0; i < up.size(); i++) {
 		TT_touch_state_t *obj = up[i];
 		if (obj->wasUpdated) {
 			obj->remove = true;
-			HandleTouch(*obj);
+			_HandleTouch(*obj);
 		}
 	}
 }
@@ -127,29 +163,39 @@ void EntityEvent::HandleTouchesCallback(touchVector_t & down, touchVector_t & up
 /**
  * Implements policy for entity event callbacks
  */
-void EntityEvent::HandleTouch(TT_touch_state_t & event)
+void EntityEvent::_HandleTouch(TT_touch_state_t & event)
 {
-	//LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
+	if (_isFirstTime) {
+		_isFirstTime = false;
+		// Policies and thresholds not calculated
+		_scrollThreshold = height * 0.03;
+		_swipeThreshold = width * 0.03;
+		_scrollSpeed = 0;
+		_minScrollSpeed = height * 0.001;
+		_maxScrollSpeed = height * 0.03;
+	}
 
-	if (event.remove){// && event.movedDistance < 5) {
-		LOG(INFO) << "TAP DETECTED";
-		Tap(event.loc.x, event.loc.y);
+	if (event.remove) {
+		if (event.movedDistance < 5) {
+			LOG(INFO) << "TAP DETECTED";
+			Tap(event.loc.x, event.loc.y);
+		}
 		return;
 	}
-	if (event.delta.y > _scrollThreshold) {
-		// User is moving hand upwards, which results
-		// in a scroll down
-		LOG(INFO) << "SCROLL DOWN DETECTED";
-		ScrollDown(event.delta.y);
-	}
-	else if (event.delta.y < -_scrollThreshold) {
-		LOG(INFO) << "SCROLL UP DETECTED";
-		ScrollUp(event.delta.y);
+
+	//LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
+
+	if (fabs(event.delta.y) > _scrollThreshold) {
+		// Scroll detected, update scroll speed, which is
+		// read by entities every frame
+		_scrollSpeed += event.delta.y;
+		if (_scrollSpeed > _minScrollSpeed)
+			_scrollSpeed = min(_scrollSpeed, _maxScrollSpeed);
+		else if (_scrollSpeed < -_minScrollSpeed)
+			_scrollSpeed = max(_scrollSpeed, -_maxScrollSpeed);
 	}
 
 }
-
-
 
 
 

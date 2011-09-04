@@ -49,15 +49,20 @@ public:
 	virtual ~EntityEvent() {}
 	void HandleHit(TouchEvent &event);
 	virtual void Tap(float x, float y) = 0;
-	virtual void ScrollDown(float deltaY) = 0;
-	virtual void ScrollUp(float deltaY) = 0;
-//	virtual void SwipeLeft() = 0;
+	virtual void ScrollDown(float speed) = 0;
+	virtual void ScrollUp(float speed) = 0;
+
+	//	virtual void SwipeLeft() = 0;
 //	virtual void SwipeRight() = 0;
+	void RunCallbacks();
+	static void RunAllCallbacks();
 private:
-	float _scrollThreshold, _swipeThreshold;
+	static vector<EntityEvent *> _entities;
+	float _scrollThreshold, _swipeThreshold, _scrollSpeed, _maxScrollSpeed, _minScrollSpeed;
+	bool _isFirstTime;
 	STouchManager *_touchManager;
-	void HandleTouchesCallback(touchVector_t & down, touchVector_t & up);
-	void HandleTouch(TT_touch_state_t &event);
+	void _HandleTouchesCallback(touchVector_t & down, touchVector_t & up);
+	void _HandleTouch(TT_touch_state_t &event);
 
 //	void _UpdateTouch(TouchEvent &event);
 };

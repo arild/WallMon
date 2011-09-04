@@ -99,6 +99,7 @@ void BoidsApp::_RenderForever()
 		glLoadIdentity();
 		Scene::RunAllScenes();
 		_HandleTouchEvents();
+		EntityEvent::RunAllCallbacks();
 
 		SDL_GL_SwapBuffers();
 		Fps::fpsControl.OnLoop();

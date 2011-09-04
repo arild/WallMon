@@ -130,6 +130,8 @@ void Boid::_DrawBoid()
 			return;
 		break;
 	}
+	if (ctx->IsHighlighted())
+		width = 4;
 	DrawEntityShape();
 }
 

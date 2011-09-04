@@ -47,12 +47,13 @@ public:
 	void SetTailLength(int length);
 	int GetTailLength();
 
-	void ShowDisplayText();
-	void DisableDisplayText();
+	void EnableHighlight();
+	void DisableHighlight();
+	bool IsHighlighted();
 private:
 	float _destx, _desty;
 	int _tailLength;
-	bool _showDisplayText;
+	bool _isHighlighted;
 	boost::mutex _mutex;
 };
 #endif /* BOIDSHAREDCONTEXT_H_ */

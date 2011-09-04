@@ -13,6 +13,7 @@
 #include "System.h"
 #include "Table.h"
 #include "Scene.h"
+#include "Button.h"
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
@@ -65,13 +66,12 @@ void Table::Add(TableItem *item)
 {
 	scoped_lock(_mutex);
 	vector<TableItem *> *itemGroup = _GetItemGroup_NoLock(item->key);
-	if (itemGroup == NULL || !_isTopLevelTable) {
+	if (itemGroup == NULL) {
 		// Group not present, create it
 		vector<TableItem *> v;
 		v.push_back(item);
 		_items.push_back(v);
-	}
-	else
+	} else
 		itemGroup->push_back(item);
 }
 
@@ -91,14 +91,15 @@ void Table::OnInit()
 {
 	_currentPixelIndex = 0;
 	_selectedPixelIndex = -1;
-
+	_selectedItem = NULL;
 	// Set up hit box
-	tx = 0;
-	ty = TABLE_BOTTOM;
-	width = 50;
-	height = TABLE_TOP;
 
 	if (_isTopLevelTable) {
+		tx = 0;
+		ty = TABLE_BOTTOM;
+		width = 50;
+		height = TABLE_TOP;
+
 		// Create and setup hitbox for the sub-table
 		// Note: Entities created by other entities are automatically
 		// added to current scene
@@ -116,11 +117,11 @@ void Table::OnInit()
 
 void Table::OnLoop()
 {
-//	if (_PerformUpdate()) {
-//		scoped_lock lock(_mutex);
-//		sort(_items.begin(), _items.end(), TableGroupCompare());
-//		_selectedPixelIndex = -1;
-//	}
+	//	if (_PerformUpdate()) {
+	//		scoped_lock lock(_mutex);
+	//		sort(_items.begin(), _items.end(), TableGroupCompare());
+	//		_selectedPixelIndex = -1;
+	//	}
 }
 
 void Table::OnRender()
@@ -137,56 +138,61 @@ void Table::OnCleanup()
 
 void Table::Tap(float x, float y)
 {
-	LOG(INFO) << "Tap: x=" << x << " | y=" << y;
-	// Find item to be visually marked
-	_selectedPixelIndex = _currentPixelIndex + (100 - y);
-//	LOG(INFO) << "selected index" << _selectedPixelIndex;
+	if (y > TABLE_TOP || y < TABLE_BOTTOM)
+		return;
+	int idx = _RelativePixelToItemIndex(y);
+	if (idx < 0 || idx >= _items.size())
+		return;
+	_selectedItem = _items[idx][0];
 
 	if (_isTopLevelTable) {
-		int idx = _SelectedPixelToItemIndex();
+		// Populate the sub-table with all items in selected group
 		vector<TableItem *> group = _items[idx];
 		_subTable->Clear();
 		_subTable->Add(group);
+
+		_HighlightBoids(group);
 	}
 }
 
-void Table::ScrollDown(float deltaY)
+void Table::ScrollDown(float speed)
 {
-	LOG(INFO) << "SCROLL DOWN";
-	_currentPixelIndex += 2;
-	int maxPixelIndex = (_items.size() * 6) - 20;
-	if (_currentPixelIndex > maxPixelIndex)
-		_currentPixelIndex = maxPixelIndex;
+	_currentPixelIndex += speed;
+	int maxPixelIndex = (_items.size() * ITEM_HEIGHT) - 35;
+	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
 }
 
-void Table::ScrollUp(float deltaY)
+void Table::ScrollUp(float speed)
 {
-	LOG(INFO) << "SCROLL UP";
-	_currentPixelIndex -= 2;
-	if (_currentPixelIndex < 0)
-		_currentPixelIndex = 0;
+	_currentPixelIndex -= speed;
+	_currentPixelIndex = fmax(_currentPixelIndex, -35.);
+}
+
+void Table::SwipeLeft(float speed)
+{
+
+}
+
+void Table::SwipeRight(float speed)
+{
+
 }
 
 void Table::_DrawAllItems()
 {
+	float selectBoxStartPixel;
 	int startIndex = _CurrentPixelToItemIndex();
-	int selectedIndex = _SelectedPixelToItemIndex();
-	float y = _GetStartPixel();
-
-	float markerStartPixel;
-	TableItem *markedItem = NULL;
-
-	for (int i = startIndex; i < _items.size(); i++) {
-		if (y <= 0)
+	for (int i = 0; i < 20 ; i++) {
+		int itemIndex = startIndex + i;
+		if (itemIndex < 0 || itemIndex >= _items.size())
+			continue;
+		float y = _ItemNumberToPixel(i);
+		y -= 4.5;
+		if (y < 0)
 			break;
-		y -= ITEM_HEIGHT;
 
-		TableItem *item = _items[i][0];
+		TableItem *item = _items[itemIndex][0];
 		glColor3ub(item->r, item->g, item->b);
-		if (i == selectedIndex) {
-			markerStartPixel = y - ITEM_HEIGHT / 4;
-			markedItem = _items[i][0];
-		}
 
 		// Draw the rectangle in front of every entry
 		glBegin(GL_QUADS);
@@ -198,10 +204,27 @@ void Table::_DrawAllItems()
 
 		string s = _font->TrimHorizontal(item->key, 30);
 		_font->RenderText(s, 12, y);
+
+		if (_selectedItem == item) {
+			// Draw the rectangular marker for selected entry
+			selectBoxStartPixel = y - ITEM_HEIGHT / 4;
+			glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
+			float y_ = selectBoxStartPixel;
+			string s = _font->TrimHorizontal(_selectedItem->key, 30);
+			float w = _font->GetHorizontalPixelLength(s);
+			glLineWidth(2);
+			glBegin(GL_LINE_STRIP);
+			glVertex2f(3, y_);
+			glVertex2f(15 + w, y_);
+			glVertex2f(15 + w, y_ + ITEM_HEIGHT);
+			glVertex2f(3, y_ + ITEM_HEIGHT);
+			glVertex2f(3, y_);
+			glEnd();
+		}
 	}
 
 	// Black out the top and bottom which is not part of the table
-	glColor3ub(0,0,0);
+	glColor3ub(0, 0, 0);
 	glBegin(GL_QUADS);
 	glVertex2f(0, TABLE_TOP);
 	glVertex2f(50, TABLE_TOP);
@@ -216,23 +239,7 @@ void Table::_DrawAllItems()
 	glVertex2f(0, TABLE_BOTTOM);
 	glEnd();
 
-	// Draw the rectangular marker for selected entry
-	if (markedItem != NULL) {
-		glColor3ub(markedItem->r, markedItem->g, markedItem->b);
-		y = markerStartPixel;
-		string s = _font->TrimHorizontal(markedItem->key, 30);
-		float w = _font->GetHorizontalPixelLength(s);
-		glLineWidth(2);
-		glBegin(GL_LINE_STRIP);
-		glVertex2f(3, y);
-		glVertex2f(15 + w, y);
-		glVertex2f(15 + w, y + ITEM_HEIGHT);
-		glVertex2f(3, y + ITEM_HEIGHT);
-		glVertex2f(3, y);
-		glEnd();
-	}
-
-	glColor3ub(255,255,255);
+	glColor3ub(255, 255, 255);
 	string heading = "Process Id";
 	if (_isTopLevelTable)
 		heading = "Process Name";
@@ -298,20 +305,45 @@ void Table::_DrawArrows()
 	_font->RenderText(down.str(), 4.5, 33, true, true);
 }
 
-int Table::_SelectedPixelToItemIndex()
-{
-	if (_selectedPixelIndex == -1)
-		return -1;
-	return _selectedPixelIndex / ITEM_HEIGHT;
-}
-
+/**
+ * Maps the current pixel to start rendering at to an item
+ */
 int Table::_CurrentPixelToItemIndex()
 {
 	return _currentPixelIndex / ITEM_HEIGHT;
 }
 
-int Table::_GetStartPixel()
+/**
+ * Returns the top-left pixel index for the rendering area of an item
+ */
+float Table::_ItemNumberToPixel(int number)
 {
-	return 100 - (_currentPixelIndex % (int)ITEM_HEIGHT);
+	float offset = fmod(_currentPixelIndex, ITEM_HEIGHT);
+	return (TABLE_TOP + offset) - (ITEM_HEIGHT * number);
+}
+
+int Table::_RelativePixelToItemIndex(float relativeY)
+{
+	float offset = fmod(_currentPixelIndex, ITEM_HEIGHT);
+	int idx = (TABLE_TOP - relativeY + offset) / ITEM_HEIGHT;
+	idx += _CurrentPixelToItemIndex();
+	return idx;
+}
+
+void Table::_HighlightBoids(vector<TableItem *> group)
+{
+	for (int i = 0; i < group.size(); i++) {
+		TableItem *item = group[i];
+		vector<BoidSharedContext *> boids = item->GetBoids();
+		for (int j = 0; j < boids.size(); j++) {
+			boids[j]->EnableHighlight();
+		}
+	}
+}
+
+void Table::_UpdateTableCallback()
+{
+	scoped_lock lock(_mutex);
+	sort(_items.begin(), _items.end(), TableGroupCompare());
 }
 

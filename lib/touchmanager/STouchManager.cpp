@@ -111,6 +111,7 @@ TT_touch_state_t* STouchManager::newTouchStateForEvent(shout_event_t *evt, bool 
 	if (parse_touch_location_event_v2(evt, &locFlags, &x, &y, &radius, 0, &senderID) == 0) {
 		if (senderID == (uint32_t) wantedSenderID || wantedSenderID == -1) {
 			ts->loc = WVPoint2d(virtX, virtY);
+//			ts->delta = WVPoint2d(0, 0);
 			ts->radius = radius;
 			ts->oid = evt->refcon;
 			ts->lastUpdated = shout_double_time();

@@ -50,14 +50,13 @@ void SdlMouseEventFetcher::PollEvents()
 			_isEventStreamActive = true;
 			break;
 		case SDL_KEYUP:
+			LOG(INFO) << "SDL KEY UP";
 			_isEventStreamActive = false;
-
-			event.shoutEvent = CreateShoutEvent(_eventId);
-			_queue.Push(event);
+//			event.shoutEvent = CreateShoutEvent(_eventId);
+//			_queue.Push(event);
 			event.shoutEvent = create_touch_remove_event(_eventId, 0);
 			_queue.Push(event);
 			_eventId += 1;
-
 			return;
 		default:
 			break;

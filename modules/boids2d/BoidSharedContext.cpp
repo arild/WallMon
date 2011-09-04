@@ -23,7 +23,7 @@ BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shap
 	blue = blue_;
 	boidShape = shape_;
 	boidView = boidType_;
-	_showDisplayText = false;
+	_isHighlighted = false;
 	boidInfo.procName = "proc name";
 	boidInfo.hostName = "host name";
 }
@@ -55,14 +55,19 @@ int BoidSharedContext::GetTailLength()
 	return _tailLength;
 }
 
-void BoidSharedContext::ShowDisplayText()
+void BoidSharedContext::EnableHighlight()
 {
-	_showDisplayText = true;
+	_isHighlighted = true;
 }
 
-void BoidSharedContext::DisableDisplayText()
+void BoidSharedContext::DisableHighlight()
 {
-	_showDisplayText = false;
+	_isHighlighted = false;
+}
+
+bool BoidSharedContext::IsHighlighted()
+{
+	return _isHighlighted;
 }
 
 
