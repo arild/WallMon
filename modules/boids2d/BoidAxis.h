@@ -12,7 +12,7 @@
 #include "Entity.h"
 #include "Font.h"
 
-class BoidAxis : public Entity {
+class BoidAxis : public EntityEvent {
 public:
 	BoidAxis();
 	virtual ~BoidAxis();
@@ -24,6 +24,11 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
+	virtual void Tap(float x, float y);
+	virtual void ScrollDown(float speed);
+	virtual void ScrollUp(float speed);
+	virtual void SwipeLeft(float speed);
+	virtual void SwipeRight(float speed);
 
 private:
 	int _start, _stop, _tickSize;

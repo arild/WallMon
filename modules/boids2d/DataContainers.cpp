@@ -35,10 +35,11 @@ void VisualBase::InitBoids(string identifierString, BoidView boidType)
 
 	// Put the boids contexts into a table that presents them visually
 	// in another way, and allows for events
-	tableItem = new TableItem(identifierString, red, green, blue);
+	tableItem = new TableItem();
 	tableItem->AddBoid(cpu);
 	tableItem->AddBoid(memory);
 	tableItem->AddBoid(network);
+	tableItem->key = identifierString;
 
 	// Create the boids, and associated the boids contexts with them
 	boidsApp->CreateBoid(cpu);
@@ -178,14 +179,14 @@ DataUpdate Data::Update(string hostname, string processName, int pid)
 		update.proc = procMap[procMapKey];
 
 	// Per process name
-	if (procNameMap.count(processName) == 0) {
-		update.procName = new ProcName(processName);
-		procNameMap[processName] = update.procName;
-		update.procNameWasCreated = true;
-		update.procName->procs.push_back(update.proc);
-	}
-	else
-		update.procName = procNameMap[processName];
+//	if (procNameMap.count(processName) == 0) {
+//		update.procName = new ProcName(processName);
+//		procNameMap[processName] = update.procName;
+//		update.procNameWasCreated = true;
+//		update.procName->procs.push_back(update.proc);
+//	}
+//	else
+//		update.procName = procNameMap[processName];
 
 	// Per node
 //	if (nodeMap.count(hostname) == 0) {

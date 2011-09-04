@@ -74,7 +74,7 @@ void Boid::OnLoop()
 		ty += speedy;
 	}
 
-	int tailLength = BoidSharedContext::tailLength;
+	int tailLength = (int)BoidSharedContext::tailLength;
 	if (tailLength == 0) {
 		_tail.clear();
 		return;

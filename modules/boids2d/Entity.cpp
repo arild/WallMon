@@ -91,10 +91,12 @@ EntityEvent::EntityEvent()
 	// Policy for detecting scrolls and swipes:
 	// If the movement (delta) from previous touch exceeds 2 percent
 	// of the height (scroll) or width (swipe)
-	_maxScrollSpeed = -1;
-	LOG(INFO) << "MAX: " << _maxScrollSpeed;
+	_maxSpeed = -1;
+	LOG(INFO) << "MAX: " << _maxSpeed;
 	_entities.push_back(this);
 	_isFirstTime = true;
+	_scrollSpeed = 0;
+	_swipeSpeed = 0;
 }
 
 /**
@@ -112,22 +114,32 @@ void EntityEvent::HandleHit(TouchEvent & event)
  */
 void EntityEvent::RunCallbacks()
 {
-	if (_scrollSpeed > _minScrollSpeed) {
-	//LOG(INFO) << "SCROLL SPEED: " << _scrollSpeed;
+	if (_scrollSpeed > _minSpeed) {
 		ScrollDown(_scrollSpeed);
-		_scrollSpeed -= (_maxScrollSpeed * 0.05);
+		_scrollSpeed -= (_maxSpeed * 0.05);
 		if (_scrollSpeed < 0)
 			_scrollSpeed = 0;
-	}
-	else if (_scrollSpeed < -_minScrollSpeed) {
-		//LOG(INFO) << "SCROLL SPEED: " << _scrollSpeed;
+	} else if (_scrollSpeed < -_minSpeed) {
 		ScrollUp(-_scrollSpeed);
-		_scrollSpeed += (_maxScrollSpeed * 0.05);
+		_scrollSpeed += (_maxSpeed * 0.05);
 		if (_scrollSpeed > 0)
 			_scrollSpeed = 0;
-	}
-	else
+	} else
 		_scrollSpeed = 0;
+
+	if (_swipeSpeed > _minSpeed) {
+		SwipeRight(_swipeSpeed);
+		_swipeSpeed -= (_maxSpeed * 0.05);
+		if (_swipeSpeed < 0)
+			_swipeSpeed = 0;
+	} else if (_swipeSpeed < -_minSpeed) {
+		SwipeLeft(-_swipeSpeed);
+		_swipeSpeed += (_maxSpeed * 0.05);
+		if (_swipeSpeed > 0)
+			_swipeSpeed = 0;
+	} else
+		_swipeSpeed = 0;
+
 }
 
 /**
@@ -170,9 +182,8 @@ void EntityEvent::_HandleTouch(TT_touch_state_t & event)
 		// Policies and thresholds not calculated
 		_scrollThreshold = height * 0.03;
 		_swipeThreshold = width * 0.03;
-		_scrollSpeed = 0;
-		_minScrollSpeed = height * 0.001;
-		_maxScrollSpeed = height * 0.03;
+		_minSpeed = height * 0.001;
+		_maxSpeed = height * 0.03;
 	}
 
 	if (event.remove) {
@@ -185,17 +196,30 @@ void EntityEvent::_HandleTouch(TT_touch_state_t & event)
 
 	//LOG(INFO) << "EVENT: id=" << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
 
-	if (fabs(event.delta.y) > _scrollThreshold) {
-		// Scroll detected, update scroll speed, which is
-		// read by entities every frame
+	float fy = fabs(event.delta.y);
+	float fx = fabs(event.delta.x);
+	if (fy < _scrollThreshold && fx < _swipeThreshold)
+		return;
+
+	// TODO: Take varied x and y axis into account
+	bool isScroll = false;
+	if (fy > fx)
+		isScroll = true;
+
+	// Scroll detected, update scroll speed, which is
+	// read by entities every frame
+	if (isScroll) {
 		_scrollSpeed += event.delta.y;
-		if (_scrollSpeed > _minScrollSpeed)
-			_scrollSpeed = min(_scrollSpeed, _maxScrollSpeed);
-		else if (_scrollSpeed < -_minScrollSpeed)
-			_scrollSpeed = max(_scrollSpeed, -_maxScrollSpeed);
+		if (_scrollSpeed > _minSpeed)
+			_scrollSpeed = min(_scrollSpeed, _maxSpeed);
+		else if (_scrollSpeed < -_minSpeed)
+			_scrollSpeed = max(_scrollSpeed, -_maxSpeed);
+	} else {
+		_swipeSpeed += event.delta.x;
+		if (_swipeSpeed > _minSpeed)
+			_swipeSpeed = min(_swipeSpeed, _maxSpeed);
+		else if (_swipeSpeed < -_minSpeed)
+			_swipeSpeed = max(_swipeSpeed, -_maxSpeed);
 	}
-
 }
-
-
 

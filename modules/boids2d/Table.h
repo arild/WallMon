@@ -13,18 +13,34 @@ using namespace std;
 class TableItem {
 public:
 	string key;
-	vector<string> subText;
 	int r, g, b;
 	float score;
-	TableItem(string displayName_, int r_, int g_, int b_);
+	string procName, hostName, pid;
+	TableItem();
 	void AddBoid(BoidSharedContext *subItem);
 	vector<BoidSharedContext *> GetBoids();
 private:
 	boost::mutex _mutex;
-	vector<BoidSharedContext *> _subItems;
+	vector<BoidSharedContext *> _boids;
 };
 
-struct TableGroupCompare {
+struct TableGroupCompareAlphabetically {
+	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
+	{
+		if (ToLower(a[0]->key).compare(ToLower(b[0]->key)) < 0)
+			return true;
+		return false;
+	}
+
+	string ToLower(string &s)
+	{
+		for (int i = 0; i < s.length(); i++)
+			s[i] = tolower(s[i]);
+		return s;
+	}
+};
+
+struct TableGroupCompareUtilization {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
 	{
 		return a[0]->score > b[0]->score;
@@ -38,6 +54,7 @@ public:
 	void Add(TableItem *item);
 	void Add(vector<TableItem *> items);
 	void Clear();
+
 	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
@@ -60,13 +77,14 @@ private:
 	bool _isTopLevelTable;
 	void _DrawAllItems();
 	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
-	bool _PerformUpdate();
 	void _DrawArrows();
 	int _CurrentPixelToItemIndex();
 	float _ItemNumberToPixel(int number);
 	int _RelativePixelToItemIndex(float relativeY);
 	void _HighlightBoids(vector<TableItem *> group);
-	void _UpdateTableCallback();
+	void _SortTableAlphabetically();
+	void _SortTableUtilization();
+	bool _IsSortable();
 };
 
 #endif /* TABLE_H_ */

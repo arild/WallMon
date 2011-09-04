@@ -22,25 +22,26 @@ const float TABLE_BOTTOM = 15.;
 const float ITEM_HEIGHT = 6.;
 const float FONT_SIZE = 4.;
 
-TableItem::TableItem(string displayName_, int r_, int g_, int b_)
+TableItem::TableItem()
 {
-	key = displayName_;
-	r = r_;
-	g = g_;
-	b = b_;
 	score = 0;
 }
 
-void TableItem::AddBoid(BoidSharedContext *subItem)
+void TableItem::AddBoid(BoidSharedContext *boid)
 {
 	scoped_lock(_mutex);
-	_subItems.push_back(subItem);
+	if (_boids.size() == 0) {
+		r = boid->red;
+		g = boid->green;
+		b = boid->blue;
+	}
+	_boids.push_back(boid);
 }
 
 vector<BoidSharedContext *> TableItem::GetBoids()
 {
 	scoped_lock(_mutex);
-	return _subItems;
+	return _boids;
 }
 
 Table::Table(bool isTopLevelTable)
@@ -143,20 +144,27 @@ void Table::Tap(float x, float y)
 	int idx = _RelativePixelToItemIndex(y);
 	if (idx < 0 || idx >= _items.size())
 		return;
-	_selectedItem = _items[idx][0];
+	TableItem *selectedItem = _items[idx][0];
 
 	if (_isTopLevelTable) {
 		// Populate the sub-table with all items in selected group
 		vector<TableItem *> group = _items[idx];
 		_subTable->Clear();
-		_subTable->Add(group);
-
-		_HighlightBoids(group);
+		if (selectedItem == _selectedItem) {
+			// Unhighlight
+			_selectedItem = NULL;
+		}
+		else {
+			_selectedItem = selectedItem;
+			_subTable->Add(group);
+			_HighlightBoids(group);
+		}
 	}
 }
 
 void Table::ScrollDown(float speed)
 {
+	LOG(INFO) << "TABLE SCROLL DOWN";
 	_currentPixelIndex += speed;
 	int maxPixelIndex = (_items.size() * ITEM_HEIGHT) - 35;
 	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
@@ -170,12 +178,12 @@ void Table::ScrollUp(float speed)
 
 void Table::SwipeLeft(float speed)
 {
-
+	_SortTableAlphabetically();
 }
 
 void Table::SwipeRight(float speed)
 {
-
+	_SortTableUtilization();
 }
 
 void Table::_DrawAllItems()
@@ -252,16 +260,6 @@ vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
 		if (_items[i][0]->key.compare(itemKey) == 0)
 			return &_items[i];
 	return NULL;
-}
-
-bool Table::_PerformUpdate()
-{
-	double tsCurrent = System::GetTimeInSec();
-	if (tsCurrent - _tsLastUpdate > 3) {
-		_tsLastUpdate = tsCurrent;
-		return true;
-	}
-	return false;
 }
 
 void Table::_DrawArrows()
@@ -341,9 +339,24 @@ void Table::_HighlightBoids(vector<TableItem *> group)
 	}
 }
 
-void Table::_UpdateTableCallback()
+void Table::_SortTableAlphabetically()
 {
 	scoped_lock lock(_mutex);
-	sort(_items.begin(), _items.end(), TableGroupCompare());
+	sort(_items.begin(), _items.end(), TableGroupCompareAlphabetically());
 }
 
+void Table::_SortTableUtilization()
+{
+	scoped_lock lock(_mutex);
+	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
+}
+
+bool Table::_IsSortable()
+{
+	double tsCurrent = System::GetTimeInSec();
+	if (tsCurrent - _tsLastUpdate > 1) {
+		_tsLastUpdate = tsCurrent;
+		return true;
+	}
+	return false;
+}

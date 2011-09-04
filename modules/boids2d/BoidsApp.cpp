@@ -145,16 +145,20 @@ void BoidsApp::_SetupAndPopulateScenes()
 	float w = TILE_SCREEN_HEIGHT;
 	float h = TILE_SCREEN_HEIGHT;
 
-	_tableScene = new Scene(0, 0, w * 3, h * 4, 100, 100);
-	_boidScene = new Scene(w * 4, h/2 + 75, w * 3, h * 3.3, 100, 100);
-	_controlPanelScene = new Scene(w * 7, 0, w * 2, h * 4, 100, 200);
+	_tableScene = new Scene(w/2, 0, w * 3.2, h * 4, 100, 100);
+	_boidScene = new Scene(w * 5, h/2 + 75, w * 3, h * 3.3, 100, 100);
 
-	Scene::AddScene(_controlPanelScene);
+
+//	_tableScene = new Scene(0, 0, w * 3, h * 4, 100, 100);
+//	_boidScene = new Scene(w * 4, h/2 + 75, w * 3, h * 3.3, 100, 100);
+//	_controlPanelScene = new Scene(w * 7, 0, w * 2, h * 4, 100, 200);
+
+//	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);
 	Scene::AddScene(_tableScene);
 
-	ControlPanel *panel = new ControlPanel();
-	_controlPanelScene->AddEntity(panel);
+//	ControlPanel *panel = new ControlPanel();
+//	_controlPanelScene->AddEntity(panel);
 
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);

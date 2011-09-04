@@ -22,18 +22,13 @@ enum BoidView {
 	BOID_TYPE_NODE
 };
 
-class BoidInfo {
-public:
-	string procName, hostName, pid;
-};
 
 class BoidSharedContext {
 public:
 	int red, green, blue;
 	Shape boidShape;
 	BoidView boidView;
-	BoidInfo boidInfo;
-	static int tailLength;
+	static float tailLength;
 
 	// Which type of boids to show within a metric
 	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
@@ -44,15 +39,15 @@ public:
 	void SetDestination(float x, float y);
 	void GetDestination(float *x, float *y);
 
-	void SetTailLength(int length);
-	int GetTailLength();
+	void SetTailLength(float length);
+	float GetTailLength();
 
 	void EnableHighlight();
 	void DisableHighlight();
 	bool IsHighlighted();
 private:
 	float _destx, _desty;
-	int _tailLength;
+	float _tailLength;
 	bool _isHighlighted;
 	boost::mutex _mutex;
 };

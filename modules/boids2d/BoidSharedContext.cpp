@@ -9,11 +9,11 @@
 
 #include "BoidSharedContext.h"
 
-int BoidSharedContext::tailLength = 0;
-bool BoidSharedContext::showCpuBoid = false;
-bool BoidSharedContext::showMemoryBoid = false;
-bool BoidSharedContext::showNetworkBoid = false;
-bool BoidSharedContext::showStorageBoid = false;
+float BoidSharedContext::tailLength = 0.;
+bool BoidSharedContext::showCpuBoid = true;
+bool BoidSharedContext::showMemoryBoid = true;
+bool BoidSharedContext::showNetworkBoid = true;
+bool BoidSharedContext::showStorageBoid = true;
 BoidView BoidSharedContext::boidViewToShow = BOID_TYPE_PROCESS_NAME;
 
 BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidView boidType_)
@@ -24,8 +24,6 @@ BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shap
 	boidShape = shape_;
 	boidView = boidType_;
 	_isHighlighted = false;
-	boidInfo.procName = "proc name";
-	boidInfo.hostName = "host name";
 }
 
 void BoidSharedContext::SetDestination(float x, float y)
@@ -42,14 +40,14 @@ void BoidSharedContext::GetDestination(float *x, float *y)
 	*y = _desty;
 }
 
-void BoidSharedContext::SetTailLength(int length)
+void BoidSharedContext::SetTailLength(float length)
 {
 	scoped_lock lock(_mutex);
 	_tailLength = length;
 }
 
 
-int BoidSharedContext::GetTailLength()
+float BoidSharedContext::GetTailLength()
 {
 	scoped_lock lock(_mutex);
 	return _tailLength;

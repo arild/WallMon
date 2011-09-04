@@ -106,7 +106,7 @@ void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg
 	ProcName *procName = update.procName;
 	Node *node = update.node;
 
-	_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
+	//_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
 	// CPU
 	double user = proc->stat->userCpuUtilization;

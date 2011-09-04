@@ -158,6 +158,12 @@ public:
 	DataUpdate();
 };
 
+class ProcInfo {
+public:
+	string hostName, procName;
+	int pid;
+};
+
 class Data {
 public:
 	ProcMap procMap;
