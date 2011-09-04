@@ -1,24 +1,25 @@
 
+message ProcessMessage
+{
+	optional string processname = 1;
+	optional uint32 pid = 2;
+	
+	optional double userCpuLoad = 3;
+	optional double systemCpuLoad = 4;
+	
+	optional double systemCpuUtilization = 5;
+	optional double userCpuUtilization = 6;
+	
+	optional double memoryUtilization = 7;
+	
+	optional uint32 networkInUtilization = 8;
+	optional uint32 networkOutUtilization = 9;
+	
+	optional uint32 networkInBytes = 10;
+	optional uint32 networkOutBytes = 11;		
+}
+
 message ProcessCollectorMessage
 {
-	message ProcessMessage
-	{
-		optional string processname = 1;
-		optional uint32 pid = 2;
-		
-		optional double userCpuLoad = 3;
-		optional double systemCpuLoad = 4;
-		
-		optional double systemCpuUtilization = 5;
-		optional double userCpuUtilization = 6;
-		
-		optional double memoryUtilization = 7;
-		
-		optional uint32 networkInUtilization = 8;
-		optional uint32 networkOutUtilization = 9;
-		
-		optional uint32 networkInBytes = 10;
-		optional uint32 networkOutBytes = 11;		
-	}
 	repeated ProcessMessage processmessage = 1;
 }

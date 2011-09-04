@@ -20,7 +20,7 @@ int _numTimesFailedMonitoringProcesses = 0;
 ProcessCollector::ProcessCollector(IProcessCollectorController *controller)
 {
 	context = new Context();
-	filter = new ProcessCollectorMessage::ProcessMessage;
+	filter = new ProcessMessage;
 	_controller = controller;
 }
 
@@ -79,7 +79,7 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 	for (vector<LinuxProcessMonitorLight *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
 		LinuxProcessMonitorLight *monitor = (*it);
 		monitor->Update();
-		ProcessCollectorMessage::ProcessMessage *processMsg = _processesMsg.add_processmessage();
+		ProcessMessage *processMsg = _processesMsg.add_processmessage();
 
 		double util;
 		if (filter->has_processname()) {

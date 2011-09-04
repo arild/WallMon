@@ -90,7 +90,7 @@ void Handler::Handle(WallmonMessage *msg)
 		LOG(FATAL) << "Protocol buffer parsing failed: ";
 	// Go through all process specific messages
 	for (int i = 0; i < _message->processmessage_size(); i++) {
-		ProcessCollectorMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
+		ProcessMessage *processMessage = _message->mutable_processmessage(i);
 		_HandleProcessMessage(*processMessage, msg->hostname());
 	}
 	_RankTableItems();
@@ -99,7 +99,7 @@ void Handler::Handle(WallmonMessage *msg)
 /**
  * Updates statistics in data indexes and boids
  */
-void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg, string hostname)
+void Handler::_HandleProcessMessage(ProcessMessage &msg, string hostname)
 {
 	DataUpdate update = _data->Update(hostname, msg.processname(), msg.pid());
 	Proc *proc = update.proc;
@@ -150,7 +150,7 @@ void Handler::_HandleProcessMessage(ProcessCollectorMessage::ProcessMessage &msg
  * @param pstat  The old values for the same process (in the message)
  * @param astat  The aggregated statistics for some metric
  */
-void Handler::_UpdateCommonAggregatedStatistics(ProcessCollectorMessage::ProcessMessage &msg,
+void Handler::_UpdateCommonAggregatedStatistics(ProcessMessage &msg,
 		StatBase &pstat, StatBase &astat)
 {
 	// CPU
@@ -174,7 +174,7 @@ void Handler::_UpdateCommonAggregatedStatistics(ProcessCollectorMessage::Process
 	astat.numSamples += 1;
 }
 
-void Handler::_UpdateProcessStatistics(ProcessCollectorMessage::ProcessMessage &msg, StatBase &pstat)
+void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
 {
 	pstat.userCpuUtilization = msg.usercpuutilization();
 	pstat.systemCpuUtilization = msg.systemcpuutilization();

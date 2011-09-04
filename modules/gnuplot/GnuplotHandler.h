@@ -19,7 +19,7 @@
 using namespace std;
 
 // host name -> vector of CPU utilization
-typedef ProcessCollectorMessage::ProcessMessage ProcMsg;
+typedef ProcessMessage ProcMsg;
 typedef map<string, vector<ProcMsg> *> DataContainer;
 
 class GnuplotHandler: public IDataHandlerProtobuf {

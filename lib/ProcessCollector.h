@@ -25,7 +25,7 @@ public:
 
 class ProcessCollector: public IDataCollectorProtobuf {
 public:
-	ProcessCollectorMessage::ProcessMessage *filter;
+	ProcessMessage *filter;
 	Context *context;
 	ProcessCollector(IProcessCollectorController *controller = NULL);
 	void SetProcesses(list<string> processNames);

@@ -10,7 +10,7 @@
 #include "ProcessMonitoring.h"
 #include "stubs/ProcessCollector.pb.h"
 
-typedef ProcessCollectorMessage::ProcessMessage ProcMsg;
+typedef ProcessMessage ProcMsg;
 
 ProcessMonitoring::ProcessMonitoring()
 {
