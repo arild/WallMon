@@ -8,8 +8,12 @@
 #include "Config.h"
 
 
-string Config::GetFontPath()
+string Config::GetTimesFontPath()
 {
 	return System::GetHomePath() + "/lib/times.ttf";
 }
 
+string Config::GetMonoFontPath()
+{
+	return System::GetHomePath() + "/lib/mono.ttf";
+}

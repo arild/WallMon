@@ -38,7 +38,7 @@ private:
 	Data *_data;
 	EventSystemBase *_eventSystem;
 	Table *_table;
-	void _HandleProcessMessage(ProcessMessage &msg, string hostname);
+	void _HandleProcessMessage(ProcessMessage &msg);
 	void _UpdateCommonAggregatedStatistics(ProcessMessage &msg, StatBase &pstat, StatBase &astat);
 	void _UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat);
 	void _RankTableItems();

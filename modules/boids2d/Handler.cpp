@@ -91,7 +91,8 @@ void Handler::Handle(WallmonMessage *msg)
 	// Go through all process specific messages
 	for (int i = 0; i < _message->processmessage_size(); i++) {
 		ProcessMessage *processMessage = _message->mutable_processmessage(i);
-		_HandleProcessMessage(*processMessage, msg->hostname());
+		processMessage->set_hostname(msg->hostname());
+		_HandleProcessMessage(*processMessage);
 	}
 	_RankTableItems();
 }
@@ -99,9 +100,9 @@ void Handler::Handle(WallmonMessage *msg)
 /**
  * Updates statistics in data indexes and boids
  */
-void Handler::_HandleProcessMessage(ProcessMessage &msg, string hostname)
+void Handler::_HandleProcessMessage(ProcessMessage &msg)
 {
-	DataUpdate update = _data->Update(hostname, msg.processname(), msg.pid());
+	DataUpdate update = _data->Update(msg);
 	Proc *proc = update.proc;
 	ProcName *procName = update.procName;
 	Node *node = update.node;

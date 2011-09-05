@@ -15,13 +15,15 @@
 
 #define STATIC_FONT_SIZE	75
 
-FTFont *Font::_font = NULL;
+FTFont *Font::_timesFont = NULL;
+FTFont *Font::_monoFont = NULL;
 
 Font::Font(int size, bool centerHorizontal, bool centerVertical)
 {
 	_fontSize = size;
 	_centerHorizontal = centerHorizontal;
 	_centerVertical = centerVertical;
+	_font = _timesFont;
 }
 
 /**
@@ -30,14 +32,29 @@ Font::Font(int size, bool centerHorizontal, bool centerVertical)
  */
 void Font::Init()
 {
-	string fontPath = Config::GetFontPath();
-	_font = new FTTextureFont(fontPath.c_str());
-	_font->FaceSize(STATIC_FONT_SIZE);
+	_timesFont = new FTTextureFont(Config::GetTimesFontPath().c_str());
+	_timesFont->FaceSize(STATIC_FONT_SIZE);
+	_monoFont = new FTTextureFont(Config::GetMonoFontPath().c_str());
+	_monoFont->FaceSize(STATIC_FONT_SIZE);
 }
 
 void Font::Close()
 {
-	delete _font;
+	delete _timesFont;
+	delete _monoFont;
+}
+
+void Font::SetFontType(FONT_TYPE fontType)
+{
+	switch (fontType)
+	{
+	case FONT_TIMES:
+		_font = _timesFont;
+		break;
+	case FONT_MONO:
+		_font = _monoFont;
+		break;
+	}
 }
 
 void Font::RenderText(string text, float tx, float ty)
@@ -80,13 +97,21 @@ float Font::_GetFontScale()
 
 string Font::TrimHorizontal(string text, int maxPixelLen)
 {
+	return TrimHorizontal(text, maxPixelLen, 0);
+}
+
+/**
+ * Shortens/trims a string to a specified length, starting from
+ * character n, counted backwards, and moving backwards.
+ */
+string Font::TrimHorizontal(string text, int maxPixelLen, int n)
+{
 	bool isTrimmed = false;
 	while (GetHorizontalPixelLength(text) > maxPixelLen) {
-		text.erase(text.length() - 2, 1);
+		text.erase(text.length() - n - 1, 1);
 		isTrimmed = true;
 	}
 	if (isTrimmed)
-		text += ".";
+		text.insert(text.length() - n + 1, ".");//text += ".";
 	return text;
 }
-

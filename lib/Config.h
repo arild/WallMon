@@ -14,7 +14,8 @@ using namespace std;
 
 class Config {
 public:
-	static string GetFontPath();
+	static string GetTimesFontPath();
+	static string GetMonoFontPath();
 };
 
 #endif /* CONFIG_H_ */

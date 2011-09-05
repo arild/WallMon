@@ -15,36 +15,13 @@ public:
 	string key;
 	int r, g, b;
 	float score;
-	string procName, hostName, pid;
-	TableItem();
+	string procName, hostName, pid, user, time;
+	TableItem(string key);
 	void AddBoid(BoidSharedContext *subItem);
 	vector<BoidSharedContext *> GetBoids();
 private:
 	boost::mutex _mutex;
 	vector<BoidSharedContext *> _boids;
-};
-
-struct TableGroupCompareAlphabetically {
-	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
-	{
-		if (ToLower(a[0]->key).compare(ToLower(b[0]->key)) < 0)
-			return true;
-		return false;
-	}
-
-	string ToLower(string &s)
-	{
-		for (int i = 0; i < s.length(); i++)
-			s[i] = tolower(s[i]);
-		return s;
-	}
-};
-
-struct TableGroupCompareUtilization {
-	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
-	{
-		return a[0]->score > b[0]->score;
-	}
 };
 
 class Table: public EntityEvent {
@@ -70,12 +47,13 @@ private:
 	vector< vector<TableItem *> > _items;
 	float _currentPixelIndex; // index of item residing on top of displayed list
 	float _selectedPixelIndex; // index of item currently marked and active
-	Font *_font, *_fontLarge;
+	Font *_fontSub, *_font, *_fontLarge;
 	double _tsLastUpdate;
 	Table *_subTable;
 	TableItem *_selectedItem;
 	bool _isTopLevelTable;
 	void _DrawAllItems();
+	void _DrawSubLevelItem(TableItem *item, float Y);
 	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
 	void _DrawArrows();
 	int _CurrentPixelToItemIndex();

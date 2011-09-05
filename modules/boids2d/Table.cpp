@@ -17,13 +17,14 @@
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
-const float TABLE_TOP = 85.;
-const float TABLE_BOTTOM = 15.;
-const float ITEM_HEIGHT = 6.;
-const float FONT_SIZE = 4.;
+float TABLE_TOP = 85.;
+float TABLE_BOTTOM = 15.;
+float ITEM_HEIGHT = 6.;
+float FONT_SIZE = 4.;
 
-TableItem::TableItem()
+TableItem::TableItem(string key_)
 {
+	key = key_;
 	score = 0;
 }
 
@@ -43,6 +44,30 @@ vector<BoidSharedContext *> TableItem::GetBoids()
 	scoped_lock(_mutex);
 	return _boids;
 }
+
+struct TableGroupCompareAlphabetically {
+	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
+	{
+		if (ToLower(a[0]->key).compare(ToLower(b[0]->key)) < 0)
+			return true;
+		return false;
+	}
+
+	string ToLower(string &s)
+	{
+		for (int i = 0; i < s.length(); i++)
+			s[i] = tolower(s[i]);
+		return s;
+	}
+};
+
+struct TableGroupCompareUtilization {
+	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
+	{
+		return a[0]->score > b[0]->score;
+	}
+};
+
 
 Table::Table(bool isTopLevelTable)
 {
@@ -112,6 +137,8 @@ void Table::OnInit()
 	}
 
 	_tsLastUpdate = 0;
+	_fontSub = new Font(FONT_SIZE - 1);
+	_fontSub->SetFontType(FONT_MONO);
 	_font = new Font(FONT_SIZE);
 	_fontLarge = new Font(FONT_SIZE + 1);
 }
@@ -127,8 +154,12 @@ void Table::OnLoop()
 
 void Table::OnRender()
 {
-	if (!_isTopLevelTable)
+	if (_isTopLevelTable)
+		ITEM_HEIGHT = 6;
+	else {
 		glTranslatef(50, 0, 0);
+		ITEM_HEIGHT = 16;
+	}
 	_DrawAllItems();
 //	_DrawArrows();
 }
@@ -195,39 +226,50 @@ void Table::_DrawAllItems()
 		if (itemIndex < 0 || itemIndex >= _items.size())
 			continue;
 		float y = _ItemNumberToPixel(i);
-		y -= 4.5;
 		if (y < 0)
 			break;
 
+		// Render first item of group. For the sub-table, there is only
+		// groups containing one item, hence all items in the sub-table are rendered
 		TableItem *item = _items[itemIndex][0];
 		glColor3ub(item->r, item->g, item->b);
 
-		// Draw the rectangle in front of every entry
-		glBegin(GL_QUADS);
-		glVertex2f(6, y);
-		glVertex2f(9, y);
-		glVertex2f(9, y + 3);
-		glVertex2f(6, y + 3);
-		glEnd();
-
-		string s = _font->TrimHorizontal(item->key, 30);
-		_font->RenderText(s, 12, y);
-
-		if (_selectedItem == item) {
-			// Draw the rectangular marker for selected entry
-			selectBoxStartPixel = y - ITEM_HEIGHT / 4;
-			glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
-			float y_ = selectBoxStartPixel;
-			string s = _font->TrimHorizontal(_selectedItem->key, 30);
-			float w = _font->GetHorizontalPixelLength(s);
-			glLineWidth(2);
-			glBegin(GL_LINE_STRIP);
-			glVertex2f(3, y_);
-			glVertex2f(15 + w, y_);
-			glVertex2f(15 + w, y_ + ITEM_HEIGHT);
-			glVertex2f(3, y_ + ITEM_HEIGHT);
-			glVertex2f(3, y_);
+		if (_isTopLevelTable) {
+			// Draw the rectangle in front of every entry
+			y -= 4.5;
+			glBegin(GL_QUADS);
+			glVertex2f(6, y);
+			glVertex2f(9, y);
+			glVertex2f(9, y + 3);
+			glVertex2f(6, y + 3);
 			glEnd();
+
+			int groupSize = _items[itemIndex].size();
+			stringstream ss;
+			ss << groupSize;
+			string s = item->procName + " (" + ss.str() + ")";
+			s = _font->TrimHorizontal(s, 30, 4 +  ss.str().length());
+			_font->RenderText(s, 12, y);
+
+			if (_selectedItem == item) {
+				// Draw the rectangular marker for selected entry
+				selectBoxStartPixel = y - ITEM_HEIGHT / 4;
+				glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
+				float y_ = selectBoxStartPixel;
+				string s = _font->TrimHorizontal(_selectedItem->key, 30);
+				float w = _font->GetHorizontalPixelLength(s);
+				glLineWidth(2);
+				glBegin(GL_LINE_STRIP);
+				glVertex2f(3, y_);
+				glVertex2f(15 + w, y_);
+				glVertex2f(15 + w, y_ + ITEM_HEIGHT);
+				glVertex2f(3, y_ + ITEM_HEIGHT);
+				glVertex2f(3, y_);
+				glEnd();
+			}
+		}
+		else {
+			_DrawSubLevelItem(item, y);
 		}
 	}
 
@@ -248,10 +290,28 @@ void Table::_DrawAllItems()
 	glEnd();
 
 	glColor3ub(255, 255, 255);
-	string heading = "Process Id";
-	if (_isTopLevelTable)
-		heading = "Process Name";
+	if (_isTopLevelTable) {
+	string heading = "Process Names";
 	_fontLarge->RenderText(heading, 3, TABLE_TOP + 8);
+	}
+}
+
+void Table::_DrawSubLevelItem(TableItem *item, float y)
+{
+	_fontSub->RenderText("Host:  " + item->hostName, 5, y-3);
+	_fontSub->RenderText("Pid :  " + item->pid, 5, y-6);
+	_fontSub->RenderText("User:  " + item->user, 5, y-9);
+	_fontSub->RenderText("Time:  " + item->time, 5, y-12);
+
+//	glColor3ub(0, 0, 255);
+//	glLineWidth(2);
+//	glBegin(GL_LINE_STRIP);
+//	glVertex2f(1, y - (ITEM_HEIGHT - 1));
+//	glVertex2f(45, y - (ITEM_HEIGHT - 1));
+//	glVertex2f(45, y - 1);
+//	glVertex2f(1, y - 1);
+//	glVertex2f(1, y - (ITEM_HEIGHT - 1));
+//	glEnd();
 }
 
 vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
@@ -360,3 +420,4 @@ bool Table::_IsSortable()
 	}
 	return false;
 }
+

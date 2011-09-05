@@ -23,10 +23,10 @@ VisualBase::~VisualBase()
 	delete tableItem;
 }
 
-void VisualBase::InitBoids(string identifierString, BoidView boidType)
+void VisualBase::InitBoids(ProcessMessage &msg, BoidView boidType)
 {
 	float red, green, blue;
-	Data::NameToRgbColor(identifierString, &red, &green, &blue);
+	Data::NameToRgbColor(msg.processname(), &red, &green, &blue);
 
 	// Create contexts of boids - used to manage them
 	cpu = new BoidSharedContext(red, green, blue, QUAD, boidType);
@@ -35,11 +35,15 @@ void VisualBase::InitBoids(string identifierString, BoidView boidType)
 
 	// Put the boids contexts into a table that presents them visually
 	// in another way, and allows for events
-	tableItem = new TableItem();
+	tableItem = new TableItem(msg.processname());
 	tableItem->AddBoid(cpu);
 	tableItem->AddBoid(memory);
 	tableItem->AddBoid(network);
-	tableItem->key = identifierString;
+	tableItem->procName = msg.processname();
+	tableItem->hostName = msg.hostname();
+	stringstream ss;
+	ss << msg.pid();
+	tableItem->pid = ss.str();
 
 	// Create the boids, and associated the boids contexts with them
 	boidsApp->CreateBoid(cpu);
@@ -73,19 +77,19 @@ ProcStat::ProcStat()
 {
 }
 
-ProcVisual::ProcVisual(string processName)
+ProcVisual::ProcVisual(ProcessMessage &msg)
 {
-	InitBoids(processName, BOID_TYPE_PROCESS);
+	InitBoids(msg, BOID_TYPE_PROCESS);
 }
 
 ProcVisual::~ProcVisual()
 {
 }
 
-Proc::Proc(string processName)
+Proc::Proc(ProcessMessage &msg)
 {
 	stat = new ProcStat();
-	visual = new ProcVisual(processName);
+	visual = new ProcVisual(msg);
 }
 
 Proc::~Proc()
@@ -102,9 +106,9 @@ ProcNameStat::~ProcNameStat()
 {
 }
 
-ProcNameVisual::ProcNameVisual(string processName)
+ProcNameVisual::ProcNameVisual(ProcessMessage &msg)
 {
-	InitBoids(processName, BOID_TYPE_PROCESS_NAME);
+	InitBoids(msg, BOID_TYPE_PROCESS_NAME);
 	VisualBase::table->Add(tableItem);
 }
 
@@ -113,10 +117,10 @@ ProcNameVisual::~ProcNameVisual()
 
 }
 
-ProcName::ProcName(string processName)
+ProcName::ProcName(ProcessMessage &msg)
 {
 	stat = new ProcNameStat();
-	visual = new ProcNameVisual(processName);
+	visual = new ProcNameVisual(msg);
 }
 
 ProcName::~ProcName()
@@ -164,14 +168,14 @@ Data::~Data()
 {
 }
 
-DataUpdate Data::Update(string hostname, string processName, int pid)
+DataUpdate Data::Update(ProcessMessage &msg)
 {
 	DataUpdate update;
 
 	// Per process
-	string procMapKey = _CreateProcKey(hostname, pid);
+	string procMapKey = _CreateProcKey(msg.hostname(), msg.pid());
 	if (procMap.count(procMapKey) == 0) {
-		update.proc = new Proc(processName);
+		update.proc = new Proc(msg);
 		procMap[procMapKey] = update.proc;
 		update.procWasCreated = true;
 	}

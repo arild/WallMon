@@ -11,6 +11,7 @@
 #include <string>
 #include <boost/tuple/tuple.hpp>
 #include "BoidSharedContext.h"
+#include "stubs/ProcessCollector.pb.h"
 #include "Table.h"
 #include "BoidsApp.h"
 
@@ -38,7 +39,7 @@ public:
 
 	VisualBase();
 	~VisualBase();
-	void InitBoids(string identifierString, BoidView boidType);
+	void InitBoids(ProcessMessage &msg, BoidView boidType);
 };
 
 /**
@@ -74,7 +75,7 @@ public:
 
 class ProcVisual : public VisualBase {
 public:
-	ProcVisual(string processName);
+	ProcVisual(ProcessMessage &msg);
 	~ProcVisual();
 };
 
@@ -83,7 +84,7 @@ public:
 	ProcStat *stat;
 	ProcVisual *visual;
 
-	Proc(string processName);
+	Proc(ProcessMessage &msg);
 	~Proc();
 };
 
@@ -102,7 +103,7 @@ public:
 
 class ProcNameVisual : public VisualBase {
 public:
-	ProcNameVisual(string processName);
+	ProcNameVisual(ProcessMessage &msg);
 	virtual ~ProcNameVisual();
 };
 
@@ -112,7 +113,7 @@ public:
 	ProcNameVisual *visual;
 	list<Proc *> procs;
 
-	ProcName(string processName);
+	ProcName(ProcessMessage &msg);
 	virtual ~ProcName();
 };
 typedef map<string, ProcName *> ProcNameMap;
@@ -172,7 +173,7 @@ public:
 
 	Data();
 	~Data();
-	DataUpdate Update(string hostname, string processName, int pid);
+	DataUpdate Update(ProcessMessage &msg);
 	static void NameToRgbColor(string name, float *r, float *g, float *b);
 private:
 	string _CreateProcKey(string hostName, int pid);

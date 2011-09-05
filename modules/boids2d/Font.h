@@ -7,6 +7,11 @@
 
 using namespace std;
 
+enum FONT_TYPE {
+	FONT_TIMES,
+	FONT_MONO
+};
+
 class Font {
 public:
 	Font(int size, bool centerHorizontal=false, bool centerVertical=false);
@@ -15,15 +20,19 @@ public:
 	static void Init();
 	static void Close();
 
+	void SetFontType(FONT_TYPE fontType);
 	void RenderText(string text, float tx, float ty);
 	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
 	int GetHorizontalPixelLength(string &text);
 	int GetVerticalPixelLength(string &text);
 	string TrimHorizontal(string text, int maxPixelLen);
+	string TrimHorizontal(string text, int maxPixelLen, int n);
 private:
 	int _fontSize;
 	bool _centerHorizontal, _centerVertical;
-	static FTFont *_font;
+	FTFont *_font;
+	static FTFont *_timesFont;
+	static FTFont *_monoFont;
 	float _GetFontScale();
 };
 

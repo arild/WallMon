@@ -16,7 +16,9 @@ message ProcessMessage
 	optional uint32 networkOutUtilization = 9;
 	
 	optional uint32 networkInBytes = 10;
-	optional uint32 networkOutBytes = 11;		
+	optional uint32 networkOutBytes = 11;
+	
+	optional string hostname = 12;		
 }
 
 message ProcessCollectorMessage
