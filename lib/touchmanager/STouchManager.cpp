@@ -29,13 +29,13 @@ STouchManager::~STouchManager(void)
 	pthread_mutex_destroy(&mgrLock);
 }
 
-void STouchManager::handleEvent(shout_event_t *evt, float virtX, float virtY)
+void STouchManager::handleEvent(shout_event_t *evt)
 {
 	bool shouldRunCallback = false;
 	lock();
 	if (evt->type == kEvt_type_calibrated_touch_location) {
 		bool isLast = false;
-		TT_touch_state_t *state = newTouchStateForEvent(evt, isLast, virtX, virtY), *existingState = 0;
+		TT_touch_state_t *state = newTouchStateForEvent(evt, isLast), *existingState = 0;
 		if (state) {
 			oidTouchMap_t::iterator it;
 			it = oidTouchMap.find(state->oid);
@@ -102,7 +102,7 @@ void STouchManager::updateTouch(TT_touch_state_t *obj, TT_touch_state_t *newObj)
 	obj->lastUpdated = shout_double_time();
 }
 
-TT_touch_state_t* STouchManager::newTouchStateForEvent(shout_event_t *evt, bool &isLast, float virtX, float virtY)
+TT_touch_state_t* STouchManager::newTouchStateForEvent(shout_event_t *evt, bool &isLast)
 {
 	TT_touch_state_t *ts = (TT_touch_state_t*) calloc(sizeof(TT_touch_state_t), 1);
 	uint32_t locFlags, senderID;
@@ -110,8 +110,7 @@ TT_touch_state_t* STouchManager::newTouchStateForEvent(shout_event_t *evt, bool 
 
 	if (parse_touch_location_event_v2(evt, &locFlags, &x, &y, &radius, 0, &senderID) == 0) {
 		if (senderID == (uint32_t) wantedSenderID || wantedSenderID == -1) {
-			ts->loc = WVPoint2d(virtX, virtY);
-//			ts->delta = WVPoint2d(0, 0);
+			ts->loc = WVPoint2d(x, y);
 			ts->radius = radius;
 			ts->oid = evt->refcon;
 			ts->lastUpdated = shout_double_time();

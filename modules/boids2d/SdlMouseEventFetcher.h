@@ -8,7 +8,7 @@
 #ifndef SDLMOUSEEVENTFETCHER_H_
 #define SDLMOUSEEVENTFETCHER_H_
 
-#include "boost/tuple/tuple.hpp"
+#include <boost/tuple/tuple.hpp>
 #include "EventSystemBase.h"
 #include "Queue.h"
 
@@ -23,11 +23,11 @@ public:
 	virtual void WaitAndHandleNextEvent();
 
 private:
-	Queue<TouchEvent> _queue;
+	Queue<shout_event_t *> _queue;
 	double _timestamp;
 	bool _isEventStreamActive;
 	int _eventId;
-	shout_event_t *CreateShoutEvent(int eventId);
+	shout_event_t *CreateShoutEvent(int eventId, float x, float y);
 };
 
 #endif /* SDLMOUSEEVENTFETCHER_H_ */

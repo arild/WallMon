@@ -9,6 +9,7 @@
 #define EVENTHANDLERBASE_H_
 
 #include <vector>
+#include <map>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <shout/event-types/touch-events.h>
@@ -22,7 +23,8 @@
 using namespace std;
 using namespace boost::tuples;
 
-typedef tuple<Entity *, TouchEvent> EventQueueItem;
+typedef tuple<Entity *, TT_touch_state_t> EventQueueItem;
+typedef map<int, tuple<Entity *, Scene *> > EventIdMap;
 
 class EventSystemBase {
 public:
@@ -46,13 +48,19 @@ public:
 	virtual void WaitAndHandleNextEvent() = 0;
 
 	// Methods intended to be used by child class
-	void FilterAndRouteEvent(TouchEvent &event);
+	void FilterAndRouteEvent(shout_event_t *event);
+	void _HandleTouchesCallback(touchVector_t & down, touchVector_t & up);
 private:
 	boost::thread _thread;
 	bool _running;
 	WallView *_wallView;
 	vector<Scene *> _scenes;
+	EventIdMap _eventIdMap;
+	Entity *_currentEntity;
+	STouchManager *_touchManager;
 	void _HandleEventsForever();
+	void _HandleTouch(TT_touch_state_t & event);
+
 };
 
 #endif /* EVENTHANDLERBASE_H_ */

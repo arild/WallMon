@@ -8,13 +8,19 @@
 #include <glog/logging.h>
 #include <boost/foreach.hpp>
 #include <shout/shout.h>
+#include "shout/event-types/touch-events.h"
 #include "Config.h"
 #include "EventSystemBase.h"
 
+typedef void (EventSystemBase::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
 
 EventSystemBase::EventSystemBase()
 {
+	HandleTouchesPtr handle = &EventSystemBase::_HandleTouchesCallback;
+	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
+	_touchManager = new STouchManager(this, callback);
 	eventQueue = new Queue<EventQueueItem> (10000);
+	_currentEntity = NULL;
 }
 
 EventSystemBase::~EventSystemBase()
@@ -59,39 +65,113 @@ void EventSystemBase::_HandleEventsForever()
 	}
 }
 
-void EventSystemBase::FilterAndRouteEvent(TouchEvent &event)
+void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 {
-	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
-	event.y = WALL_SCREEN_HEIGHT - event.y;
+	uint32_t locFlags, senderID, eventId;
+	float x, y, radius;
+	bool isLast;
+	if (event->type == kEvt_type_calibrated_touch_location) {
+		isLast = false;
+		if (parse_touch_location_event_v2(event, &locFlags, &x, &y, &radius, 0, &senderID) != 0)
+			// Failed parsing shout event
+			LOG(FATAL) << "failed parsing touch event";
+		eventId = event->refcon;
+	}
+	else if (event->type == kEvt_type_touch_remove) {
+		isLast = true;
+		if (parse_touch_remove_event(event, &eventId, &senderID) != 0)
+			LOG(FATAL) << "failed parsing touch remove event";
+	}
+	else {
+		LOG(WARNING) << "Unknown touch event type";
+		return;
+	}
 
-	if (_wallView->IsCordsWithin(event.x, event.y) == false)
+	// Convert y coordinate: 0,0 assumed to be in the top-left corner of input
+	y = WALL_SCREEN_HEIGHT - y;
+
+	if (isLast == false && _wallView->IsCordsWithin(x, y) == false)
+		// Event not within the defined grid (on the display wall)
 		return;
 
 	// Transform the global display wall coordinates from shout into global
 	// coordinates within the application, which uses the same coordinate system,
-	// however, might be (significantly) smaller in physical screen size (.e.g 2x2 tiles)
-	_wallView->GlobalToGridCoords((float *)&event.x, (float *)&event.y);
+	// however, might be (significantly) smaller in physical screen size (.e.g. 2x2 tiles)
+	_wallView->GlobalToGridCoords((float *) &x, (float *) &y);
 
 	// Find all entities that the event "hits"
-	vector<EntityHit> entityHits = Scene::GetAllEntityHits(event.x, event.y);
+	vector<EntityHit> entityHits = Scene::GetAllEntityHits(x, y);
+	int numEntityHits = entityHits.size();
 
-	event.realX = event.x;
-	event.realY = event.y;
+	// No entity hits within scene
+	TT_touch_state_t event_;
+	event_.loc.x = x;
+	event_.loc.y = y;
+	event_.visualizeOnly = true;
+	eventQueue->Push(make_tuple((Entity *) NULL, event_));
 
-	if (entityHits.size() == 0) {
-		// No entity hits within scene
-		event.visualizeOnly = true;
-		eventQueue->Push(make_tuple((Entity *)NULL, event));
+	// Associate the id of the event with an entity
+	EventIdMap::iterator it = _eventIdMap.find(eventId);
+	Scene *scene = NULL;
+	if (it != _eventIdMap.end()) {
+		// Event id already associated with entity. Forward to
+		// touch manager regardless whether the entity is hit or not
+		LOG(INFO) << "ASSOCIATION FOUND";
+		_currentEntity = it->second.get<0>();
+		scene = it->second.get<1>();
+		if (event->type == kEvt_type_touch_remove) {
+			LOG(INFO) << "ASSOCIATION REMOVE";
+			// Special case: the event is a remove event (the last one)
+			_eventIdMap.erase(eventId);
+		}
+	}
+	else if (numEntityHits == 0) {
+		// Id not previously associated and no entities' hit, discard event
+		LOG(INFO) << "EVENT DISCARD";
 		return;
 	}
+	else if (numEntityHits > 0) {
+		LOG(INFO) << "ASSOCIATION NEW";
+		// Id not previously associated, but entity hits available.
+		_currentEntity = entityHits[0].entity;
+		scene = entityHits[0].scene;
+		_eventIdMap[eventId] = make_tuple(_currentEntity, scene);
+	}
 
-	event.visualizeOnly = false;
-	event.x = entityHits[0].virtX;
-	event.y = entityHits[0].virtY;
+	// Transform grid coordinates to virtual entity coordinates
+	scene->RealToVirtualCoords(x, y, &x, &y);
 
-	eventQueue->Push(make_tuple(entityHits[0].entity, event));
+	// Re-create shout event for compatibility with touch-manager
+	if (event->type == kEvt_type_calibrated_touch_location)
+		event = create_calibrated_touch_location_event_v2(eventId,
+				kTouch_evt_first_detect_flag | kTouch_evt_last_detect_flag, x, y, radius, 0, senderID);
+	else if (event->type == kEvt_type_touch_remove)
+		event = create_touch_remove_event(eventId, 0);
+	else
+		return;
+	_touchManager->handleEvent(event);
 }
 
+void EventSystemBase::_HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
+{
+	for (int i = 0; i < down.size(); i++) {
+		TT_touch_state_t *obj = down[i];
+		if (obj->wasUpdated) {
+			obj->remove = false;
+			_HandleTouch(*obj);
+		}
+	}
+	for (int i = 0; i < up.size(); i++) {
+		TT_touch_state_t *obj = up[i];
+		if (obj->wasUpdated) {
+			obj->remove = true;
+			_HandleTouch(*obj);
+		}
+	}
+}
 
-
+void EventSystemBase::_HandleTouch(TT_touch_state_t & event)
+{
+	eventQueue->Push(make_tuple(_currentEntity, event));
+}
 

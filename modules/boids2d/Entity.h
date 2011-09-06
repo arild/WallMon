@@ -31,7 +31,7 @@ public:
 	virtual void OnCleanup() = 0;
 
 	virtual bool IsHit(float x, float y);
-	virtual void HandleHit(TouchEvent &event);
+	virtual void HandleHit(TT_touch_state_t &event);
 };
 
 class EntityShape : virtual Entity {
@@ -47,7 +47,7 @@ class EntityEvent : public virtual Entity {
 public:
 	EntityEvent();
 	virtual ~EntityEvent() {}
-	void HandleHit(TouchEvent &event);
+	void HandleHit(TT_touch_state_t &event);
 	virtual void Tap(float x, float y) = 0;
 //	virtual void TapHold(float x, float y) = 0;
 	virtual void ScrollDown(float speed) = 0;
@@ -60,11 +60,6 @@ private:
 	static vector<EntityEvent *> _entities;
 	float _scrollThreshold, _swipeThreshold, _scrollSpeed, _swipeSpeed, _maxSpeed, _minSpeed;
 	bool _isFirstTime;
-	STouchManager *_touchManager;
-	void _HandleTouchesCallback(touchVector_t & down, touchVector_t & up);
-	void _HandleTouch(TT_touch_state_t &event);
-
-//	void _UpdateTouch(TouchEvent &event);
 };
 
 #endif /* IENTITY_H_ */

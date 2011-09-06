@@ -155,10 +155,11 @@ void Table::OnLoop()
 void Table::OnRender()
 {
 	if (_isTopLevelTable)
-		ITEM_HEIGHT = 6;
+		//ITEM_HEIGHT = 6;
+		;
 	else {
 		glTranslatef(50, 0, 0);
-		ITEM_HEIGHT = 16;
+		//ITEM_HEIGHT = 16;
 	}
 	_DrawAllItems();
 //	_DrawArrows();
@@ -195,7 +196,7 @@ void Table::Tap(float x, float y)
 
 void Table::ScrollDown(float speed)
 {
-	LOG(INFO) << "TABLE SCROLL DOWN";
+//	LOG(INFO) << "TABLE SCROLL DOWN";
 	_currentPixelIndex += speed;
 	int maxPixelIndex = (_items.size() * ITEM_HEIGHT) - 35;
 	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
@@ -261,8 +262,8 @@ void Table::_DrawAllItems()
 				glLineWidth(2);
 				glBegin(GL_LINE_STRIP);
 				glVertex2f(3, y_);
-				glVertex2f(15 + w, y_);
-				glVertex2f(15 + w, y_ + ITEM_HEIGHT);
+				glVertex2f(21 + w, y_);
+				glVertex2f(21 + w, y_ + ITEM_HEIGHT);
 				glVertex2f(3, y_ + ITEM_HEIGHT);
 				glVertex2f(3, y_);
 				glEnd();

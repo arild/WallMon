@@ -18,15 +18,10 @@ ShoutEventSystem::ShoutEventSystem()
 ShoutEventSystem::~ShoutEventSystem()
 {
 	shout_disconnect(_shout);
-	delete _touchManager;
 }
 
 bool ShoutEventSystem::InitEventSystem()
 {
-	HandleTouchesPtr handle = &ShoutEventSystem::HandleTouches;
-	touchManagerCallback_t callback = *(touchManagerCallback_t*) &handle;
-	_touchManager = new STouchManager(this, callback);
-
 	_shout = shout_connect_default(kClient_type_both, "Boids2D");
 	if (!_shout)
 		_shout = shout_connect(kClient_type_both, "rocksvv.cs.uit.no", kShout_default_port,"Boids2D");
@@ -44,35 +39,8 @@ void ShoutEventSystem::PollEvents()
 
 void ShoutEventSystem::WaitAndHandleNextEvent()
 {
-	TouchEvent event;
-	shout_event_t *shoutEvent = shout_wait_next_event(_shout);
-	uint32_t locFlags, senderID;
-	float x, y, radius;
-	if (parse_touch_location_event_v2(shoutEvent, &locFlags, &x, &y, &radius, 0, &senderID) == 0) {
-		event.x = x;
-		event.y = y;
-		event.shoutEvent = shoutEvent;
-//		LOG(INFO) << "Shout size: " << sizeof(shoutEvent) << " | " << sizeof(shout_event_t);
-//		if (event.shoutEvent == NULL)
-//			LOG(INFO) << "SHOUT == NULL";
-		FilterAndRouteEvent(event);
-	}
-}
-
-void ShoutEventSystem::HandleTouches(touchVector_t & down, touchVector_t & up)
-{
-//	for (int i = 0; i < down.size(); i++) {
-//		TT_touch_state_t *obj = down[i];
-//		obj->isUp = false;
-//		if (obj->wasUpdated)
-//			FilterAndRouteEvent(obj);
-//	}
-//	for (int i = 0; i < up.size(); i++) {
-//		TT_touch_state_t *obj = up[i];
-//		obj->isUp = true;
-//		if (obj->wasUpdated)
-//			FilterAndRouteEvent(obj);
-//	}
+	shout_event_t *event = shout_wait_next_event(_shout);
+	FilterAndRouteEvent(event);
 }
 
 

@@ -175,11 +175,12 @@ void BoidsApp::_HandleTouchEvents()
 	while (_eventSystem->eventQueue->GetSize() > 0) {
 		EventQueueItem item = _eventSystem->eventQueue->Pop();
 		Entity *entity = item.get<0>();
-		TouchEvent event = item.get<1>();
+		TT_touch_state_t event = item.get<1>();
 
-		_VisualizeShoutEvent(event.realX, event.realY);
-		if (event.visualizeOnly)
+		if (event.visualizeOnly) {
+			_VisualizeShoutEvent(event.loc.x, event.loc.y);
 			continue;
+		}
 
 		if (++numEventesProcessed == 5) {
 			// Process no more than 5 events at a time, and
@@ -188,10 +189,7 @@ void BoidsApp::_HandleTouchEvents()
 			break;
 		}
 		entity->HandleHit(event);
-
 	}
-//	if (numEventesProcessed > 0)
-//		LOG(INFO) << "Num event processed: " << numEventesProcessed;
 }
 
 void BoidsApp::_VisualizeShoutEvent(float x, float y)

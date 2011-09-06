@@ -37,9 +37,8 @@ void SdlMouseEventFetcher::PollEvents()
 {
 	int mx, my;
 	SDL_GetMouseState(&mx, &my);
-	TouchEvent event;
-	event.x = mx * (float) (WALL_SCREEN_WIDTH / (float) 1600);
-	event.y = my * (float) (WALL_SCREEN_HEIGHT / (float) 768);
+	mx *= (float) (WALL_SCREEN_WIDTH / (float) 1600);
+	my *= (float) (WALL_SCREEN_HEIGHT / (float) 768);
 
 	SDL_Event sdlEvent;
 	SDL_PumpEvents();
@@ -47,15 +46,14 @@ void SdlMouseEventFetcher::PollEvents()
 		switch (sdlEvent.type)
 		{
 		case SDL_KEYDOWN: // Occurs only once when a key is pressed and kept down
+			LOG(INFO) << "---------------------------";
+			LOG(INFO) << "SDL KEY DOWN";
 			_isEventStreamActive = true;
 			break;
 		case SDL_KEYUP:
 			LOG(INFO) << "SDL KEY UP";
 			_isEventStreamActive = false;
-//			event.shoutEvent = CreateShoutEvent(_eventId);
-//			_queue.Push(event);
-			event.shoutEvent = create_touch_remove_event(_eventId, 0);
-			_queue.Push(event);
+			_queue.Push(create_touch_remove_event(_eventId, 0));
 			_eventId += 1;
 			return;
 		default:
@@ -67,20 +65,19 @@ void SdlMouseEventFetcher::PollEvents()
 		return;
 
 	double ts = System::GetTimeInMsec();
-	if (ts - _timestamp < 10)
+	if (ts - _timestamp < 50)
 		return;
 	_timestamp = ts;
-	event.shoutEvent = CreateShoutEvent(_eventId);
-	_queue.Push(event);
+	_queue.Push(CreateShoutEvent(_eventId, (float)mx, (float)my));
 }
 
 void SdlMouseEventFetcher::WaitAndHandleNextEvent()
 {
-	TouchEvent event = _queue.Pop();
+	shout_event_t *event = _queue.Pop();
 	FilterAndRouteEvent(event);
 }
 
-shout_event_t *SdlMouseEventFetcher::CreateShoutEvent(int eventId)
+shout_event_t *SdlMouseEventFetcher::CreateShoutEvent(int eventId, float x, float y)
 {
-	return create_calibrated_touch_location_event_v2(eventId, kTouch_evt_first_detect_flag | kTouch_evt_last_detect_flag, 0, 0, 2, 0, 0);
+	return create_calibrated_touch_location_event_v2(eventId, kTouch_evt_first_detect_flag | kTouch_evt_last_detect_flag, x, y, 2, 0, 0);
 }

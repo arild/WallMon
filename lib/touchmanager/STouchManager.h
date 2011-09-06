@@ -20,7 +20,7 @@ typedef struct {
 	uint32_t oid;
 	float radius, movedDistance, time;
 	double lastUpdated;
-	bool wasUpdated, remove;
+	bool wasUpdated, remove, visualizeOnly;
 } TT_touch_state_t;
 
 typedef std::map<uint32_t, TT_touch_state_t*> oidTouchMap_t;
@@ -44,7 +44,7 @@ public:
 	virtual ~STouchManager(void);
 
 	static STouchManager* sharedTouchManager(void);
-	void handleEvent(shout_event_t *evt, float virtX, float virtY);
+	void handleEvent(shout_event_t *evt);
 	double maxDistanceBetweenTouches(size_t &a, size_t &b);
 	void runCallback(void);
 	void setCallback(touchManagerCallback_t newCallback)
@@ -59,7 +59,7 @@ public:
 	void unlock(void);
 protected:
 	void updateTouch(TT_touch_state_t *obj, TT_touch_state_t *newObj);
-	TT_touch_state_t* newTouchStateForEvent(shout_event_t *evt, bool &isLast, float virtX, float virtY);
+	TT_touch_state_t* newTouchStateForEvent(shout_event_t *evt, bool &isLast);
 
 	void *refcon;
 	oidTouchMap_t oidTouchMap;

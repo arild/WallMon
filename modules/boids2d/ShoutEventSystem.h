@@ -20,10 +20,8 @@ public:
 	virtual bool InitEventSystem();
 	virtual void PollEvents();
 	virtual void WaitAndHandleNextEvent();
-	void HandleTouches(touchVector_t & down, touchVector_t & up);
 private:
 	shout_t *_shout;
-	STouchManager *_touchManager;
 };
 
 #endif /* SHOUTEVENTSYSTEM_H_ */
