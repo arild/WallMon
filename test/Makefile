@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-LIBS=-lpthread -lgtest -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher -lWallView -lPidMonitor
+LIBS=-lpthread -lgtest -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lPs -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher -lWallView -lPidMonitor
 
 all: test
 

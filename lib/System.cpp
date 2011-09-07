@@ -89,7 +89,7 @@ void _TokenizeFile(FILE *file, vector<int> *v)
 	}
 }
 
-vector<int> *System::System::GetAllPids()
+vector<int> *System::GetAllPids()
 {
 	string cmd = "ps ax | awk '{print $1}'";
 	FILE *fp = popen(cmd.c_str(), "r");

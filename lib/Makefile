@@ -8,7 +8,7 @@ CFLAGS = -c -fPIC
 all: stubs_
 	make all_
 	
-all_: touchmanager_ ClassLoader System Config PracticalSocket ByteBuffer LinuxProcessMonitor LinuxProcessMonitorLight IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector
+all_: touchmanager_ ClassLoader System Config Ps PracticalSocket ByteBuffer LinuxProcessMonitor LinuxProcessMonitorLight IoLogger WallView PidMonitor MonitorDispatcher ProcessCollector
 	
 clean: 	
 	${CLEAN}
@@ -25,6 +25,9 @@ System: System.o
 	${MAKE_STATIC_LIB}
 	
 Config: Config.o
+	${MAKE_STATIC_LIB}
+
+Ps: Ps.o
 	${MAKE_STATIC_LIB}
 
 PracticalSocket: PracticalSocket.o
@@ -58,7 +61,7 @@ MonitorDispatcher: MonitorDispatcher.o PracticalSocket.o ClassLoader.o
 # Note that the protobuf stub (ProcessCollector.pb.o) is included
 # This library is build as a shared library due to some problems
 # with protobuf and static linking
-ProcessCollector: ProcessCollector.o LinuxProcessMonitorLight.o PidMonitor.o
-	${MAKE_SHARED_LIB} LinuxProcessMonitorLight.o PidMonitor.o stubs/ProcessCollector.pb.o
+ProcessCollector: ProcessCollector.o LinuxProcessMonitorLight.o PidMonitor.o Ps.o
+	${MAKE_SHARED_LIB} LinuxProcessMonitorLight.o PidMonitor.o Ps.o stubs/ProcessCollector.pb.o
 			
 include ../Makefile.dep.inc

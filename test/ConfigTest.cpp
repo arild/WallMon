@@ -45,8 +45,4 @@ TEST_F(ConfigTest, FontPath)
 	LOG(INFO) << "Path: " << path;
 	ASSERT_STREQ("/home/arild/lib/times.ttf", path);
 
-	path = Config::GetTimesFontPath().c_str();
-	LOG(INFO) << "Path: " << path;
-	ASSERT_STREQ("/home/arild/lib/times.ttf", path);
-
 }

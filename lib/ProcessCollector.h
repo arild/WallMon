@@ -13,6 +13,7 @@
 #include "stubs/ProcessCollector.pb.h"
 #include "LinuxProcessMonitorLight.h"
 #include "PidMonitor.h"
+#include "Ps.h"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ public:
 private:
 	vector<LinuxProcessMonitorLight *> *_monitors;
 	PidMonitor *_pidMonitor;
+	Ps _ps;
 	list<string> _processNames;
 	char *_buffer;
 	int _numCores;

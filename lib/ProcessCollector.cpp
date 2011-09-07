@@ -110,6 +110,15 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		if (filter->has_networkoutbytes()) {
 			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
 		}
+		if (filter->has_user()) {
+			processMsg->set_user(_ps.PidToUser(monitor->pid()));
+		}
+		if (filter->has_starttime()) {
+			processMsg->set_starttime(_ps.PidToStime(monitor->pid()));
+		}
+		if (filter->has_numthreads()) {
+			processMsg->set_numthreads(monitor->numthreads());
+		}
 	}
 
 	if (_processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)

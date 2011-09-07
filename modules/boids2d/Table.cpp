@@ -21,7 +21,6 @@ typedef boost::mutex::scoped_lock scoped_lock;
 
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
-float _itemHeight = 6.;
 float FONT_SIZE = 4.;
 
 TableItem::TableItem(string key_)
@@ -142,7 +141,7 @@ void Table::OnInit()
 		_fontLarge = new Font(FONT_SIZE + 1);
 	}
 	else {
-		_itemHeight = 16;
+		_itemHeight = 20;
 		_fontSub = new Font(FONT_SIZE - 1);
 		_fontSub->SetFontType(FONT_MONO);
 	}
@@ -166,7 +165,7 @@ void Table::OnRender()
 	}
 	else {
 		glTranslatef(50, 0, 0);
-		_itemHeight = 16;
+		_itemHeight = 20;
 		_DrawSubLevelTable();
 	}
 }
@@ -292,12 +291,10 @@ void Table::_DrawSubLevelTable()
 	vector<TableItem *> group = _items[0];
 	glColor3ub(group[0]->r, group[0]->g, group[0]->b);
 
-	LOG(INFO) << "start index: " << startIndex;
 	for (int i = max(startIndex, 0); i < group.size(); i++) {
 		float y = _ItemNumberToPixel(i - startIndex);
 		if (y < 0)
 			break;
-		LOG(INFO) << "Rendering i=" << i;
 		_DrawSubLevelItem(group[i], y);
 	}
 	_DrawBlackBorders();
@@ -328,6 +325,7 @@ void Table::_DrawSubLevelItem(TableItem *item, float y)
 	_fontSub->RenderText("Pid :  " + item->pid, 5, y-6);
 	_fontSub->RenderText("User:  " + item->user, 5, y-9);
 	_fontSub->RenderText("Time:  " + item->time, 5, y-12);
+	_fontSub->RenderText("Threads:  " + item->numThreads, 5, y - 15);
 }
 
 vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)

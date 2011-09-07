@@ -46,6 +46,7 @@ public:
 	int pid();
 	char* comm();
 	long jiffy();
+	unsigned int numthreads();
 
 	// statm
 	double GetTotalProgramSize(); // in megabytes
@@ -63,6 +64,7 @@ private:
 	char _comm[4096];
 	unsigned long _utime;
 	unsigned long _stime;
+	unsigned int _numThreads;
 
 	// /proc/<pid>/statm variables
 	unsigned long _size;

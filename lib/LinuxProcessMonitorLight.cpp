@@ -68,8 +68,8 @@ void LinuxProcessMonitorLight::Update()
 
 	rewind(_procstat);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstat);
-	sscanf(_buffer, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu", &_pid, _comm,
-			&_utime, &_stime);
+	sscanf(_buffer, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*ld %*ld %*ld %*ld %d", &_pid, _comm,
+			&_utime, &_stime, &_numThreads);
 
 	rewind(_procstatm);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstatm);
@@ -149,6 +149,11 @@ unsigned long LinuxProcessMonitorLight::stime()
 long LinuxProcessMonitorLight::jiffy()
 {
 	return _jiffy;
+}
+
+unsigned int LinuxProcessMonitorLight::numthreads()
+{
+	return _numThreads;
 }
 
 unsigned long LinuxProcessMonitorLight::size()

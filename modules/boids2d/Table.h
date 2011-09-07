@@ -15,7 +15,7 @@ public:
 	string key;
 	int r, g, b;
 	float score;
-	string procName, hostName, pid, user, time;
+	string procName, hostName, pid, user, time, numThreads;
 	TableItem(string key);
 	void AddBoid(BoidSharedContext *subItem);
 	vector<BoidSharedContext *> GetBoids();
