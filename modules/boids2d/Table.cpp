@@ -1,8 +1,10 @@
 /**
  * Implements a scrollable and touchable table that holds and displays
- * named entries. The implementation is highly general, however, tailored
- * for having process names in the higher-level table, while specific processes
- * in the lower-level table.
+ * named entries. The implementation is general, however, tailored
+ * for having process names in a higher-level table, while specific processes
+ * in a lower-level table. The implementation is based on having two instances
+ * of the table object with the same set of methods, where differences are accounted
+ * for via branching on their identity, similar to patterns seen in MPI.
  */
 
 #include <GL/gl.h>
@@ -19,7 +21,7 @@ typedef boost::mutex::scoped_lock scoped_lock;
 
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
-float ITEM_HEIGHT = 6.;
+float _itemHeight = 6.;
 float FONT_SIZE = 4.;
 
 TableItem::TableItem(string key_)
@@ -134,13 +136,17 @@ void Table::OnInit()
 		_subTable->ty = 0;
 		_subTable->width = 50;
 		_subTable->height = 100;
-	}
 
+		_itemHeight = 6;
+		_font = new Font(FONT_SIZE);
+		_fontLarge = new Font(FONT_SIZE + 1);
+	}
+	else {
+		_itemHeight = 16;
+		_fontSub = new Font(FONT_SIZE - 1);
+		_fontSub->SetFontType(FONT_MONO);
+	}
 	_tsLastUpdate = 0;
-	_fontSub = new Font(FONT_SIZE - 1);
-	_fontSub->SetFontType(FONT_MONO);
-	_font = new Font(FONT_SIZE);
-	_fontLarge = new Font(FONT_SIZE + 1);
 }
 
 void Table::OnLoop()
@@ -154,15 +160,15 @@ void Table::OnLoop()
 
 void Table::OnRender()
 {
-	if (_isTopLevelTable)
-		//ITEM_HEIGHT = 6;
-		;
+	if (_isTopLevelTable) {
+		_itemHeight = 6;
+		_DrawTopLevelTable();
+	}
 	else {
 		glTranslatef(50, 0, 0);
-		//ITEM_HEIGHT = 16;
+		_itemHeight = 16;
+		_DrawSubLevelTable();
 	}
-	_DrawAllItems();
-//	_DrawArrows();
 }
 
 void Table::OnCleanup()
@@ -198,14 +204,18 @@ void Table::ScrollDown(float speed)
 {
 //	LOG(INFO) << "TABLE SCROLL DOWN";
 	_currentPixelIndex += speed;
-	int maxPixelIndex = (_items.size() * ITEM_HEIGHT) - 35;
+	int numItems = _items.size();
+	if (!_isTopLevelTable)
+		numItems = _items[0].size();
+	// Allow half an item to fade on top
+	int maxPixelIndex = (numItems * _itemHeight) - _itemHeight*(float)1.5;
 	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
 }
 
 void Table::ScrollUp(float speed)
 {
 	_currentPixelIndex -= speed;
-	_currentPixelIndex = fmax(_currentPixelIndex, -35.);
+	_currentPixelIndex = fmax(_currentPixelIndex, -15);
 }
 
 void Table::SwipeLeft(float speed)
@@ -218,62 +228,83 @@ void Table::SwipeRight(float speed)
 	_SortTableUtilization();
 }
 
-void Table::_DrawAllItems()
+void Table::_DrawTopLevelTable()
 {
 	float selectBoxStartPixel;
 	int startIndex = _CurrentPixelToItemIndex();
-	for (int i = 0; i < 20 ; i++) {
-		int itemIndex = startIndex + i;
-		if (itemIndex < 0 || itemIndex >= _items.size())
-			continue;
-		float y = _ItemNumberToPixel(i);
+	for (int i = max(startIndex, 0); i < _items.size() ; i++) {
+
+		float y = _ItemNumberToPixel(i - startIndex);
 		if (y < 0)
 			break;
+		if (_items[i].size() == 0)
+			LOG(INFO) << "group is empty";
 
 		// Render first item of group. For the sub-table, there is only
 		// groups containing one item, hence all items in the sub-table are rendered
-		TableItem *item = _items[itemIndex][0];
+		TableItem *item = _items[i][0];
+		int groupSize = _items[i].size();
+
+		// Draw the rectangle in front of every entry
 		glColor3ub(item->r, item->g, item->b);
+		y -= 4.5;
+		glBegin(GL_QUADS);
+		glVertex2f(6, y);
+		glVertex2f(9, y);
+		glVertex2f(9, y + 3);
+		glVertex2f(6, y + 3);
+		glEnd();
 
-		if (_isTopLevelTable) {
-			// Draw the rectangle in front of every entry
-			y -= 4.5;
-			glBegin(GL_QUADS);
-			glVertex2f(6, y);
-			glVertex2f(9, y);
-			glVertex2f(9, y + 3);
-			glVertex2f(6, y + 3);
+		stringstream ss;
+		ss << groupSize;
+		string s = item->procName + " (" + ss.str() + ")";
+		s = _font->TrimHorizontal(s, 30, 4 +  ss.str().length());
+		_font->RenderText(s, 12, y);
+
+		if (_selectedItem == item) {
+			// Draw the rectangular marker for selected entry
+			selectBoxStartPixel = y - _itemHeight / 4;
+			glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
+			float y_ = selectBoxStartPixel;
+			string s = _font->TrimHorizontal(_selectedItem->key, 30);
+			float w = _font->GetHorizontalPixelLength(s);
+			glLineWidth(2);
+			glBegin(GL_LINE_STRIP);
+			glVertex2f(3, y_);
+			glVertex2f(21 + w, y_);
+			glVertex2f(21 + w, y_ + _itemHeight);
+			glVertex2f(3, y_ + _itemHeight);
+			glVertex2f(3, y_);
 			glEnd();
-
-			int groupSize = _items[itemIndex].size();
-			stringstream ss;
-			ss << groupSize;
-			string s = item->procName + " (" + ss.str() + ")";
-			s = _font->TrimHorizontal(s, 30, 4 +  ss.str().length());
-			_font->RenderText(s, 12, y);
-
-			if (_selectedItem == item) {
-				// Draw the rectangular marker for selected entry
-				selectBoxStartPixel = y - ITEM_HEIGHT / 4;
-				glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
-				float y_ = selectBoxStartPixel;
-				string s = _font->TrimHorizontal(_selectedItem->key, 30);
-				float w = _font->GetHorizontalPixelLength(s);
-				glLineWidth(2);
-				glBegin(GL_LINE_STRIP);
-				glVertex2f(3, y_);
-				glVertex2f(21 + w, y_);
-				glVertex2f(21 + w, y_ + ITEM_HEIGHT);
-				glVertex2f(3, y_ + ITEM_HEIGHT);
-				glVertex2f(3, y_);
-				glEnd();
-			}
 		}
-		else {
-			_DrawSubLevelItem(item, y);
-		}
+
 	}
+	_DrawBlackBorders();
+	glColor3ub(255, 255, 255);
+	_fontLarge->RenderText("Process Names", 3, TABLE_TOP + 8);
+}
 
+void Table::_DrawSubLevelTable()
+{
+	if (_items.size() == 0)
+		return;
+	int startIndex = _CurrentPixelToItemIndex();
+	vector<TableItem *> group = _items[0];
+	glColor3ub(group[0]->r, group[0]->g, group[0]->b);
+
+	LOG(INFO) << "start index: " << startIndex;
+	for (int i = max(startIndex, 0); i < group.size(); i++) {
+		float y = _ItemNumberToPixel(i - startIndex);
+		if (y < 0)
+			break;
+		LOG(INFO) << "Rendering i=" << i;
+		_DrawSubLevelItem(group[i], y);
+	}
+	_DrawBlackBorders();
+}
+
+void Table::_DrawBlackBorders()
+{
 	// Black out the top and bottom which is not part of the table
 	glColor3ub(0, 0, 0);
 	glBegin(GL_QUADS);
@@ -289,12 +320,6 @@ void Table::_DrawAllItems()
 	glVertex2f(50, TABLE_BOTTOM);
 	glVertex2f(0, TABLE_BOTTOM);
 	glEnd();
-
-	glColor3ub(255, 255, 255);
-	if (_isTopLevelTable) {
-	string heading = "Process Names";
-	_fontLarge->RenderText(heading, 3, TABLE_TOP + 8);
-	}
 }
 
 void Table::_DrawSubLevelItem(TableItem *item, float y)
@@ -303,16 +328,6 @@ void Table::_DrawSubLevelItem(TableItem *item, float y)
 	_fontSub->RenderText("Pid :  " + item->pid, 5, y-6);
 	_fontSub->RenderText("User:  " + item->user, 5, y-9);
 	_fontSub->RenderText("Time:  " + item->time, 5, y-12);
-
-//	glColor3ub(0, 0, 255);
-//	glLineWidth(2);
-//	glBegin(GL_LINE_STRIP);
-//	glVertex2f(1, y - (ITEM_HEIGHT - 1));
-//	glVertex2f(45, y - (ITEM_HEIGHT - 1));
-//	glVertex2f(45, y - 1);
-//	glVertex2f(1, y - 1);
-//	glVertex2f(1, y - (ITEM_HEIGHT - 1));
-//	glEnd();
 }
 
 vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
@@ -323,53 +338,12 @@ vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
 	return NULL;
 }
 
-void Table::_DrawArrows()
-{
-	glColor3ub(0, 255, 0);
-
-	glBegin(GL_QUADS);
-	glVertex2f(4, 55);
-	glVertex2f(5, 55);
-	glVertex2f(5, 60);
-	glVertex2f(4, 60);
-	glEnd();
-
-	glBegin(GL_TRIANGLES);
-	glVertex2f(3, 60);
-	glVertex2f(6, 60);
-	glVertex2f(4.5, 63);
-	glEnd();
-
-	glBegin(GL_QUADS);
-	glVertex2f(4, 40);
-	glVertex2f(5, 40);
-	glVertex2f(5, 45);
-	glVertex2f(4, 45);
-	glEnd();
-
-	glBegin(GL_TRIANGLES);
-	glVertex2f(3, 40);
-	glVertex2f(6, 40);
-	glVertex2f(4.5, 37);
-	glEnd();
-
-	glColor3ub(255, 0, 0);
-
-	stringstream up, down;
-	int numUp = _currentPixelIndex / ITEM_HEIGHT;
-	up << numUp;
-	_font->RenderText(up.str(), 4.5, 68, true, true);
-	int numDown = _items.size() - numUp - (70 / ITEM_HEIGHT);
-	down << numDown;
-	_font->RenderText(down.str(), 4.5, 33, true, true);
-}
-
 /**
  * Maps the current pixel to start rendering at to an item
  */
 int Table::_CurrentPixelToItemIndex()
 {
-	return _currentPixelIndex / ITEM_HEIGHT;
+	return _currentPixelIndex / _itemHeight;
 }
 
 /**
@@ -377,14 +351,14 @@ int Table::_CurrentPixelToItemIndex()
  */
 float Table::_ItemNumberToPixel(int number)
 {
-	float offset = fmod(_currentPixelIndex, ITEM_HEIGHT);
-	return (TABLE_TOP + offset) - (ITEM_HEIGHT * number);
+	float offset = fmod(_currentPixelIndex, _itemHeight);
+	return (TABLE_TOP + offset) - (_itemHeight * number);
 }
 
 int Table::_RelativePixelToItemIndex(float relativeY)
 {
-	float offset = fmod(_currentPixelIndex, ITEM_HEIGHT);
-	int idx = (TABLE_TOP - relativeY + offset) / ITEM_HEIGHT;
+	float offset = fmod(_currentPixelIndex, _itemHeight);
+	int idx = (TABLE_TOP - relativeY + offset) / _itemHeight;
 	idx += _CurrentPixelToItemIndex();
 	return idx;
 }

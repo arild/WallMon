@@ -104,11 +104,13 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	int numEntityHits = entityHits.size();
 
 	// No entity hits within scene
-	TT_touch_state_t event_;
-	event_.loc.x = x;
-	event_.loc.y = y;
-	event_.visualizeOnly = true;
-	eventQueue->Push(make_tuple((Entity *) NULL, event_));
+	if (!isLast) {
+		TT_touch_state_t e;
+		e.loc.x = x;
+		e.loc.y = y;
+		e.visualizeOnly = true;
+		eventQueue->Push(make_tuple((Entity *) NULL, e));
+	}
 
 	// Associate the id of the event with an entity
 	EventIdMap::iterator it = _eventIdMap.find(eventId);

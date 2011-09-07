@@ -47,12 +47,15 @@ private:
 	vector< vector<TableItem *> > _items;
 	float _currentPixelIndex; // index of item residing on top of displayed list
 	float _selectedPixelIndex; // index of item currently marked and active
+	float _itemHeight;
 	Font *_fontSub, *_font, *_fontLarge;
 	double _tsLastUpdate;
 	Table *_subTable;
 	TableItem *_selectedItem;
 	bool _isTopLevelTable;
-	void _DrawAllItems();
+	void _DrawTopLevelTable();
+	void _DrawSubLevelTable();
+	void _DrawBlackBorders();
 	void _DrawSubLevelItem(TableItem *item, float Y);
 	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
 	void _DrawArrows();

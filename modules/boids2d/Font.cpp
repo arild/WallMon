@@ -107,11 +107,12 @@ string Font::TrimHorizontal(string text, int maxPixelLen)
 string Font::TrimHorizontal(string text, int maxPixelLen, int n)
 {
 	bool isTrimmed = false;
+	n = text.length() - n;
 	while (GetHorizontalPixelLength(text) > maxPixelLen) {
-		text.erase(text.length() - n - 1, 1);
+		text.erase(n--, 1);
 		isTrimmed = true;
 	}
 	if (isTrimmed)
-		text.insert(text.length() - n + 1, ".");//text += ".";
+		text.replace(n, 1, ".");
 	return text;
 }
