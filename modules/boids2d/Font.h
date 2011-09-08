@@ -14,17 +14,18 @@ enum FONT_TYPE {
 
 class Font {
 public:
-	Font(int size, bool centerHorizontal=false, bool centerVertical=false);
+	Font(int size=5, bool centerHorizontal=false, bool centerVertical=false);
 	virtual ~Font() {}
 
 	static void Init();
 	static void Close();
 
 	void SetFontType(FONT_TYPE fontType);
+	void SetFontSize(int size);
 	void RenderText(string text, float tx, float ty);
 	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
-	int GetHorizontalPixelLength(string &text);
-	int GetVerticalPixelLength(string &text);
+	float GetHorizontalPixelLength(string &text);
+	float GetVerticalPixelLength(string &text);
 	string TrimHorizontal(string text, int maxPixelLen);
 	string TrimHorizontal(string text, int maxPixelLen, int n);
 private:

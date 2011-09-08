@@ -53,9 +53,15 @@ float BoidSharedContext::GetTailLength()
 	return _tailLength;
 }
 
-void BoidSharedContext::EnableHighlight()
+void BoidSharedContext::EnableHighlight(int highlightNumber)
 {
 	_isHighlighted = true;
+	_highlightNumber = highlightNumber;
+}
+
+int BoidSharedContext::GetHighlightNumber()
+{
+	return _highlightNumber;
 }
 
 void BoidSharedContext::DisableHighlight()

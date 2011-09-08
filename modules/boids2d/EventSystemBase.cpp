@@ -72,15 +72,19 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	bool isLast;
 	if (event->type == kEvt_type_calibrated_touch_location) {
 		isLast = false;
-		if (parse_touch_location_event_v2(event, &locFlags, &x, &y, &radius, 0, &senderID) != 0)
+		if (parse_touch_location_event_v2(event, &locFlags, &x, &y, &radius, 0, &senderID) != 0) {
 			// Failed parsing shout event
-			LOG(FATAL) << "failed parsing touch event";
+			LOG(WARNING) << "failed parsing touch event";
+			return;
+		}
 		eventId = event->refcon;
 	}
 	else if (event->type == kEvt_type_touch_remove) {
 		isLast = true;
-		if (parse_touch_remove_event(event, &eventId, &senderID) != 0)
-			LOG(FATAL) << "failed parsing touch remove event";
+		if (parse_touch_remove_event(event, &eventId, &senderID) != 0) {
+			LOG(WARNING) << "failed parsing touch remove event";
+			return;
+		}
 	}
 	else {
 		LOG(WARNING) << "Unknown touch event type";
@@ -118,22 +122,18 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	if (it != _eventIdMap.end()) {
 		// Event id already associated with entity. Forward to
 		// touch manager regardless whether the entity is hit or not
-		LOG(INFO) << "ASSOCIATION FOUND";
 		_currentEntity = it->second.get<0>();
 		scene = it->second.get<1>();
 		if (event->type == kEvt_type_touch_remove) {
-			LOG(INFO) << "ASSOCIATION REMOVE";
 			// Special case: the event is a remove event (the last one)
 			_eventIdMap.erase(eventId);
 		}
 	}
 	else if (numEntityHits == 0) {
 		// Id not previously associated and no entities' hit, discard event
-		LOG(INFO) << "EVENT DISCARD";
 		return;
 	}
 	else if (numEntityHits > 0) {
-		LOG(INFO) << "ASSOCIATION NEW";
 		// Id not previously associated, but entity hits available.
 		_currentEntity = entityHits[0].entity;
 		scene = entityHits[0].scene;

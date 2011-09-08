@@ -1,11 +1,9 @@
 #!/bin/bash
-DAEMON_DIR=~/WallMon/daemon
-DAEMON_EXECUTE="./wallmond -d"
+. $(dirname $0)/incl.sh
+. $(dirname $0)/server_cluster_start.sh
+. $(dirname $0)/daemon_cluster_start.sh
 
-SERVER_DIR=~/WallMon/server
-SERVER_EXECUTE="./wallmons -d"
-
-DISPLAY="DISPLAY=localhost:0"
-
-cluster-fork --bg "cd ${SERVER_DIR} && ${DISPLAY} ${SERVER_EXECUTE} && cd ${DAEMON_DIR} && ${DAEMON_EXECUTE}"
-cd ${DAEMON_DIR} && ${DAEMON_EXECUTE} cd -
+# Time to make sure both server and client is up and running when the 
+# initilization broadcoast message from the dispatcher comes
+sleep 0.5 
+${WALLMON_DISPATCH_MODULES}

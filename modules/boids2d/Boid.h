@@ -7,6 +7,7 @@
 #include <boost/tuple/tuple.hpp>
 #include "Entity.h"
 #include "BoidSharedContext.h"
+#include "Font.h"
 
 using namespace boost::tuples;
 typedef tuple<float, float> TailTupleType;
@@ -27,11 +28,13 @@ private:
 	float _oldDestx, _oldDesty;
 	int _maxTailLength;
 	list<TailTupleType> _tail;
+	Font _font;
 
 	bool _visible;
 	bool _IsDestinationReached(float destx, float desty);
 	void _DrawBoid();
 	void _DrawTail();
+	void _DrawHighlight();
 };
 
 #endif /* BOID_H_ */

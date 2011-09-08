@@ -14,6 +14,7 @@ class TableItem {
 public:
 	string key;
 	int r, g, b;
+	int highlightNumber;
 	float score;
 	string procName, hostName, pid, user, time, numThreads;
 	TableItem(string key);
@@ -46,9 +47,8 @@ private:
 	boost::mutex _mutex;
 	vector< vector<TableItem *> > _items;
 	float _currentPixelIndex; // index of item residing on top of displayed list
-	float _selectedPixelIndex; // index of item currently marked and active
 	float _itemHeight;
-	Font *_fontSub, *_font, *_fontLarge;
+	Font *_fontSub, _fontSubLarge, *_font, *_fontLarge;
 	double _tsLastUpdate;
 	Table *_subTable;
 	TableItem *_selectedItem;
@@ -56,13 +56,15 @@ private:
 	void _DrawTopLevelTable();
 	void _DrawSubLevelTable();
 	void _DrawBlackBorders();
-	void _DrawSubLevelItem(TableItem *item, float Y);
+	void _DrawCommonHeadingAndFrame();
+	void _DrawSubLevelItem(TableItem *item, float y, int highlightNumber);
 	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
 	void _DrawArrows();
 	int _CurrentPixelToItemIndex();
 	float _ItemNumberToPixel(int number);
 	int _RelativePixelToItemIndex(float relativeY);
 	void _HighlightBoids(vector<TableItem *> group);
+	void _UnHighlightBoids(vector<TableItem *> group);
 	void _SortTableAlphabetically();
 	void _SortTableUtilization();
 	bool _IsSortable();

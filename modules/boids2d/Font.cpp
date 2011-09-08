@@ -57,6 +57,11 @@ void Font::SetFontType(FONT_TYPE fontType)
 	}
 }
 
+void Font::SetFontSize(int size)
+{
+	_fontSize = size;
+}
+
 void Font::RenderText(string text, float tx, float ty)
 {
 	RenderText(text, tx, ty, _centerHorizontal, _centerVertical);
@@ -79,12 +84,12 @@ void Font::RenderText(string text, float tx, float ty, bool centerHorizontal, bo
 	glPopMatrix();
 }
 
-int Font::GetHorizontalPixelLength(string &text)
+float Font::GetHorizontalPixelLength(string &text)
 {
 	return _font->Advance(text.c_str()) * _GetFontScale();
 }
 
-int Font::GetVerticalPixelLength(string &text)
+float Font::GetVerticalPixelLength(string &text)
 {
 	return _font->FaceSize() * _GetFontScale();
 }

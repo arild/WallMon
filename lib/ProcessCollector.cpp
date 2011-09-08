@@ -72,8 +72,8 @@ void ProcessCollector::OnStop()
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
 	// TODO: Investigate why this causes segfault at arbirary intervals
-//	if (_processNames.size() == 0)
-//		_FindAllNewProcesses();
+	if (_processNames.size() == 0)
+		_FindAllNewProcesses();
 
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (vector<LinuxProcessMonitorLight *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {

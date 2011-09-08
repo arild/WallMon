@@ -27,7 +27,7 @@ public:
 	static bool IsRocksvvCluster();
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
-	static void ExportDisplayToLocalhost();
+	static void AttachToLocalDisplay();
 
 	static string GetCurrentUser();
 	static bool IsRocksvvClusterRootNode();

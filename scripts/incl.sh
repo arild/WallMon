@@ -13,6 +13,7 @@ SERVER_PROC_NAME=wallmons
 
 DAEMON_EXECUTE="./${DAEMON_PROC_NAME} -d"
 SERVER_EXECUTE="./${SERVER_PROC_NAME} -d"
+WALLMON_DISPATCH_MODULES="python ${DISPATCHER_DIR}/main.py init"
 
 ROCKSVV_ADDR=rocksvv.cs.uit.no
 ROCKSVV=arild@${ROCKSVV_ADDR}:.
@@ -20,9 +21,8 @@ ROCKSVV=arild@${ROCKSVV_ADDR}:.
 ICE_ADDR=ice.cs.uit.no
 ICE=ani027@${ICE_ADDR}:.
 
-LOCAL_DISPLAY=DISPLAY=localhost:0
+LOCAL_DISPLAY="DISPLAY=localhost:0"
 
-# Escaping how-to: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_03.html
 if [ $HOSTNAME = $ICE_ADDR ]; then
 	CLUSTER_FORK="rocks run host"	
 elif [ $HOSTNAME = $ROCKSVV_ADDR ]; then

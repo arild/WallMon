@@ -33,8 +33,8 @@ void EntityShape::DrawEntityShape()
 {
 	float x, y;
 	if (centerShape) {
-		x = tx - (width / 2);
-		y = ty - (height / 2);
+		x = tx - (width / (float)2);
+		y = ty - (height / (float)2);
 	} else {
 		x = tx;
 		y = ty;
@@ -102,7 +102,7 @@ EntityEvent::EntityEvent()
 void EntityEvent::HandleHit(TT_touch_state_t & event)
 {
 
-	LOG(INFO) << "Received event id " << event.oid;// << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
+//	LOG(INFO) << "Received event id " << event.oid;// << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
 	if (_isFirstTime) {
 		_isFirstTime = false;
 		// Policies and thresholds not calculated

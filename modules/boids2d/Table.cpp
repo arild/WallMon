@@ -27,6 +27,7 @@ TableItem::TableItem(string key_)
 {
 	key = key_;
 	score = 0;
+	highlightNumber = -1;
 }
 
 void TableItem::AddBoid(BoidSharedContext *boid)
@@ -111,13 +112,17 @@ void Table::Add(vector<TableItem *> items)
 void Table::Clear()
 {
 	scoped_lock(_mutex);
+	for (int i = 0; i < _items.size(); i++) {
+		_UnHighlightBoids(_items[i]);
+	}
 	_items.clear();
+	_currentPixelIndex = 0;
+	_selectedItem = NULL;
 }
 
 void Table::OnInit()
 {
 	_currentPixelIndex = 0;
-	_selectedPixelIndex = -1;
 	_selectedItem = NULL;
 	// Set up hit box
 
@@ -137,14 +142,16 @@ void Table::OnInit()
 		_subTable->height = 100;
 
 		_itemHeight = 6;
-		_font = new Font(FONT_SIZE);
-		_fontLarge = new Font(FONT_SIZE + 1);
 	}
 	else {
 		_itemHeight = 20;
-		_fontSub = new Font(FONT_SIZE - 1);
-		_fontSub->SetFontType(FONT_MONO);
 	}
+	_font = new Font(FONT_SIZE);
+	_fontLarge = new Font(FONT_SIZE + 1);
+	_fontSub = new Font(FONT_SIZE - 1, false, true);
+	_fontSub->SetFontType(FONT_MONO);
+	_fontSubLarge.SetFontSize(FONT_SIZE);
+	_fontSubLarge.SetFontType(FONT_MONO);
 	_tsLastUpdate = 0;
 }
 
@@ -167,6 +174,7 @@ void Table::OnRender()
 		glTranslatef(50, 0, 0);
 		_itemHeight = 20;
 		_DrawSubLevelTable();
+		_DrawCommonHeadingAndFrame();
 	}
 }
 
@@ -280,7 +288,6 @@ void Table::_DrawTopLevelTable()
 	}
 	_DrawBlackBorders();
 	glColor3ub(255, 255, 255);
-	_fontLarge->RenderText("Process Names", 3, TABLE_TOP + 8);
 }
 
 void Table::_DrawSubLevelTable()
@@ -295,7 +302,7 @@ void Table::_DrawSubLevelTable()
 		float y = _ItemNumberToPixel(i - startIndex);
 		if (y < 0)
 			break;
-		_DrawSubLevelItem(group[i], y);
+		_DrawSubLevelItem(group[i], y, group[i]->highlightNumber);
 	}
 	_DrawBlackBorders();
 }
@@ -319,13 +326,27 @@ void Table::_DrawBlackBorders()
 	glEnd();
 }
 
-void Table::_DrawSubLevelItem(TableItem *item, float y)
+void Table::_DrawCommonHeadingAndFrame()
 {
-	_fontSub->RenderText("Host:  " + item->hostName, 5, y-3);
-	_fontSub->RenderText("Pid :  " + item->pid, 5, y-6);
-	_fontSub->RenderText("User:  " + item->user, 5, y-9);
-	_fontSub->RenderText("Time:  " + item->time, 5, y-12);
-	_fontSub->RenderText("Threads:  " + item->numThreads, 5, y - 15);
+	glColor3ub(255, 255, 255);
+	_fontLarge->RenderText("Process Explorer", 0, TABLE_TOP + 8, true, false);
+
+}
+
+void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
+{
+	glColor3ub(item->r, item->g, item->b);
+	_fontSub->RenderText("Host:  " + item->hostName, 5, y-4);
+	_fontSub->RenderText("Pid :  " + item->pid, 5, y-7);
+	_fontSub->RenderText("User:  " + item->user, 5, y-10);
+	_fontSub->RenderText("Time:  " + item->time, 5, y-13);
+	_fontSub->RenderText("Threads:  " + item->numThreads, 5, y - 16);
+	if (highlightNumber != -1) {
+		glColor3ub(255, 0, 0);
+		stringstream ss;
+		ss << highlightNumber;
+		_fontSubLarge.RenderText(ss.str(), 1, y - _itemHeight/(float)2, true, true);
+	}
 }
 
 vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
@@ -365,9 +386,22 @@ void Table::_HighlightBoids(vector<TableItem *> group)
 {
 	for (int i = 0; i < group.size(); i++) {
 		TableItem *item = group[i];
+		item->highlightNumber = i;
 		vector<BoidSharedContext *> boids = item->GetBoids();
 		for (int j = 0; j < boids.size(); j++) {
-			boids[j]->EnableHighlight();
+			boids[j]->EnableHighlight(i);
+		}
+	}
+}
+
+void Table::_UnHighlightBoids(vector<TableItem *> group)
+{
+	for (int i = 0; i < group.size(); i++) {
+		TableItem *item = group[i];
+		item->highlightNumber = -1;
+		vector<BoidSharedContext *> boids = item->GetBoids();
+		for (int j = 0; j < boids.size(); j++) {
+			boids[j]->DisableHighlight();
 		}
 	}
 }

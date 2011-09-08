@@ -42,13 +42,15 @@ public:
 	void SetTailLength(float length);
 	float GetTailLength();
 
-	void EnableHighlight();
+	void EnableHighlight(int highlightNumber);
+	int GetHighlightNumber();
 	void DisableHighlight();
 	bool IsHighlighted();
 private:
 	float _destx, _desty;
 	float _tailLength;
 	bool _isHighlighted;
+	int _highlightNumber;
 	boost::mutex _mutex;
 };
 #endif /* BOIDSHAREDCONTEXT_H_ */

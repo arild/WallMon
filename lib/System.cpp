@@ -189,7 +189,7 @@ vector<string> System::HostnameToIpAddress(string hostname)
 	return result;
 }
 
-void System::ExportDisplayToLocalhost()
+void System::AttachToLocalDisplay()
 {
 	RunCommand("export DISPLAY=localhost:0");
 }
