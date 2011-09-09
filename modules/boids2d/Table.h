@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <boost/thread/mutex.hpp>
+#include "Queue.h"
 #include "Entity.h"
 #include "Font.h"
 #include "BoidSharedContext.h"
@@ -29,6 +30,7 @@ class Table: public EntityEvent {
 public:
 	Table(bool isTopLevelTable=true);
 	virtual ~Table();
+
 	void Add(TableItem *item);
 	void Add(vector<TableItem *> items);
 	void Clear();
@@ -44,7 +46,6 @@ public:
 	virtual void SwipeRight(float speed);
 
 private:
-	boost::mutex _mutex;
 	vector< vector<TableItem *> > _items;
 	float _currentPixelIndex; // index of item residing on top of displayed list
 	float _itemHeight;
@@ -52,14 +53,13 @@ private:
 	double _tsLastUpdate;
 	Table *_subTable;
 	TableItem *_selectedItem;
+	Queue<TableItem *> _addQueue, _removeQueue;
 	bool _isTopLevelTable;
 	void _DrawTopLevelTable();
 	void _DrawSubLevelTable();
 	void _DrawBlackBorders();
 	void _DrawCommonHeadingAndFrame();
 	void _DrawSubLevelItem(TableItem *item, float y, int highlightNumber);
-	vector<TableItem *> *_GetItemGroup_NoLock(string &itemKey);
-	void _DrawArrows();
 	int _CurrentPixelToItemIndex();
 	float _ItemNumberToPixel(int number);
 	int _RelativePixelToItemIndex(float relativeY);
@@ -68,6 +68,7 @@ private:
 	void _SortTableAlphabetically();
 	void _SortTableUtilization();
 	bool _IsSortable();
+	vector<TableItem *> *_LookupItemGroup(string &itemKey);
 };
 
 #endif /* TABLE_H_ */

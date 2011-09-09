@@ -1,10 +1,15 @@
 /**
  * Implements a scrollable and touchable table that holds and displays
- * named entries. The implementation is general, however, tailored
+ * named entries. The implementation is somewhat general, however, tailored
  * for having process names in a higher-level table, while specific processes
  * in a lower-level table. The implementation is based on having two instances
  * of the table object with the same set of methods, where differences are accounted
  * for via branching on their identity, similar to patterns seen in MPI.
+ *
+ * The implementation accesses the list of items without any locking mechanisms because:
+ * - Touch events and render callbacks are carried out sequentially by the main loop
+ * - External addition and deletion of table entries are temporarily stored in (thread-safe)
+ *   queues, before being processed in render callbacks
  */
 
 #include <GL/gl.h>
@@ -92,15 +97,7 @@ Table::~Table()
  */
 void Table::Add(TableItem *item)
 {
-	scoped_lock(_mutex);
-	vector<TableItem *> *itemGroup = _GetItemGroup_NoLock(item->key);
-	if (itemGroup == NULL) {
-		// Group not present, create it
-		vector<TableItem *> v;
-		v.push_back(item);
-		_items.push_back(v);
-	} else
-		itemGroup->push_back(item);
+	_addQueue.Push(item);
 }
 
 void Table::Add(vector<TableItem *> items)
@@ -111,13 +108,7 @@ void Table::Add(vector<TableItem *> items)
 
 void Table::Clear()
 {
-	scoped_lock(_mutex);
-	for (int i = 0; i < _items.size(); i++) {
-		_UnHighlightBoids(_items[i]);
-	}
-	_items.clear();
-	_currentPixelIndex = 0;
-	_selectedItem = NULL;
+	_removeQueue.Push((TableItem *)NULL);
 }
 
 void Table::OnInit()
@@ -157,11 +148,38 @@ void Table::OnInit()
 
 void Table::OnLoop()
 {
-	//	if (_PerformUpdate()) {
-	//		scoped_lock lock(_mutex);
-	//		sort(_items.begin(), _items.end(), TableGroupCompare());
-	//		_selectedPixelIndex = -1;
-	//	}
+	// Process removal of single or all items
+	while (_removeQueue.GetSize() > 0) {
+		TableItem *item = _removeQueue.Pop();
+		if (item == NULL) {
+			// Clear all items
+			for (int i = 0; i < _items.size(); i++) {
+				_UnHighlightBoids(_items[i]);
+			}
+			_items.clear();
+			_currentPixelIndex = 0;
+			_selectedItem = NULL;
+		}
+		else {
+			// Remove single item
+		}
+
+	}
+
+	// Handle addition of new items
+	while (_addQueue.GetSize() > 0) {
+		TableItem *item = _addQueue.Pop();
+			// Clear (remove) all items
+			vector<TableItem *> *itemGroup = _LookupItemGroup(item->key);
+			if (itemGroup == NULL) {
+				// Group not present, create it
+				vector<TableItem *> v;
+				v.push_back(item);
+				_items.push_back(v);
+			} else
+				itemGroup->push_back(item);
+	}
+
 }
 
 void Table::OnRender()
@@ -349,14 +367,6 @@ void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
 	}
 }
 
-vector<TableItem *> *Table::_GetItemGroup_NoLock(string &itemKey)
-{
-	for (int i = 0; i < _items.size(); i++)
-		if (_items[i][0]->key.compare(itemKey) == 0)
-			return &_items[i];
-	return NULL;
-}
-
 /**
  * Maps the current pixel to start rendering at to an item
  */
@@ -408,13 +418,11 @@ void Table::_UnHighlightBoids(vector<TableItem *> group)
 
 void Table::_SortTableAlphabetically()
 {
-	scoped_lock lock(_mutex);
 	sort(_items.begin(), _items.end(), TableGroupCompareAlphabetically());
 }
 
 void Table::_SortTableUtilization()
 {
-	scoped_lock lock(_mutex);
 	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
 }
 
@@ -428,3 +436,10 @@ bool Table::_IsSortable()
 	return false;
 }
 
+vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)
+{
+	for (int i = 0; i < _items.size(); i++)
+		if (_items[i][0]->key.compare(itemKey) == 0)
+			return &_items[i];
+	return NULL;
+}
