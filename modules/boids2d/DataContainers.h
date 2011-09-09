@@ -30,7 +30,6 @@ using namespace boost::tuples;
  */
 class VisualBase {
 public:
-	int red, green, blue;
 	BoidSharedContext *cpu, *memory, *network;
 	TableItem *tableItem;
 

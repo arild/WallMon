@@ -22,35 +22,9 @@
 #include "Scene.h"
 #include "Button.h"
 
-typedef boost::mutex::scoped_lock scoped_lock;
-
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
 float FONT_SIZE = 4.;
-
-TableItem::TableItem(string key_)
-{
-	key = key_;
-	score = 0;
-	highlightNumber = -1;
-}
-
-void TableItem::AddBoid(BoidSharedContext *boid)
-{
-	scoped_lock(_mutex);
-	if (_boids.size() == 0) {
-		r = boid->red;
-		g = boid->green;
-		b = boid->blue;
-	}
-	_boids.push_back(boid);
-}
-
-vector<BoidSharedContext *> TableItem::GetBoids()
-{
-	scoped_lock(_mutex);
-	return _boids;
-}
 
 struct TableGroupCompareAlphabetically {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
@@ -282,7 +256,7 @@ void Table::_DrawTopLevelTable()
 
 		stringstream ss;
 		ss << groupSize;
-		string s = item->procName + " (" + ss.str() + ")";
+		string s = item->_procName + " (" + ss.str() + ")";
 		s = _font->TrimHorizontal(s, 30, 4 +  ss.str().length());
 		_font->RenderText(s, 12, y);
 
@@ -354,11 +328,11 @@ void Table::_DrawCommonHeadingAndFrame()
 void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
 {
 	glColor3ub(item->r, item->g, item->b);
-	_fontSub->RenderText("Host:  " + item->hostName, 5, y-4);
-	_fontSub->RenderText("Pid :  " + item->pid, 5, y-7);
-	_fontSub->RenderText("User:  " + item->user, 5, y-10);
-	_fontSub->RenderText("Time:  " + item->time, 5, y-13);
-	_fontSub->RenderText("Threads:  " + item->numThreads, 5, y - 16);
+	_fontSub->RenderText("Host:  " + item->GetHostName(), 5, y-4);
+	_fontSub->RenderText("Pid :  " + item->GetPid(), 5, y-7);
+	_fontSub->RenderText("User:  " + item->GetUser(), 5, y-10);
+	_fontSub->RenderText("Time:  " + item->GetStartTime(), 5, y-13);
+	_fontSub->RenderText("Threads:  " + item->GetNumThreads(), 5, y - 16);
 	if (highlightNumber != -1) {
 		glColor3ub(255, 0, 0);
 		stringstream ss;

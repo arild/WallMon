@@ -39,15 +39,6 @@ void VisualBase::InitBoids(ProcessMessage &msg, BoidView boidType)
 	tableItem->AddBoid(cpu);
 	tableItem->AddBoid(memory);
 	tableItem->AddBoid(network);
-	tableItem->procName = msg.processname();
-	tableItem->hostName = msg.hostname();
-	tableItem->user = msg.user();
-	tableItem->time = msg.starttime();
-	stringstream ss, ss2;
-	ss << msg.numthreads();
-	tableItem->numThreads = ss.str();
-	ss2 << msg.pid();
-	tableItem->pid = ss2.str();
 
 	// Create the boids, and associated the boids contexts with them
 	boidsApp->CreateBoid(cpu);

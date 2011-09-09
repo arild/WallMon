@@ -7,24 +7,10 @@
 #include "Queue.h"
 #include "Entity.h"
 #include "Font.h"
+#include "TableItem.h"
 #include "BoidSharedContext.h"
 
 using namespace std;
-
-class TableItem {
-public:
-	string key;
-	int r, g, b;
-	int highlightNumber;
-	float score;
-	string procName, hostName, pid, user, time, numThreads;
-	TableItem(string key);
-	void AddBoid(BoidSharedContext *subItem);
-	vector<BoidSharedContext *> GetBoids();
-private:
-	boost::mutex _mutex;
-	vector<BoidSharedContext *> _boids;
-};
 
 class Table: public EntityEvent {
 public:

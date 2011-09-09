@@ -142,6 +142,26 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	else
 		proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
 
+	// Table visual
+	TableItem *item = proc->visual->tableItem;
+	if (msg.has_processname())
+		item->SetProcName(msg.processname());
+	if (msg.has_hostname())
+		item->SetHostName(msg.hostname());
+	if (msg.has_user())
+		item->SetUser(msg.user());
+	if (msg.has_starttime())
+		item->SetStartTime(msg.starttime());
+	if (msg.has_numthreads()) {
+		stringstream ss;
+		ss << msg.numthreads();
+		item->SetNumThreads(ss.str());
+	}
+	if (msg.has_pid()) {
+		stringstream ss;
+		ss << msg.pid();
+		item->SetPid(ss.str());
+	}
 	proc->visual->tableItem->score += (totalCpuUtilization * 0.1);
 }
 
