@@ -45,11 +45,13 @@ void SdlMouseEventFetcher::PollEvents()
 	while (SDL_PollEvent(&sdlEvent)) {
 		switch (sdlEvent.type)
 		{
-		case SDL_KEYDOWN: // Occurs only once when a key is pressed and kept down
-//			LOG(INFO) << "---------------------------";
+		case SDL_MOUSEBUTTONDOWN: // Occurs only once when a key is pressed and kept down
+		case SDL_KEYDOWN:
+			//			LOG(INFO) << "---------------------------";
 //			LOG(INFO) << "SDL KEY DOWN";
 			_isEventStreamActive = true;
 			break;
+		case SDL_MOUSEBUTTONUP:
 		case SDL_KEYUP:
 //			LOG(INFO) << "SDL KEY UP";
 			_isEventStreamActive = false;
@@ -65,7 +67,7 @@ void SdlMouseEventFetcher::PollEvents()
 		return;
 
 	double ts = System::GetTimeInMsec();
-	if (ts - _timestamp < 50)
+	if (ts - _timestamp < 25)
 		return;
 	_timestamp = ts;
 	_queue.Push(CreateShoutEvent(_eventId, (float)mx, (float)my));

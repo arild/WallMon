@@ -104,7 +104,7 @@ void BoidsApp::_RenderForever()
 		SDL_GL_SwapBuffers();
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
-		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), 0);
+		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
 
@@ -208,16 +208,5 @@ void BoidsApp::_VisualizeShoutEvent(float x, float y)
 	glEnd();
 
 	SDL_GL_SwapBuffers();
-}
-
-int BoidsApp::_CountTotalNumObjects()
-{
-	return 1;
-//	int numObjects = 0;
-//	BOOST_FOREACH(Scene *s, Scene::scenes)
-//				{
-//					numObjects += s->entityList.size();
-//				}
-//	return numObjects;
 }
 

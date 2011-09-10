@@ -3,13 +3,9 @@
 #include "Entity.h"
 #include "Scene.h"
 
-bool Entity::automaticallyAddToCurrentScene = false;
-
 Entity::Entity()
 {
 	tx, ty, width, height = 0;
-	if (automaticallyAddToCurrentScene)
-		Scene::AddEntityCurrent(this);
 }
 
 bool Entity::IsHit(float x, float y)

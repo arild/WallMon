@@ -7,6 +7,7 @@ DAEMON_DIR=${WMON_DIR}/daemon
 SERVER_DIR=${WMON_DIR}/server
 DISPATCHER_DIR=${WMON_DIR}/dispatcher
 SRC_DIR=~/src
+APP_DIR=~/apps
 
 DAEMON_PROC_NAME=wallmond
 SERVER_PROC_NAME=wallmons

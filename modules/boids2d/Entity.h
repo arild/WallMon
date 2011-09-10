@@ -18,7 +18,6 @@ enum Shape {
 
 class Entity {
 public:
-	static bool automaticallyAddToCurrentScene;
 	float tx, ty;
 	float width, height;
 	bool supportsTouch;

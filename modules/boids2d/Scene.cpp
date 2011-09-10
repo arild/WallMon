@@ -103,11 +103,9 @@ vector<EntityHit> Scene::GetAllEntityHits(float x, float y)
 
 void Scene::RunAllScenes()
 {
-	Entity::automaticallyAddToCurrentScene = true;
 	scoped_lock(_sceneMutex);
 	for (int i = 0; i < Scene::scenes.size(); i++)
 		Scene::scenes[i]->Run();
-	Entity::automaticallyAddToCurrentScene = false;
 }
 
 
@@ -144,6 +142,57 @@ void Scene::RealToVirtualCoords(float realX, float realY, float *virtX, float *v
 	float localY = realY - _y;
 	*virtX = localX * (1 / (float)_scale);
 	*virtY = localY * (1 / (float)_scale);
+}
+
+
+bool Scene::IsSceneHit(float x, float y)
+{
+        if (x >= _x && x <= _x + _w && y >= _y && y <= _y + _h)
+                return true;
+        return false;
+}
+
+/**
+ * Takes coordinates according to scene coordinate system and returns all
+ * entities within the scene that overlaps with given coordinates
+ */
+vector<EntityHit> Scene::GetEntityHits(float x, float y)
+{
+	vector<EntityHit> result;
+	_entityMutex.lock();
+	for (int i = 0; i < entityList.size(); i++)
+			if (entityList[i]->IsHit(x, y))
+				result.push_back(EntityHit(x, y, this, entityList[i]));
+	_entityMutex.unlock();
+	return result;
+}
+
+void Scene::Run()
+{
+	scoped_lock(_entityMutex);
+	current = this;
+	LoadVirtual();
+	while (entityListInit.size() > 0) {
+		Entity *e = entityListInit.back();
+		entityListInit.pop_back();
+		entityList.push_back(e);
+		e->OnInit();
+	}
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnLoop();
+	for (int i = 0; i < entityList.size(); i++)
+		entityList[i]->OnRender();
+	Unload();
+}
+
+int Scene::GetTotalNumEntities()
+{
+	scoped_lock(_sceneMutex);
+	scoped_lock(_entityMutex);
+	int numEntities = 0;
+	for (int i = 0; i < scenes.size(); i++)
+		numEntities += scenes[i]->entityList.size();
+	return numEntities;
 }
 
 /**
@@ -190,46 +239,4 @@ void Scene::Visualize()
 
 	Unload();
 }
-
-bool Scene::IsSceneHit(float x, float y)
-{
-        if (x >= _x && x <= _x + _w && y >= _y && y <= _y + _h)
-                return true;
-        return false;
-}
-
-/**
- * Takes coordinates according to scene coordinate system and returns all
- * entities within the scene that overlaps with given coordinates
- */
-vector<EntityHit> Scene::GetEntityHits(float x, float y)
-{
-	vector<EntityHit> result;
-	_entityMutex.lock();
-	for (int i = 0; i < entityList.size(); i++)
-			if (entityList[i]->IsHit(x, y))
-				result.push_back(EntityHit(x, y, this, entityList[i]));
-	_entityMutex.unlock();
-	return result;
-}
-
-void Scene::Run()
-{
-	scoped_lock(_entityMutex);
-	current = this;
-	LoadVirtual();
-	while (entityListInit.size() > 0) {
-		Entity *e = entityListInit.back();
-		entityListInit.pop_back();
-		entityList.push_back(e);
-		e->OnInit();
-	}
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnLoop();
-	for (int i = 0; i < entityList.size(); i++)
-		entityList[i]->OnRender();
-	Unload();
-//	Visualize();
-}
-
 

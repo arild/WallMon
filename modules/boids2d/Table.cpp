@@ -101,6 +101,7 @@ void Table::OnInit()
 		// Note: Entities created by other entities are automatically
 		// added to current scene
 		_subTable = new Table(false);
+		Scene::AddEntityCurrent(_subTable);
 		_subTable->tx = 50;
 		_subTable->ty = 0;
 		_subTable->width = 50;

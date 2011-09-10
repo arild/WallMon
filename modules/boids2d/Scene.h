@@ -42,10 +42,11 @@ public:
 	void LoadReal();
 	void Unload();
 	void RealToVirtualCoords(float realX, float realY, float *virtX, float *virtY);
-	void Visualize();
 	bool IsSceneHit(float x, float y);
 	vector<EntityHit> GetEntityHits(float x, float y);
 	void Run();
+	static int GetTotalNumEntities();
+	void Visualize();
 private:
 	float _x, _y, _w, _h, _scale;
 	boost::mutex _entityMutex;

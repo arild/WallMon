@@ -40,7 +40,6 @@ private:
 	void _SetupAndPopulateScenes();
 	void _HandleTouchEvents();
 	void _VisualizeShoutEvent(float x, float y);
-	int _CountTotalNumObjects();
 };
 
 #endif /* BOIDSAPP_H_ */

@@ -33,17 +33,17 @@ void VisualBase::InitBoids(ProcessMessage &msg, BoidView boidType)
 	memory = new BoidSharedContext(red, green, blue, TRIANGLE, boidType);
 	network = new BoidSharedContext(red, green, blue, DIAMOND, boidType);
 
+	// Create the boids, and associated the boids contexts with them
+	boidsApp->CreateBoid(cpu);
+	boidsApp->CreateBoid(memory);
+	boidsApp->CreateBoid(network);
+
 	// Put the boids contexts into a table that presents them visually
 	// in another way, and allows for events
 	tableItem = new TableItem(msg.processname());
 	tableItem->AddBoid(cpu);
 	tableItem->AddBoid(memory);
 	tableItem->AddBoid(network);
-
-	// Create the boids, and associated the boids contexts with them
-	boidsApp->CreateBoid(cpu);
-	boidsApp->CreateBoid(memory);
-	boidsApp->CreateBoid(network);
 	table->Add(tableItem);
 }
 
