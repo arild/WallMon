@@ -182,7 +182,7 @@ void BoidsApp::_HandleTouchEvents()
 			continue;
 		}
 
-		if (++numEventesProcessed == 5) {
+		if (++numEventesProcessed == 999) {
 			// Process no more than 5 events at a time, and
 			// discard remaining events
 			_eventSystem->eventQueue->Clear();

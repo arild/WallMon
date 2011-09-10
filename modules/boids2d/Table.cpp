@@ -181,9 +181,9 @@ void Table::Tap(float x, float y)
 	int idx = _RelativePixelToItemIndex(y);
 	if (idx < 0 || idx >= _items.size())
 		return;
-	TableItem *selectedItem = _items[idx][0];
 
 	if (_isTopLevelTable) {
+		TableItem *selectedItem = _items[idx][0];
 		// Populate the sub-table with all items in selected group
 		vector<TableItem *> group = _items[idx];
 		_subTable->Clear();
@@ -201,12 +201,16 @@ void Table::Tap(float x, float y)
 
 void Table::ScrollDown(float speed)
 {
-//	LOG(INFO) << "TABLE SCROLL DOWN";
 	_currentPixelIndex += speed;
 	int numItems = _items.size();
-	if (!_isTopLevelTable)
+	if (!_isTopLevelTable) {
+		if (_items.size() == 0)
+			// No items present in sub-table (tap not performed)
+			return;
 		numItems = _items[0].size();
+	}
 	// Allow half an item to fade on top
+	numItems = max(numItems, 2);
 	int maxPixelIndex = (numItems * _itemHeight) - _itemHeight*(float)1.5;
 	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
 }
@@ -224,7 +228,7 @@ void Table::SwipeLeft(float speed)
 
 void Table::SwipeRight(float speed)
 {
-	_SortTableUtilization();
+	_SortTableScore();
 }
 
 void Table::_DrawTopLevelTable()
@@ -306,13 +310,13 @@ void Table::_DrawBlackBorders()
 	glBegin(GL_QUADS);
 	glVertex2f(0, TABLE_TOP);
 	glVertex2f(50, TABLE_TOP);
-	glVertex2f(50, 100);
-	glVertex2f(0, 100);
+	glVertex2f(50, 120);
+	glVertex2f(0, 120);
 	glEnd();
 
 	glBegin(GL_QUADS);
-	glVertex2f(0, 0);
-	glVertex2f(50, 0);
+	glVertex2f(0, -20);
+	glVertex2f(50, -20);
 	glVertex2f(50, TABLE_BOTTOM);
 	glVertex2f(0, TABLE_BOTTOM);
 	glEnd();
@@ -395,7 +399,7 @@ void Table::_SortTableAlphabetically()
 	sort(_items.begin(), _items.end(), TableGroupCompareAlphabetically());
 }
 
-void Table::_SortTableUtilization()
+void Table::_SortTableScore()
 {
 	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
 }

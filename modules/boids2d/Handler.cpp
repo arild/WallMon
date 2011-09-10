@@ -19,7 +19,7 @@
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
 #define FILTER_THRESHOLD 			2.0
-
+float NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 5;// 5MB
 int numUniqueProcesses = 0;
 
 void Handler::OnInit(Context *ctx)
@@ -36,7 +36,7 @@ void Handler::OnInit(Context *ctx)
 	_wallView = new WallView(3, 0, 4, 4);
 	if (_wallView->IsTileWithin() == false)
 		return;
-	//System::AttachToLocalDisplay();
+
 	double x, y, width, height;
 	_eventSystem = new ShoutEventSystem();
 	_wallView->GetDisplayArea(&x, &y, &width, &height);
@@ -95,7 +95,7 @@ void Handler::Handle(WallmonMessage *msg)
 		processMessage->set_hostname(msg->hostname());
 		_HandleProcessMessage(*processMessage);
 	}
-	_RankTableItems();
+//	_RankTableItems();
 }
 
 /**
@@ -162,6 +162,9 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 		ss << msg.pid();
 		item->SetPid(ss.str());
 	}
+
+	// Ranking of processes. Computation of score takes all metrics into account
+	// and weighs them equally
 	proc->visual->tableItem->score += (totalCpuUtilization * 0.1);
 }
 
@@ -201,8 +204,11 @@ void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
 	pstat.userCpuUtilization = msg.usercpuutilization();
 	pstat.systemCpuUtilization = msg.systemcpuutilization();
 	pstat.memoryUtilization = msg.memoryutilization();
-	pstat.networkInUtilization = msg.networkinutilization();
-	pstat.networkOutUtilization = msg.networkoututilization();
+
+	pstat.networkInUtilization = (msg.networkinbytes() / (double)NETWORK_MAX_IN_AND_OUT_BYTES) * (double)100;
+	pstat.networkOutUtilization = (msg.networkoutbytes() / (double)NETWORK_MAX_IN_AND_OUT_BYTES) * (double)100;
+//	pstat.networkInUtilization = msg.networkinutilization();
+//	pstat.networkOutUtilization = msg.networkoututilization();
 
 	pstat.userCpuUtilizationSum += pstat.userCpuUtilization;
 	pstat.systemCpuUtilizationSum += pstat.systemCpuUtilization;

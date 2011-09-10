@@ -13,7 +13,6 @@
 #include "unistd.h"
 
 #define MESSAGE_BUF_SIZE				1024 * 50 // 50KB (350 processes ~ 15 KB)
-const double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 100;
 
 int _numTimesFailedMonitoringProcesses = 0;
 

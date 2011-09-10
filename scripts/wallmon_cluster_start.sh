@@ -5,5 +5,5 @@
 
 # Time to make sure both server and client is up and running when the 
 # initilization broadcoast message from the dispatcher comes
-sleep 0.5 
+sleep 1 
 ${WALLMON_DISPATCH_MODULES}

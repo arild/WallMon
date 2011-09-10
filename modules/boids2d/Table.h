@@ -52,7 +52,7 @@ private:
 	void _HighlightBoids(vector<TableItem *> group);
 	void _UnHighlightBoids(vector<TableItem *> group);
 	void _SortTableAlphabetically();
-	void _SortTableUtilization();
+	void _SortTableScore();
 	bool _IsSortable();
 	vector<TableItem *> *_LookupItemGroup(string &itemKey);
 };

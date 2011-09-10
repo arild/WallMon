@@ -21,21 +21,17 @@ ROCKSVV=arild@${ROCKSVV_ADDR}:.
 ICE_ADDR=ice.cs.uit.no
 ICE=ani027@${ICE_ADDR}:.
 
-LOCAL_DISPLAY="DISPLAY=localhost:0"
-
 if [ $HOSTNAME = $ICE_ADDR ]; then
 	CLUSTER_FORK="rocks run host"	
 elif [ $HOSTNAME = $ROCKSVV_ADDR ]; then
 	CLUSTER_FORK=cf
-	# Use displays at display wall and locally
-	SERVER_EXECUTE="$LOCAL_DISPLAY $SERVER_EXECUTE"
 fi
 
 if [ $# -eq 0 ]; then
 	DAEMON_KILL="pkill -SIGTERM $DAEMON_PROC_NAME"
 	SERVER_KILL="pkill -SIGTERM $SERVER_PROC_NAME"
 else
-	# Assume user provides arguments to pkill
+	# Assume user provides arguments to pkill, such as -9 (SIGKILL) 
 	DAEMON_KILL="pkill $@ $DAEMON_PROC_NAME"
 	SERVER_KILL="pkill $@ $SERVER_PROC_NAME"
 fi

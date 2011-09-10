@@ -31,8 +31,10 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_usercpuutilization(0);
 	p->filter->set_systemcpuutilization(0);
 	p->filter->set_memoryutilization(0);
-	p->filter->set_networkinutilization(0);
-	p->filter->set_networkoututilization(0);
+//	p->filter->set_networkinutilization(0);
+//	p->filter->set_networkoututilization(0);
+	p->filter->set_networkinbytes(0);
+	p->filter->set_networkoutbytes(0);
 	p->filter->set_user("");
 	p->filter->set_starttime("");
 	p->filter->set_numthreads(0);
