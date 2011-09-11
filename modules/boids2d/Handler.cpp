@@ -34,9 +34,10 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(3, 0, 4, 3);
+	_wallView = new WallView(1, 0, 4, 3);
 	if (_wallView->IsTileWithin() == false)
 		return;
+	System::AttachToLocalDisplay();
 
 	double x, y, width, height;
 	_eventSystem = new ShoutEventSystem();
@@ -64,6 +65,9 @@ void Handler::OnInit(Context *ctx)
 	_eventSystem->Start();
 	LOG(INFO) << "starting BoidsApp...";
 	_boidsApp->Start();
+#ifdef ROCKSVV
+	System::BringWallmonServerWindowToFront();
+#endif
 	LOG(INFO) << "BoidsApp started";
 	VisualBase::boidsApp = _boidsApp;
 	VisualBase::table = _table;
@@ -171,9 +175,12 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 		ss << msg.pid();
 		item->SetPid(ss.str());
 	}
+
 	// Ranking of processes. Computation of score takes all metrics into account
 	// and weighs them equally
-	proc->visual->tableItem->score += (proc->stat->userCpuUtilizationSum + proc->stat->systemCpuUtilization) * 0.1;
+	float newScore = totalCpuUtilization + networkUtilization * 2 + memUtil * 0.5;
+	float oldScore = proc->visual->tableItem->score;
+	proc->visual->tableItem->score = newScore * 0.5 + oldScore * 0.5;
 }
 
 /**

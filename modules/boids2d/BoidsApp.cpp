@@ -27,6 +27,10 @@
 #include "Button.h"
 #include "ControlPanel.h"
 
+boost::condition mainLoopThreadCondition;
+boost::mutex mainLoopThreadMutex;
+
+
 BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
@@ -47,7 +51,7 @@ void BoidsApp::Start()
 {
 	_running = true;
 	_thread = boost::thread(&BoidsApp::_RenderForever, this);
-	//mainLoopThreadCondition.wait(mainLoopThreadMutex);
+	mainLoopThreadCondition.wait(mainLoopThreadMutex);
 }
 
 /**
@@ -84,7 +88,7 @@ void BoidsApp::SetDisplayArea(double x, double y, double width, double height)
 void BoidsApp::_RenderForever()
 {
 	_InitSdlAndOpenGl();
-	//mainLoopThreadCondition.notify_one();
+	mainLoopThreadCondition.notify_one();
 	LOG(INFO) << "BoidsApp entering infinite loop";
 	while (_running) {
 		if (_updateOrtho) {
@@ -104,7 +108,7 @@ void BoidsApp::_RenderForever()
 		SDL_GL_SwapBuffers();
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
-		sprintf(Buffer, "FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());
+		sprintf(Buffer, "WallMon - FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());
 		SDL_WM_SetCaption(Buffer, Buffer);
 	}
 

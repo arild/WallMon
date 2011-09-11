@@ -45,7 +45,16 @@ struct TableGroupCompareAlphabetically {
 struct TableGroupCompareUtilization {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
 	{
-		return a[0]->score > b[0]->score;
+		float aScore = 0;
+		float bScore = 0;
+		int len = max(a.size(), b.size());
+		for (int i = 0; i < len; i++) {
+			if (i < a.size())
+				aScore += a[i]->score;
+			if (i < b.size())
+				bScore += b[i]->score;
+		}
+		return aScore/(float)a.size() > bScore/(float)b.size();
 	}
 };
 

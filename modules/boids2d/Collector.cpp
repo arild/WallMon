@@ -14,7 +14,7 @@ extern "C" ProcessCollector *create_collector()
 	p->context->key = KEY;
 	p->context->includeStatistics = true;
 	if (System::IsRocksvvCluster()) {
-		vector<string> servers = WallView(3, 0, 4, 3).GetGrid();
+		vector<string> servers = WallView(1, 0, 4, 3).GetGrid();
 		p->context->AddServers(servers);
 	}
 	else if (System::GetHostname().compare(0, 5, "arild") == 0) {

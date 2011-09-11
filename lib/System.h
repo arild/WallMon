@@ -36,6 +36,7 @@ public:
 	static string GetHomePath();
 	static bool IsUserPath(string path);
 	static string ExpandUserPath(string path);
+	static void BringWallmonServerWindowToFront();
 	static string RunCommand(string cmd);
 	static string RunCommand(char *cmd);
 };

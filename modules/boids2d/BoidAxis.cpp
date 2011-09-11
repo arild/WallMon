@@ -167,7 +167,7 @@ void BoidAxis::OnRender()
 		if (i == 0)
 			ss << 0;
 		else
-			ss << (float)pow(2, i - 1);
+			ss << (float)pow((float)2, i - 1);
 		if (BoidSharedContext::useLogarithmicAxis)
 			_font->RenderText(ss.str(), step + w / (float) 2, -9);
 		_font->RenderText(ss.str(), 105, step + w / (float) 2, false, true);

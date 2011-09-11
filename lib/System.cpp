@@ -240,6 +240,11 @@ string System::ExpandUserPath(string path)
 	return path.replace(0, 1, GetHomePath());
 }
 
+void System::BringWallmonServerWindowToFront()
+{
+	RunCommand("wmctrl -r 'WallMon' -b toggle,above");
+}
+
 string System::RunCommand(string cmd)
 {
 	char buf[4096];

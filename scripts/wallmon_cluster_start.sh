@@ -3,7 +3,7 @@
 . $(dirname $0)/server_cluster_start.sh
 . $(dirname $0)/daemon_cluster_start.sh
 
-# Time to make sure both server and client is up and running when the 
-# initilization broadcoast message from the dispatcher comes
+# The delay makes sure both server and client is up and running when the 
+# initilization broadcoast message from the dispatcher arrives
 sleep 1 
 ${WALLMON_DISPATCH_MODULES}
