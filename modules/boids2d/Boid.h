@@ -29,6 +29,7 @@ private:
 	int _maxTailLength;
 	list<TailTupleType> _tail;
 	Font _font;
+	bool _isHighlighted;
 
 	bool _visible;
 	bool _IsDestinationReached(float destx, float desty);

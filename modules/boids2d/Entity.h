@@ -47,18 +47,25 @@ public:
 	EntityEvent();
 	virtual ~EntityEvent() {}
 	void HandleHit(TT_touch_state_t &event);
+	void SetScrollEventInterval(double seconds);
+	void SetSwipeEventInterval(double seconds);
+
 	virtual void Tap(float x, float y) = 0;
 //	virtual void TapHold(float x, float y) = 0;
 	virtual void ScrollDown(float speed) = 0;
 	virtual void ScrollUp(float speed) = 0;
 	virtual void SwipeLeft(float speed) = 0;
 	virtual void SwipeRight(float speed) = 0;
-	void RunCallbacks();
 	static void RunAllCallbacks();
+	void RunCallbacks();
 private:
+	void _RunScrollCallbacks();
+	void _RunSwipeCallbacks();
 	static vector<EntityEvent *> _entities;
 	float _scrollThreshold, _swipeThreshold, _scrollSpeed, _swipeSpeed, _maxSpeed, _minSpeed;
 	bool _isFirstTime;
+	double _scrollEventInterval, _previousScrollEventTimestamp, _currentScrollEventTimestamp;
+	double _swipeEventInterval, _previousSwipeEventTimestamp, _currentSwipeEventTimestamp;
 };
 
 #endif /* IENTITY_H_ */

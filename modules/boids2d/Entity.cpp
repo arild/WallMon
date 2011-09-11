@@ -88,6 +88,9 @@ EntityEvent::EntityEvent()
 	_isFirstTime = true;
 	_scrollSpeed = 0;
 	_swipeSpeed = 0;
+
+	_scrollEventInterval = 0;
+	_swipeEventInterval = 0;
 }
 
 /**
@@ -129,12 +132,14 @@ void EntityEvent::HandleHit(TT_touch_state_t & event)
 	// Scroll detected, update scroll speed, which is
 	// read by entities every frame
 	if (isScroll) {
+		_currentScrollEventTimestamp = event.lastUpdated;
 		_scrollSpeed += event.delta.y;
 		if (_scrollSpeed > _minSpeed)
 			_scrollSpeed = min(_scrollSpeed, _maxSpeed);
 		else if (_scrollSpeed < -_minSpeed)
 			_scrollSpeed = max(_scrollSpeed, -_maxSpeed);
 	} else {
+		_currentSwipeEventTimestamp = event.lastUpdated;
 		_swipeSpeed += event.delta.x;
 		if (_swipeSpeed > _minSpeed)
 			_swipeSpeed = min(_swipeSpeed, _maxSpeed);
@@ -143,10 +148,42 @@ void EntityEvent::HandleHit(TT_touch_state_t & event)
 	}
 }
 
+void EntityEvent::SetScrollEventInterval(double seconds)
+{
+	_scrollEventInterval = seconds;
+}
+
+void EntityEvent::SetSwipeEventInterval(double seconds)
+{
+	_swipeEventInterval = seconds;
+}
+
+/**
+ * Intended to be called by the main loop
+ */
+void EntityEvent::RunAllCallbacks()
+{
+	for (int i = 0; i < _entities.size(); i++)
+		_entities[i]->RunCallbacks();
+}
+
 /**
  * Carries out touch event callbacks, and updates physics variables
  */
 void EntityEvent::RunCallbacks()
+{
+	if (_currentScrollEventTimestamp - _previousScrollEventTimestamp > _scrollEventInterval) {
+		_previousScrollEventTimestamp = _currentScrollEventTimestamp;
+		_RunScrollCallbacks();
+	}
+	if (_currentSwipeEventTimestamp - _previousSwipeEventTimestamp > _swipeEventInterval) {
+		_previousSwipeEventTimestamp = _currentSwipeEventTimestamp;
+		_RunSwipeCallbacks();
+	}
+}
+
+
+void EntityEvent::_RunScrollCallbacks()
 {
 	if (_scrollSpeed > _minSpeed) {
 		ScrollDown(_scrollSpeed);
@@ -160,7 +197,10 @@ void EntityEvent::RunCallbacks()
 			_scrollSpeed = 0;
 	} else
 		_scrollSpeed = 0;
+}
 
+void EntityEvent::_RunSwipeCallbacks()
+{
 	if (_swipeSpeed > _minSpeed) {
 		SwipeRight(_swipeSpeed);
 		_swipeSpeed -= (_maxSpeed * 0.05);
@@ -173,15 +213,5 @@ void EntityEvent::RunCallbacks()
 			_swipeSpeed = 0;
 	} else
 		_swipeSpeed = 0;
-
-}
-
-/**
- * Intended to be called by the main loop
- */
-void EntityEvent::RunAllCallbacks()
-{
-	for (int i = 0; i < _entities.size(); i++)
-		_entities[i]->RunCallbacks();
 }
 

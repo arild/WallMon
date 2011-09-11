@@ -78,6 +78,20 @@ void Boid::OnLoop()
 		ty += speedy;
 	}
 
+	if (_visible) {
+		// Normally this would be located in OnRender(), however, in order to
+		// draw all boids first, then label them with a number, this works as
+		// a simple solution.
+		_isHighlighted = ctx->IsHighlighted();
+		if (_isHighlighted) {
+			width += 1;
+			height += 1;
+		}
+		glColor3ub(ctx->red, ctx->green, ctx->blue);
+		_DrawBoid();
+		_DrawTail();
+	}
+
 	int tailLength = (int)BoidSharedContext::tailLength;
 	if (tailLength == 0) {
 		_tail.clear();
@@ -90,21 +104,13 @@ void Boid::OnLoop()
 
 void Boid::OnRender()
 {
-	// Domain specific filter, .e.g utilization less than a threshold
 	if (_visible == false)
 		return;
-	bool isHighlighted = ctx->IsHighlighted();
-	if (isHighlighted) {
-		width += 1.5;
-		height += 1.5;
-	}
-	glColor3ub(ctx->red, ctx->green, ctx->blue);
-	_DrawBoid();
-	_DrawTail();
-	if (isHighlighted) {
+
+	if (_isHighlighted) {
 		_DrawHighlight();
-		width -= 1.5;
-		height -= 1.5;
+		width -= 1;
+		height -= 1;
 	}
 }
 

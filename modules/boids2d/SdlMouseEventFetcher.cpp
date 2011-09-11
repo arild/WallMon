@@ -47,13 +47,10 @@ void SdlMouseEventFetcher::PollEvents()
 		{
 		case SDL_MOUSEBUTTONDOWN: // Occurs only once when a key is pressed and kept down
 		case SDL_KEYDOWN:
-			//			LOG(INFO) << "---------------------------";
-//			LOG(INFO) << "SDL KEY DOWN";
 			_isEventStreamActive = true;
 			break;
 		case SDL_MOUSEBUTTONUP:
 		case SDL_KEYUP:
-//			LOG(INFO) << "SDL KEY UP";
 			_isEventStreamActive = false;
 			_queue.Push(create_touch_remove_event(_eventId, 0));
 			_eventId += 1;

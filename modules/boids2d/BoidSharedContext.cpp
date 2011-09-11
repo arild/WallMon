@@ -10,6 +10,7 @@
 #include "BoidSharedContext.h"
 
 float BoidSharedContext::tailLength = 0.;
+bool BoidSharedContext::useRelativeView = false;
 bool BoidSharedContext::showCpuBoid = true;
 bool BoidSharedContext::showMemoryBoid = true;
 bool BoidSharedContext::showNetworkBoid = true;
@@ -23,6 +24,7 @@ BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shap
 	blue = blue_;
 	boidShape = shape_;
 	boidView = boidType_;
+
 	_isHighlighted = false;
 }
 

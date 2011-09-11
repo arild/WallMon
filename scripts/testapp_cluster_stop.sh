@@ -1,2 +1,4 @@
 . $(dirname $0)/incl.sh
-${FORK_CMD} "pkill -9 -f TestApp"
+KILL_CMD="pkill -9 -f testapp $@"
+${CLUSTER_FORK} "$KILL_CMD"
+$KILL_CMD

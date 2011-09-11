@@ -110,37 +110,42 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 
 	//_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
-	// CPU
-	double user = proc->stat->userCpuUtilization;
-	double system = proc->stat->systemCpuUtilization;
-	double totalCpuUtilization = user + system;
-	double userCpuRelativeShare = 50;
-	if (totalCpuUtilization > 0)
-		userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
-	if (totalCpuUtilization < FILTER_THRESHOLD)
-		proc->visual->cpu->SetDestination(-1, -1);
-	else
-		proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+	if (BoidSharedContext::useRelativeView) {
 
-	// Memory
-	double avgMemoryUtilization = proc->stat->memoryUtilizationSum
-			/ (double) proc->stat->numSamples;
-	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
-		proc->visual->memory->SetDestination(-1, -1);
-	else
-		proc->visual->memory->SetDestination(proc->stat->memoryUtilization, avgMemoryUtilization);
+	}
+	else {
+		// CPU
+		double user = proc->stat->userCpuUtilization;
+		double system = proc->stat->systemCpuUtilization;
+		double totalCpuUtilization = user + system;
+		double userCpuRelativeShare = 50;
+		if (totalCpuUtilization > 0)
+			userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
+		if (totalCpuUtilization < FILTER_THRESHOLD)
+			proc->visual->cpu->SetDestination(-1, -1);
+		else
+			proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
 
-	// Network
-	double in = proc->stat->networkInUtilization;
-	double out = proc->stat->networkOutUtilization;
-	double networkUtilization = in + out;
-	double outNetworkRelativeShare = 50;
-	if (networkUtilization > 0)
-		outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
-	if (networkUtilization < FILTER_THRESHOLD)
-		proc->visual->network->SetDestination(-1, -1);
-	else
-		proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
+		// Memory
+		double avgMemoryUtilization = proc->stat->memoryUtilizationSum
+				/ (double) proc->stat->numSamples;
+		if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
+			proc->visual->memory->SetDestination(-1, -1);
+		else
+			proc->visual->memory->SetDestination(proc->stat->memoryUtilization, avgMemoryUtilization);
+
+		// Network
+		double in = proc->stat->networkInUtilization;
+		double out = proc->stat->networkOutUtilization;
+		double networkUtilization = in + out;
+		double outNetworkRelativeShare = 50;
+		if (networkUtilization > 0)
+			outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
+		if (networkUtilization < FILTER_THRESHOLD)
+			proc->visual->network->SetDestination(-1, -1);
+		else
+			proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
+	}
 
 	// Table visual
 	TableItem *item = proc->visual->tableItem;
@@ -162,10 +167,9 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 		ss << msg.pid();
 		item->SetPid(ss.str());
 	}
-
 	// Ranking of processes. Computation of score takes all metrics into account
 	// and weighs them equally
-	proc->visual->tableItem->score += (totalCpuUtilization * 0.1);
+	proc->visual->tableItem->score += (proc->stat->userCpuUtilizationSum + proc->stat->systemCpuUtilization) * 0.1;
 }
 
 /**

@@ -6,8 +6,10 @@
  * Entity that that draws the axes in the boid scene
  */
 
+#include <glog/logging.h>
 #include <GL/gl.h>
 #include <sstream>
+#include "System.h"
 #include "Config.h"
 #include "BoidAxis.h"
 #include "Scene.h"
@@ -39,6 +41,8 @@ void BoidAxis::OnInit()
 	ty = 0;
 	width = 100;
 	height = 100;
+
+	SetScrollEventInterval(1);
 }
 
 void BoidAxis::OnCleanup()
@@ -139,10 +143,12 @@ void BoidAxis::Tap(float x, float y)
 
 void BoidAxis::ScrollDown(float speed)
 {
+	BoidSharedContext::useRelativeView = !BoidSharedContext::useRelativeView;
 }
 
 void BoidAxis::ScrollUp(float speed)
 {
+	BoidSharedContext::useRelativeView = !BoidSharedContext::useRelativeView;
 }
 
 void BoidAxis::SwipeLeft(float speed)

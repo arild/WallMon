@@ -25,7 +25,7 @@ ICE=ani027@${ICE_ADDR}:.
 if [ $HOSTNAME = $ICE_ADDR ]; then
 	CLUSTER_FORK="rocks run host"	
 elif [ $HOSTNAME = $ROCKSVV_ADDR ]; then
-	CLUSTER_FORK=cf
+	CLUSTER_FORK="cf"
 fi
 
 if [ $# -eq 0 ]; then

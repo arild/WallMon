@@ -1,4 +1,5 @@
 . $(dirname $0)/incl.sh
-CMD="cd ~/apps/testapp && ./TestApp $@"
-${FORK_CMD} "${CMD}"
+START_CMD="cd ${APP_DIR}/testapp && ./testapp $@"
+${CLUSTER_FORK} "$START_CMD"
+$START_CMD
 
