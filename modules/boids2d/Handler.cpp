@@ -9,6 +9,7 @@
 #include <boost/foreach.hpp>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 #include "Handler.h"
 #include "System.h"
 #include "unistd.h"
@@ -18,8 +19,8 @@
 
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
-#define FILTER_THRESHOLD 			2.0
-float NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 5;// 5MB
+double FILTER_THRESHOLD = 1.0;
+double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 10;
 int numUniqueProcesses = 0;
 
 void Handler::OnInit(Context *ctx)
@@ -110,42 +111,45 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 
 	//_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
-	if (BoidSharedContext::useRelativeView) {
 
-	}
-	else {
-		// CPU
-		double user = proc->stat->userCpuUtilization;
-		double system = proc->stat->systemCpuUtilization;
-		double totalCpuUtilization = user + system;
-		double userCpuRelativeShare = 50;
-		if (totalCpuUtilization > 0)
-			userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
-		if (totalCpuUtilization < FILTER_THRESHOLD)
-			proc->visual->cpu->SetDestination(-1, -1);
-		else
-			proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+	// CPU
+	double user = proc->stat->userCpuUtilization;
+	double system = proc->stat->systemCpuUtilization;
+	double totalCpuUtilization = user + system;
+	double userCpuRelativeShare = 50;
+	if (totalCpuUtilization > 0)
+		userCpuRelativeShare = (user / totalCpuUtilization) * (double) 100;
+	if (BoidSharedContext::useLogarithmicAxis)
+		totalCpuUtilization = _LinearToLogarithmicAxisValue(totalCpuUtilization);
+	if (totalCpuUtilization < FILTER_THRESHOLD)
+		proc->visual->cpu->SetDestination(-1, -1);
+	else
+		proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
 
-		// Memory
-		double avgMemoryUtilization = proc->stat->memoryUtilizationSum
-				/ (double) proc->stat->numSamples;
-		if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
-			proc->visual->memory->SetDestination(-1, -1);
-		else
-			proc->visual->memory->SetDestination(proc->stat->memoryUtilization, avgMemoryUtilization);
+	// Memory
+	double avgMemoryUtilization = proc->stat->memoryUtilizationSum
+			/ (double) proc->stat->numSamples;
+	double memUtil = proc->stat->memoryUtilization;
+	if (BoidSharedContext::useLogarithmicAxis)
+		memUtil = _LinearToLogarithmicAxisValue(memUtil);
+	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
+		proc->visual->memory->SetDestination(-1, -1);
+	else
+		proc->visual->memory->SetDestination(memUtil, avgMemoryUtilization);
 
-		// Network
-		double in = proc->stat->networkInUtilization;
-		double out = proc->stat->networkOutUtilization;
-		double networkUtilization = in + out;
-		double outNetworkRelativeShare = 50;
-		if (networkUtilization > 0)
-			outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
-		if (networkUtilization < FILTER_THRESHOLD)
-			proc->visual->network->SetDestination(-1, -1);
-		else
-			proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
-	}
+	// Network
+	double in = proc->stat->networkInUtilization;
+	double out = proc->stat->networkOutUtilization;
+	double networkUtilization = in + out;
+	double outNetworkRelativeShare = 50;
+	if (BoidSharedContext::useLogarithmicAxis)
+		networkUtilization = _LinearToLogarithmicAxisValue(networkUtilization);
+	if (networkUtilization > 0)
+		outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
+	if (networkUtilization < FILTER_THRESHOLD)
+		proc->visual->network->SetDestination(-1, -1);
+	else
+		proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
 
 	// Table visual
 	TableItem *item = proc->visual->tableItem;
@@ -231,6 +235,11 @@ void Handler::_RankTableItems()
 		double newScore = procName->stat->userCpuUtilization + procName->stat->systemCpuUtilization;
 		procName->visual->tableItem->score = newScore;
 	}
+}
+
+float Handler::_LinearToLogarithmicAxisValue(float linearValue)
+{
+	return (log2(linearValue) + 1) * 12.5;
 }
 
 /**

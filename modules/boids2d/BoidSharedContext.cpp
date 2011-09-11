@@ -10,7 +10,7 @@
 #include "BoidSharedContext.h"
 
 float BoidSharedContext::tailLength = 0.;
-bool BoidSharedContext::useRelativeView = false;
+bool BoidSharedContext::useLogarithmicAxis = false;
 bool BoidSharedContext::showCpuBoid = true;
 bool BoidSharedContext::showMemoryBoid = true;
 bool BoidSharedContext::showNetworkBoid = true;

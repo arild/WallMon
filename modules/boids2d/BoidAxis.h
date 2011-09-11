@@ -33,6 +33,8 @@ public:
 private:
 	int _start, _stop, _tickSize;
 	Font *_font;
+	void _DrawLinearTicks();
+	void _DrawLogarithmicTicks();
 };
 
 #endif /* AXIS_H_ */

@@ -89,8 +89,8 @@ EntityEvent::EntityEvent()
 	_scrollSpeed = 0;
 	_swipeSpeed = 0;
 
-	_scrollEventInterval = 0;
-	_swipeEventInterval = 0;
+	_scrollEventInterval = -1;
+	_swipeEventInterval = -1;
 }
 
 /**

@@ -28,7 +28,7 @@ public:
 	int red, green, blue;
 	Shape boidShape;
 	BoidView boidView;
-	static bool useRelativeView;
+	static bool useLogarithmicAxis;
 	static float tailLength;
 
 	// Which type of boids to show within a metric

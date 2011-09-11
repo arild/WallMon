@@ -42,6 +42,7 @@ private:
 	void _UpdateCommonAggregatedStatistics(ProcessMessage &msg, StatBase &pstat, StatBase &astat);
 	void _UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat);
 	void _RankTableItems();
+	float _LinearToLogarithmicAxisValue(float linearValue);
 };
 
 #endif /* HANDLER_H_ */

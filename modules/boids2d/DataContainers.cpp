@@ -65,6 +65,14 @@ StatBase::StatBase()
 	storageReadUtilizationSum = 0;
 	storageWriteUtilizationSum = 0;
 
+//	totalUserCpuUtilization = 0;
+//	totalSystemCpuUtilization = 0;
+//	totalMemoryUtilization = 0;
+//	totalNetworkInUtilization = 0;
+//	totalNetworkOutUtilization = 0;
+//	totalStorageReadUtilization = 0;
+//	totalStorageWriteUtilization = 0;
+
 	numSamples = 0;
 }
 
