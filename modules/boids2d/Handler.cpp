@@ -36,7 +36,7 @@ void Handler::OnInit(Context *ctx)
 	 */
 	_wallView = new WallView(1, 0, 4, 3);
 	if (_wallView->IsTileWithin() == false)
-		return;
+	return;
 	System::AttachToLocalDisplay();
 
 	double x, y, width, height;
@@ -50,12 +50,11 @@ void Handler::OnInit(Context *ctx)
 	 * the 'entire' display wall is used, and coordinates are mapped thereafter. Also,
 	 * the single screen is told to show everything.
 	 */
-//	_wallView = new WallView(3, 0, 3, 4);
-//	_eventSystem = new ShoutEventSystem();
+	//	_wallView = new WallView(3, 0, 3, 4);
+	//	_eventSystem = new ShoutEventSystem();
 	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
 	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
-
 
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif
@@ -100,7 +99,7 @@ void Handler::Handle(WallmonMessage *msg)
 		processMessage->set_hostname(msg->hostname());
 		_HandleProcessMessage(*processMessage);
 	}
-//	_RankTableItems();
+	//	_RankTableItems();
 }
 
 /**
@@ -178,9 +177,11 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 
 	// Ranking of processes. Computation of score takes all metrics into account
 	// and weighs them equally
-	float newScore = totalCpuUtilization + networkUtilization * 2 + memUtil * 0.5;
-	float oldScore = proc->visual->tableItem->score;
-	proc->visual->tableItem->score = newScore * 0.5 + oldScore * 0.5;
+	float newScore = (proc->stat->userCpuUtilization + proc->stat->systemCpuUtilization)
+			+ (proc->stat->networkInUtilization + proc->stat->networkOutUtilization) * 2
+			+ proc->stat->memoryUtilization * 0.5;
+	float oldScore = proc->visual->tableItem->GetScore();
+	proc->visual->tableItem->SetScore(newScore * 0.5 + oldScore * 0.5);
 }
 
 /**
@@ -190,8 +191,8 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
  * @param pstat  The old values for the same process (in the message)
  * @param astat  The aggregated statistics for some metric
  */
-void Handler::_UpdateCommonAggregatedStatistics(ProcessMessage &msg,
-		StatBase &pstat, StatBase &astat)
+void Handler::_UpdateCommonAggregatedStatistics(ProcessMessage &msg, StatBase &pstat,
+		StatBase &astat)
 {
 	// CPU
 	// Subtract old values
@@ -220,10 +221,12 @@ void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
 	pstat.systemCpuUtilization = msg.systemcpuutilization();
 	pstat.memoryUtilization = msg.memoryutilization();
 
-	pstat.networkInUtilization = (msg.networkinbytes() / (double)NETWORK_MAX_IN_AND_OUT_BYTES) * (double)100;
-	pstat.networkOutUtilization = (msg.networkoutbytes() / (double)NETWORK_MAX_IN_AND_OUT_BYTES) * (double)100;
-//	pstat.networkInUtilization = msg.networkinutilization();
-//	pstat.networkOutUtilization = msg.networkoututilization();
+	pstat.networkInUtilization = (msg.networkinbytes() / (double) NETWORK_MAX_IN_AND_OUT_BYTES)
+			* (double) 100;
+	pstat.networkOutUtilization = (msg.networkoutbytes() / (double) NETWORK_MAX_IN_AND_OUT_BYTES)
+			* (double) 100;
+	//	pstat.networkInUtilization = msg.networkinutilization();
+	//	pstat.networkOutUtilization = msg.networkoututilization();
 
 	pstat.userCpuUtilizationSum += pstat.userCpuUtilization;
 	pstat.systemCpuUtilizationSum += pstat.systemCpuUtilization;
@@ -232,16 +235,6 @@ void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
 	pstat.networkOutUtilizationSum += pstat.networkOutUtilization;
 
 	pstat.numSamples += 1;
-}
-
-void Handler::_RankTableItems()
-{
-//	LOG(INFO) << "Num proc names: " << _data->procNameMap.size();
-	BOOST_FOREACH(ProcNameMap::value_type val, _data->procNameMap) {
-		ProcName *procName = val.second;
-		double newScore = procName->stat->userCpuUtilization + procName->stat->systemCpuUtilization;
-		procName->visual->tableItem->score = newScore;
-	}
 }
 
 float Handler::_LinearToLogarithmicAxisValue(float linearValue)
@@ -261,7 +254,4 @@ extern "C" void destroy_handler(Handler *p)
 {
 	delete p;
 }
-
-
-
 

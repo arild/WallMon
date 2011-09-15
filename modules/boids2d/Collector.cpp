@@ -13,7 +13,7 @@ extern "C" ProcessCollector *create_collector()
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 	p->context->includeStatistics = true;
-	if (System::IsRocksvvCluster()) {
+	if (System::IsRocksvvCluster() && false) {
 		vector<string> servers = WallView(1, 0, 4, 3).GetGrid();
 		p->context->AddServers(servers);
 	}

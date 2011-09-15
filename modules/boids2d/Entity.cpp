@@ -79,11 +79,6 @@ vector<EntityEvent *> EntityEvent::_entities;
 
 EntityEvent::EntityEvent()
 {
-	// Policy for detecting scrolls and swipes:
-	// If the movement (delta) from previous touch exceeds 2 percent
-	// of the height (scroll) or width (swipe)
-	_maxSpeed = -1;
-	//	LOG(INFO) << "MAX: " << _maxSpeed;
 	_entities.push_back(this);
 	_isFirstTime = true;
 	_scrollSpeed = 0;
@@ -91,6 +86,8 @@ EntityEvent::EntityEvent()
 
 	_scrollEventInterval = -1;
 	_swipeEventInterval = -1;
+	_previousScrollEventTimestamp = -1;
+	_previousSwipeEventTimestamp = -1;
 }
 
 /**

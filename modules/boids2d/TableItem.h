@@ -13,12 +13,14 @@ public:
 	string key;
 	int r, g, b;
 	int highlightNumber;
-	float score;
+	float _score;
 	string _procName, _hostName, _pid, _user, _time, _numThreads;
 	TableItem(string key);
 	void AddBoid(BoidSharedContext *subItem);
 	vector<BoidSharedContext *> GetBoids();
 
+	float GetScore();
+	float SetScore(float score);
 	void SetProcName(string procName);
 	string GetProcName();
 	void SetHostName(string hostName);

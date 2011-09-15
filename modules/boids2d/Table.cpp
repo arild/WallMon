@@ -50,11 +50,15 @@ struct TableGroupCompareUtilization {
 		int len = max(a.size(), b.size());
 		for (int i = 0; i < len; i++) {
 			if (i < a.size())
-				aScore += a[i]->score;
+				aScore += a[i]->GetScore();
 			if (i < b.size())
-				bScore += b[i]->score;
+				bScore += b[i]->GetScore();
 		}
-		return aScore/(float)a.size() > bScore/(float)b.size();
+		aScore /= (float)(a.size() * (float)0.95);
+		bScore /= (float)(b.size() * (float)0.95);
+
+		LOG(INFO) << "SCORES: " << aScore << " | " << bScore;
+		return aScore > bScore;
 	}
 };
 
@@ -127,7 +131,7 @@ void Table::OnInit()
 	_fontSub->SetFontType(FONT_MONO);
 	_fontSubLarge.SetFontSize(FONT_SIZE);
 	_fontSubLarge.SetFontType(FONT_MONO);
-	_tsLastUpdate = 0;
+	SetSwipeEventInterval(0.5);
 }
 
 void Table::OnLoop()
@@ -186,6 +190,7 @@ void Table::OnCleanup()
 
 void Table::Tap(float x, float y)
 {
+	LOG(INFO) << "TAP";
 	if (y > TABLE_TOP || y < TABLE_BOTTOM)
 		return;
 	int idx = _RelativePixelToItemIndex(y);
@@ -211,6 +216,7 @@ void Table::Tap(float x, float y)
 
 void Table::ScrollDown(float speed)
 {
+	LOG(INFO) << "Scroll Down";
 	_currentPixelIndex += speed;
 	int numItems = _items.size();
 	if (!_isTopLevelTable) {
@@ -227,18 +233,22 @@ void Table::ScrollDown(float speed)
 
 void Table::ScrollUp(float speed)
 {
+	LOG(INFO) << "Scroll up";
 	_currentPixelIndex -= speed;
 	_currentPixelIndex = fmax(_currentPixelIndex, -15);
 }
 
 void Table::SwipeLeft(float speed)
 {
-	_SortTableAlphabetically();
+	LOG(INFO) << "SWIPE LEFT";
+	if (_isTopLevelTable)
+		_SortTableAlphabetically();
 }
 
 void Table::SwipeRight(float speed)
 {
-	_SortTableScore();
+	if (_isTopLevelTable)
+		_SortTableScore();
 }
 
 void Table::_DrawTopLevelTable()
@@ -412,16 +422,6 @@ void Table::_SortTableAlphabetically()
 void Table::_SortTableScore()
 {
 	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
-}
-
-bool Table::_IsSortable()
-{
-	double tsCurrent = System::GetTimeInSec();
-	if (tsCurrent - _tsLastUpdate > 1) {
-		_tsLastUpdate = tsCurrent;
-		return true;
-	}
-	return false;
 }
 
 vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)

@@ -36,7 +36,6 @@ private:
 	float _currentPixelIndex; // index of item residing on top of displayed list
 	float _itemHeight;
 	Font *_fontSub, _fontSubLarge, *_font, *_fontLarge;
-	double _tsLastUpdate;
 	Table *_subTable;
 	TableItem *_selectedItem;
 	Queue<TableItem *> _addQueue, _removeQueue;

@@ -6,7 +6,7 @@ typedef boost::mutex::scoped_lock scoped_lock;
 TableItem::TableItem(string key_)
 {
 	key = key_;
-	score = 0;
+	_score = 0;
 	highlightNumber = -1;
 }
 
@@ -25,6 +25,16 @@ vector<BoidSharedContext *> TableItem::GetBoids()
 {
 	scoped_lock(_mutex);
 	return _boids;
+}
+
+float TableItem::GetScore()
+{
+	return _score;
+}
+
+float TableItem::SetScore(float score)
+{
+	_score = score;
 }
 
 void TableItem::SetProcName(string procName)
