@@ -34,7 +34,7 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(1, 0, 4, 3);
+	_wallView = new WallView(1, 0, 2, 2);
 	if (_wallView->IsTileWithin() == false)
 	return;
 	System::AttachToLocalDisplay();
@@ -99,7 +99,6 @@ void Handler::Handle(WallmonMessage *msg)
 		processMessage->set_hostname(msg->hostname());
 		_HandleProcessMessage(*processMessage);
 	}
-	//	_RankTableItems();
 }
 
 /**
@@ -107,13 +106,14 @@ void Handler::Handle(WallmonMessage *msg)
  */
 void Handler::_HandleProcessMessage(ProcessMessage &msg)
 {
-	DataUpdate update = _data->Update(msg);
-	Proc *proc = update.proc;
-	ProcName *procName = update.procName;
-	Node *node = update.node;
+	Proc *proc = _data->Update(msg);
+	if (proc == NULL)
+		// Resources related to process deleted
+		return;
 
 	//_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
+
 
 	// CPU
 	double user = proc->stat->userCpuUtilization;
@@ -180,8 +180,7 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	float newScore = (proc->stat->userCpuUtilization + proc->stat->systemCpuUtilization)
 			+ (proc->stat->networkInUtilization + proc->stat->networkOutUtilization) * 2
 			+ proc->stat->memoryUtilization * 0.5;
-	float oldScore = proc->visual->tableItem->GetScore();
-	proc->visual->tableItem->SetScore(newScore * 0.5 + oldScore * 0.5);
+	proc->visual->tableItem->SetScore(newScore);
 }
 
 /**

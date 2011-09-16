@@ -45,8 +45,6 @@ void ProcessCollector::OnInit(Context *ctx)
 
 	_numCores = System::GetNumLogicalCores();
 	_totalMemoryMb = (double)System::GetTotalMemory() / 1024.;
-	// Create a process monitor for each pid on system
-	_monitors = new vector<LinuxProcessMonitorLight *>();
 	_pidMonitor = new PidMonitor;
 	_buffer = new char[MESSAGE_BUF_SIZE];
 	memset(_buffer, 0, MESSAGE_BUF_SIZE);
@@ -59,7 +57,7 @@ void ProcessCollector::OnInit(Context *ctx)
 
 	LOG(INFO) << "num cores detected: " << _numCores;
 	LOG(INFO) << "total memory detected: " << _totalMemoryMb << " MB";
-	LOG(INFO) << "num processes being monitored: " << _monitors->size();
+	LOG(INFO) << "num processes being monitored: " << _monitors.size();
 }
 
 void ProcessCollector::OnStop()
@@ -75,10 +73,17 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		_FindAllNewProcesses();
 
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
-	for (vector<LinuxProcessMonitorLight *>::iterator it = _monitors->begin(); it != _monitors->end(); it++) {
-		LinuxProcessMonitorLight *monitor = (*it);
-		monitor->Update();
+	for (int i = 0; i < _monitors.size(); i++) {
+		LinuxProcessMonitorLight *monitor = _monitors[i];
 		ProcessMessage *processMsg = _processesMsg.add_processmessage();
+		if (monitor->Update() == false) {
+			// Process is terminated (and not present in procfs)
+			_monitors.erase(_monitors.begin() + i);
+			processMsg->set_isterminated(true);
+
+			// Continue reading old values stored in the monitor
+			// and after that delete it
+		}
 
 		double util;
 		if (filter->has_processname()) {
@@ -118,6 +123,9 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		if (filter->has_numthreads()) {
 			processMsg->set_numthreads(monitor->numthreads());
 		}
+
+		if (processMsg->isterminated())
+			delete monitor;
 	}
 
 	if (_processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
@@ -155,7 +163,7 @@ void ProcessCollector::_AddProcess(int pid)
 		return;
 	}
 	monitor->Update();
-	_monitors->push_back(monitor);
+	_monitors.push_back(monitor);
 }
 
 

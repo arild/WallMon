@@ -36,7 +36,7 @@ public:
 	virtual void OnStop();
 	virtual void Sample(WallmonMessage *msg);
 private:
-	vector<LinuxProcessMonitorLight *> *_monitors;
+	vector<LinuxProcessMonitorLight *> _monitors;
 	PidMonitor *_pidMonitor;
 	Ps _ps;
 	list<string> _processNames;

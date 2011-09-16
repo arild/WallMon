@@ -158,9 +158,6 @@ Node::~Node()
 
 DataUpdate::DataUpdate()
 {
-	procWasCreated = false;
-	procNameWasCreated = false;
-	nodeWasCreated = false;
 }
 
 Data::Data()
@@ -171,43 +168,22 @@ Data::~Data()
 {
 }
 
-DataUpdate Data::Update(ProcessMessage &msg)
+Proc *Data::Update(ProcessMessage &msg)
 {
-	DataUpdate update;
-
-	// Per process
 	string procMapKey = _CreateProcKey(msg.hostname(), msg.pid());
+	if (msg.isterminated()) {
+		procMap.erase(procMapKey);
+		return NULL;
+	}
+
+	Proc *proc;
 	if (procMap.count(procMapKey) == 0) {
-		update.proc = new Proc(msg);
-		procMap[procMapKey] = update.proc;
-		update.procWasCreated = true;
+		proc = new Proc(msg);
+		procMap[procMapKey] = proc;
 	}
 	else
-		update.proc = procMap[procMapKey];
-
-	// Per process name
-//	if (procNameMap.count(processName) == 0) {
-//		update.procName = new ProcName(processName);
-//		procNameMap[processName] = update.procName;
-//		update.procNameWasCreated = true;
-//		update.procName->procs.push_back(update.proc);
-//	}
-//	else
-//		update.procName = procNameMap[processName];
-
-	// Per node
-//	if (nodeMap.count(hostname) == 0) {
-//		update.node = new Node();
-//		nodeMap[hostname] = update.node;
-//		update.nodeWasCreated = true;
-//	}
-//	else
-//		update.node = nodeMap[hostname];
-//
-//	if (update.procWasCreated)
-//		update.node->procs.push_back(update.proc);
-
-	return update;
+		proc = procMap[procMapKey];
+	return proc;
 }
 
 string Data::_CreateProcKey(string hostName, int pid)

@@ -56,8 +56,6 @@ struct TableGroupCompareUtilization {
 		}
 		aScore /= (float)(a.size() * (float)0.95);
 		bScore /= (float)(b.size() * (float)0.95);
-
-		LOG(INFO) << "SCORES: " << aScore << " | " << bScore;
 		return aScore > bScore;
 	}
 };
@@ -194,10 +192,10 @@ void Table::Tap(float x, float y)
 	if (y > TABLE_TOP || y < TABLE_BOTTOM)
 		return;
 	int idx = _RelativePixelToItemIndex(y);
-	if (idx < 0 || idx >= _items.size())
-		return;
 
 	if (_isTopLevelTable) {
+		if (idx < 0 || idx >= _items.size())
+			return;
 		TableItem *selectedItem = _items[idx][0];
 		// Populate the sub-table with all items in selected group
 		vector<TableItem *> group = _items[idx];
@@ -211,6 +209,9 @@ void Table::Tap(float x, float y)
 			_subTable->Add(group);
 			_HighlightBoids(group);
 		}
+	}
+	else {
+		LOG(INFO) << "IDX: " << idx;
 	}
 }
 

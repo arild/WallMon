@@ -32,7 +32,7 @@ public:
 	virtual ~LinuxProcessMonitorLight();
 
 	bool Open(int pid=-1);
-	void Update();
+	bool Update();
 	double SecondsSinceLastUpdate();
 
 	// stat

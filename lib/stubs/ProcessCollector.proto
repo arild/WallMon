@@ -22,6 +22,8 @@ message ProcessMessage
 	optional string user = 13;
 	optional string startTime = 14;
 	optional uint32 numThreads = 15;
+	
+	optional bool isTerminated = 16 [default = false];
 }
 
 message ProcessCollectorMessage

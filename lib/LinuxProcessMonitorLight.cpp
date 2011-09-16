@@ -7,6 +7,8 @@
 
 #include "LinuxProcessMonitorLight.h"
 #include "System.h"
+#include <glog/logging.h>
+
 
 LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 {
@@ -57,7 +59,7 @@ bool LinuxProcessMonitorLight::Open(int pid)
 	return true;
 }
 
-void LinuxProcessMonitorLight::Update()
+bool LinuxProcessMonitorLight::Update()
 {
 	_prevUserTime = _utime;
 	_prevSystemTime = _stime;
@@ -68,16 +70,24 @@ void LinuxProcessMonitorLight::Update()
 
 	rewind(_procstat);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstat);
+	if (ferror(_procstat))
+		return false;
 	sscanf(_buffer, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*ld %*ld %*ld %*ld %d", &_pid, _comm,
 			&_utime, &_stime, &_numThreads);
 
 	rewind(_procstatm);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstatm);
+	if (ferror(_procstatm))
+		return false;
 	sscanf(_buffer, "%lu", &_size);
 
 	rewind(_procio);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procio);
+	if (ferror(_procio))
+		return false;
 	sscanf(_buffer, "%*s %lu %*s %lu", &_rchar, &_wchar);
+
+	return true;
 }
 
 double LinuxProcessMonitorLight::SecondsSinceLastUpdate()
