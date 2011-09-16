@@ -15,27 +15,17 @@ using namespace std;
 
 typedef boost::mutex::scoped_lock scoped_lock;
 
-enum BoidView {
-	BOID_TYPE_CORE,
-	BOID_TYPE_PROCESS,
-	BOID_TYPE_PROCESS_NAME,
-	BOID_TYPE_NODE
-};
-
-
 class BoidSharedContext {
 public:
 	int red, green, blue;
 	Shape boidShape;
-	BoidView boidView;
 	static bool useLogarithmicAxis;
 	static float tailLength;
 
 	// Which type of boids to show within a metric
 	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
-	static BoidView boidViewToShow; // Simple filter for the different metrics
 
-	BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidView boidType_);
+	BoidSharedContext(int red_, int green_, int blue_, Shape shape_);
 
 	void SetDestination(float x, float y);
 	void GetDestination(float *x, float *y);

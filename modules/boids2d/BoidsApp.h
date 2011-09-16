@@ -20,7 +20,8 @@ public:
 	virtual ~BoidsApp();
 	void Start();
 	void Stop();
-	void CreateBoid(BoidSharedContext *ctx);
+	Boid *CreateBoid(BoidSharedContext *ctx);
+	void RemoveBoid(Boid *boid);
 	Table *GetNameTable();
 
 	void SetDisplayArea(double x, double y, double width, double height);

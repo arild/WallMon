@@ -91,6 +91,11 @@ void Table::Add(vector<TableItem *> items)
 		Add(items[i]);
 }
 
+void Table::Remove(TableItem *item)
+{
+	_removeQueue.Push(item);
+}
+
 void Table::Clear()
 {
 	_removeQueue.Push((TableItem *)NULL);
@@ -147,7 +152,16 @@ void Table::OnLoop()
 			_selectedItem = NULL;
 		}
 		else {
-			// Remove single item
+			// Search through the two-dimensional space of table items.
+			// If the particular table item is found, it is removed
+			for (int i = 0; i < _items.size(); i++)
+				for (int j = 0; j < _items[i].size(); j++)
+					if (item == _items[i][j]) {
+						_items[i].erase(_items[i].begin() + j);
+						if (_items[i].size() == 0)
+							// No more items in group
+							_items.erase(_items.begin() + i);
+					}
 		}
 
 	}

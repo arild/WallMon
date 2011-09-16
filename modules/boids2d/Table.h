@@ -19,6 +19,7 @@ public:
 
 	void Add(TableItem *item);
 	void Add(vector<TableItem *> items);
+	void Remove(TableItem *item);
 	void Clear();
 
 	virtual void OnInit();

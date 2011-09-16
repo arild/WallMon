@@ -23,27 +23,21 @@ VisualBase::~VisualBase()
 	delete tableItem;
 }
 
-void VisualBase::InitBoids(ProcessMessage &msg, BoidView boidType)
+void VisualBase::InitBoids(ProcessMessage &msg)
 {
 	float red, green, blue;
 	Data::NameToRgbColor(msg.processname(), &red, &green, &blue);
 
-	// Create contexts of boids - used to manage them
-	cpu = new BoidSharedContext(red, green, blue, QUAD, boidType);
-	memory = new BoidSharedContext(red, green, blue, TRIANGLE, boidType);
-	network = new BoidSharedContext(red, green, blue, DIAMOND, boidType);
-
-	// Create the boids, and associated the boids contexts with them
-	boidsApp->CreateBoid(cpu);
-	boidsApp->CreateBoid(memory);
-	boidsApp->CreateBoid(network);
+	cpu = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, QUAD));
+	memory = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, TRIANGLE));
+	network = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, DIAMOND));
 
 	// Put the boids contexts into a table that presents them visually
 	// in another way, and allows for events
 	tableItem = new TableItem(msg.processname());
-	tableItem->AddBoid(cpu);
-	tableItem->AddBoid(memory);
-	tableItem->AddBoid(network);
+	tableItem->AddBoid(cpu->ctx);
+	tableItem->AddBoid(memory->ctx);
+	tableItem->AddBoid(network->ctx);
 	table->Add(tableItem);
 }
 
@@ -82,7 +76,7 @@ ProcStat::ProcStat()
 
 ProcVisual::ProcVisual(ProcessMessage &msg)
 {
-	InitBoids(msg, BOID_TYPE_PROCESS);
+	InitBoids(msg);
 }
 
 ProcVisual::~ProcVisual()
@@ -111,7 +105,7 @@ ProcNameStat::~ProcNameStat()
 
 ProcNameVisual::ProcNameVisual(ProcessMessage &msg)
 {
-	InitBoids(msg, BOID_TYPE_PROCESS_NAME);
+	InitBoids(msg);
 	VisualBase::table->Add(tableItem);
 }
 
@@ -172,7 +166,16 @@ Proc *Data::Update(ProcessMessage &msg)
 {
 	string procMapKey = _CreateProcKey(msg.hostname(), msg.pid());
 	if (msg.isterminated()) {
-		procMap.erase(procMapKey);
+		if (procMap.count(procMapKey) > 0) {
+			Proc *proc = procMap[procMapKey];
+			procMap.erase(procMapKey);
+			BoidsApp *app = proc->visual->boidsApp;
+			app->RemoveBoid(proc->visual->cpu);
+			app->RemoveBoid(proc->visual->memory);
+			app->RemoveBoid(proc->visual->network);
+			proc->visual->table->Remove(proc->visual->tableItem);
+		}
+
 		return NULL;
 	}
 

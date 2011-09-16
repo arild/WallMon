@@ -15,15 +15,13 @@ bool BoidSharedContext::showCpuBoid = true;
 bool BoidSharedContext::showMemoryBoid = true;
 bool BoidSharedContext::showNetworkBoid = true;
 bool BoidSharedContext::showStorageBoid = true;
-BoidView BoidSharedContext::boidViewToShow = BOID_TYPE_PROCESS_NAME;
 
-BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_, BoidView boidType_)
+BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_)
 {
 	red = red_;
 	green = green_;
 	blue = blue_;
 	boidShape = shape_;
-	boidView = boidType_;
 
 	_isHighlighted = false;
 }

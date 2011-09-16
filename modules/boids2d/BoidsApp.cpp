@@ -66,9 +66,16 @@ void BoidsApp::Stop()
 	LOG(INFO) << "BoidsApp stopped";
 }
 
-void BoidsApp::CreateBoid(BoidSharedContext *ctx)
+Boid *BoidsApp::CreateBoid(BoidSharedContext *ctx)
 {
-	_boidScene->AddEntity(new Boid(ctx));
+	Boid *boid = new Boid(ctx);
+	_boidScene->AddEntity(boid);
+	return boid;
+}
+
+void BoidsApp::RemoveBoid(Boid *boid)
+{
+	_boidScene->RemoveEntity(boid);
 }
 
 Table *BoidsApp::GetNameTable()

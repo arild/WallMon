@@ -125,9 +125,9 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	if (BoidSharedContext::useLogarithmicAxis)
 		totalCpuUtilization = _LinearToLogarithmicAxisValue(totalCpuUtilization);
 	if (totalCpuUtilization < FILTER_THRESHOLD)
-		proc->visual->cpu->SetDestination(-1, -1);
+		proc->visual->cpu->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->cpu->SetDestination(totalCpuUtilization, userCpuRelativeShare);
+		proc->visual->cpu->ctx->SetDestination(totalCpuUtilization, userCpuRelativeShare);
 
 	// Memory
 	double avgMemoryUtilization = proc->stat->memoryUtilizationSum
@@ -136,9 +136,9 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	if (BoidSharedContext::useLogarithmicAxis)
 		memUtil = _LinearToLogarithmicAxisValue(memUtil);
 	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
-		proc->visual->memory->SetDestination(-1, -1);
+		proc->visual->memory->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->memory->SetDestination(memUtil, avgMemoryUtilization);
+		proc->visual->memory->ctx->SetDestination(memUtil, avgMemoryUtilization);
 
 	// Network
 	double in = proc->stat->networkInUtilization;
@@ -150,9 +150,9 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	if (networkUtilization > 0)
 		outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
 	if (networkUtilization < FILTER_THRESHOLD)
-		proc->visual->network->SetDestination(-1, -1);
+		proc->visual->network->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->network->SetDestination(networkUtilization, outNetworkRelativeShare);
+		proc->visual->network->ctx->SetDestination(networkUtilization, outNetworkRelativeShare);
 
 	// Table visual
 	TableItem *item = proc->visual->tableItem;

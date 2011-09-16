@@ -30,7 +30,7 @@ using namespace boost::tuples;
  */
 class VisualBase {
 public:
-	BoidSharedContext *cpu, *memory, *network;
+	Boid *cpu, *memory, *network, *storage;
 	TableItem *tableItem;
 
 	static BoidsApp *boidsApp;
@@ -38,7 +38,7 @@ public:
 
 	VisualBase();
 	~VisualBase();
-	void InitBoids(ProcessMessage &msg, BoidView boidType);
+	void InitBoids(ProcessMessage &msg);
 };
 
 /**

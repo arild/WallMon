@@ -33,6 +33,7 @@ public:
 	static void AddScene(Scene *scene);
 	void AddEntity(Entity *entity);
 	static void AddEntityCurrent(Entity *entity);
+	void RemoveEntity(Entity *entity);
 	static vector<EntityHit> GetAllEntityHits(float x, float y);
 	static void RunAllScenes();
 

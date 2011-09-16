@@ -79,6 +79,14 @@ void Scene::AddEntityCurrent(Entity *entity)
 	current->_entityMutex.unlock();
 }
 
+void Scene::RemoveEntity(Entity *entity)
+{
+	scoped_lock(_entityMutex);
+	for (int i = 0; i < entityList.size(); i++)
+		if (entityList[i] == entity)
+			entityList.erase(entityList.begin() + i);
+}
+
 vector<EntityHit> Scene::GetAllEntityHits(float x, float y)
 {
 	scoped_lock(_sceneMutex);
