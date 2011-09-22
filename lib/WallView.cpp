@@ -1,8 +1,16 @@
-/*
- * WallView.cpp
+/**
+ * Helper class for organizing tiles on the display wall.
  *
- *  Created on: Apr 22, 2011
- *      Author: arild
+ * This class provides an abstraction where a grid of tiles (on the display wall)
+ * is defined. Several operations can be carried out on this grid, such as determining
+ * if a given tile or pair of coordinates is within the grid.
+ *
+ * IMPORTANT: After a grid has been defined, some of the methods assumes that the
+ * virtual resolution within this grid is mapped 1:1. For example, given a 2x2 grid
+ * with a total physical resolution of 2048x1536, the virtual resolution is the same.
+ * A previous approach to this was to always have the entire display wall resolution,
+ * 7168x3072 as the virtual resolution, which was convenient in some cases. However,
+ * when scaling down, to for example 2x2 tiles, it was hard to predict the final visual result.
  */
 
 #include "System.h"
@@ -18,6 +26,11 @@ string HOSTNAMES[WALL_WIDHT * WALL_HEIGHT] = { "tile-0-0", "tile-1-0", "tile-2-0
 		"tile-4-2", "tile-5-2", "tile-6-2", "tile-0-3", "tile-1-3", "tile-2-3", "tile-3-3",
 		"tile-4-3", "tile-5-3", "tile-6-3" };
 
+/**
+ * Defines a grid on the display wall
+ *
+ * Later operations in this instance will take this grid into account
+ */
 WallView::WallView(int x, int y, int width, int height)
 {
 	_x = x;
@@ -37,6 +50,8 @@ WallView::WallView(int x, int y, int width, int height)
 
 /**
  * Returns the 1D bottom-up row-wise array of tile names generated in the constructor
+ *
+ * This might be useful if the caller needs all host names of the current grid
  */
 vector<string> WallView::GetGrid()
 {
@@ -55,6 +70,8 @@ bool WallView::IsTileWithin()
 
 /**
  * Determines if given global coordinates are within the defined grid
+ *
+ * This method is intended to be used in collaboration with the shout event system
  */
 bool WallView::IsCordsWithin(float x, float y)
 {
@@ -73,10 +90,8 @@ bool WallView::IsCordsWithin(float x, float y)
  */
 void WallView::GlobalToGridCoords(float *x, float *y)
 {
-	float localX = *x - (TILE_SCREEN_WIDTH * _x);
-	float localY = *y - (TILE_SCREEN_HEIGHT * _y);
-	*x = localX * (WALL_WIDHT / (float)_w);
-	*y = localY * (WALL_HEIGHT / (float)_h);
+	*x = *x - (TILE_SCREEN_WIDTH * _x);
+	*y = *y - (TILE_SCREEN_HEIGHT * _y);
 }
 
 /**
@@ -91,10 +106,10 @@ void WallView::GetDisplayArea(double *x, double *y, double *width, double *heigh
 	int posx, posy, index;
 	index = _GetIndex(hostname);
 	_IndexToCoordinates(index, &posx, &posy);
-	*x = (posx / (double) _w) * (double) WALL_SCREEN_WIDTH;
-	*y = (posy / (double) _h) * (double) WALL_SCREEN_HEIGHT;
-	*width = (1 / (double) _w) * (double) WALL_SCREEN_WIDTH;
-	*height = (1 / (double) _h) * (double) WALL_SCREEN_HEIGHT;
+	*x = (posx / (double) _w) * (double)(TILE_SCREEN_WIDTH * _w);
+	*y = (posy / (double) _h) * (double) (TILE_SCREEN_HEIGHT * _h);
+	*width = TILE_SCREEN_WIDTH;
+	*height = TILE_SCREEN_HEIGHT;
 }
 
 void WallView::GetDisplayArea(double *x, double *y, double *width, double *height)
@@ -117,3 +132,28 @@ void WallView::_IndexToCoordinates(int index, int *x, int *y)
 	*y = index / _w;
 }
 
+/**
+ * Returns the total width of the grid in pixels
+ */
+int WallView::GetTotalPixelWidth()
+{
+	return TILE_SCREEN_WIDTH * _w;
+}
+
+/**
+ * Returns the total height of the grid in pixels
+ */
+int WallView::GetTotalPixelHeight()
+{
+	return TILE_SCREEN_HEIGHT * _h;
+}
+
+int WallView::GetWidth()
+{
+	return _w;
+}
+
+int WallView::GetHeight()
+{
+	return _h;
+}

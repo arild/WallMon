@@ -17,7 +17,7 @@ public:
 	Font(int size=5, bool centerHorizontal=false, bool centerVertical=false);
 	virtual ~Font() {}
 
-	static void Init();
+	static void Init(int displayWidth);
 	static void Close();
 
 	void SetFontType(FONT_TYPE fontType);
@@ -34,6 +34,7 @@ private:
 	FTFont *_font;
 	static FTFont *_timesFont;
 	static FTFont *_monoFont;
+	static float _resoultionScaleFactor;
 	float _GetFontScale();
 };
 

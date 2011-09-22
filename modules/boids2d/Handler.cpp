@@ -34,27 +34,28 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(1, 0, 2, 2);
+	_wallView = new WallView(2,2,2,2);
+//	_wallView = new WallView(0,0,7,4);
 	if (_wallView->IsTileWithin() == false)
-	return;
-	System::AttachToLocalDisplay();
-
+		return;
+	System::AttachToLocalDisplay(); // Does not seem to be required on rocksvv cluster
 	double x, y, width, height;
 	_eventSystem = new ShoutEventSystem();
 	_wallView->GetDisplayArea(&x, &y, &width, &height);
-	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, _eventSystem);
+	_boidsApp = new BoidsApp(TILE_SCREEN_WIDTH, TILE_SCREEN_HEIGHT, _eventSystem, _wallView);
 	_boidsApp->SetDisplayArea(x, y, width, height);
 #else
 	/**
 	 * In a local environment (only one computer/screen) the event system is told that
 	 * the 'entire' display wall is used, and coordinates are mapped thereafter. Also,
-	 * the single screen is told to show everything.
+	 * the single screen is told to show everything. Visually, this works fine since the
+	 * hard-coded resolution (1600x768) is a down-scaled version of the display wall resolution.
 	 */
 	//	_wallView = new WallView(3, 0, 3, 4);
 	//	_eventSystem = new ShoutEventSystem();
 	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
 	_eventSystem = new SdlMouseEventFetcher();
-	_boidsApp = new BoidsApp(1600, 768, _eventSystem);
+	_boidsApp = new BoidsApp(1600, 768, _eventSystem, _wallView);
 
 	_boidsApp->SetDisplayArea(0, 0, WALL_SCREEN_WIDTH, WALL_SCREEN_HEIGHT);
 #endif

@@ -32,6 +32,10 @@ public:
 	void GlobalToGridCoords(float *x, float *y);
 	void GetDisplayArea(double *x, double *y, double *width, double *height, string hostname);
 	void GetDisplayArea(double *x, double *y, double *width, double *height);
+	int GetTotalPixelWidth();
+	int GetTotalPixelHeight();
+	int GetWidth();
+	int GetHeight();
 private:
 	int _x, _y, _w, _h;
 	string _hostname;

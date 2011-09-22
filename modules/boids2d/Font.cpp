@@ -17,6 +17,7 @@
 
 FTFont *Font::_timesFont = NULL;
 FTFont *Font::_monoFont = NULL;
+float Font::_resoultionScaleFactor;
 
 Font::Font(int size, bool centerHorizontal, bool centerVertical)
 {
@@ -30,12 +31,13 @@ Font::Font(int size, bool centerHorizontal, bool centerVertical)
  * Create a common font for all entities. The size of this font is large
  * enough for all entities, and can be scaled down.
  */
-void Font::Init()
+void Font::Init(int displayWidth)
 {
 	_timesFont = new FTTextureFont(Config::GetTimesFontPath().c_str());
 	_timesFont->FaceSize(STATIC_FONT_SIZE);
 	_monoFont = new FTTextureFont(Config::GetMonoFontPath().c_str());
 	_monoFont->FaceSize(STATIC_FONT_SIZE);
+	displayWidth > 7000 ? _resoultionScaleFactor = 0.05 : _resoultionScaleFactor = 0.1;
 }
 
 void Font::Close()
@@ -97,7 +99,7 @@ float Font::GetVerticalPixelLength(string &text)
 float Font::_GetFontScale()
 {
 	float actualFontSize = Scene::current->GetScale() * (float)_fontSize;
-	return actualFontSize/(float)STATIC_FONT_SIZE * 0.05;
+	return (actualFontSize/(float)STATIC_FONT_SIZE) * _resoultionScaleFactor;
 }
 
 string Font::TrimHorizontal(string text, int maxPixelLen)

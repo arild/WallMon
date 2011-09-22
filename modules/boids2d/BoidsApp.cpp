@@ -31,11 +31,12 @@ boost::condition mainLoopThreadCondition;
 boost::mutex mainLoopThreadMutex;
 
 
-BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem) :
+BoidsApp::BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem, WallView *wallView) :
 	_screenWidth(screenWidth), _screenHeight(screenHeight)
 {
-	Font::Init();
+	Font::Init(wallView->GetTotalPixelWidth());
 	_eventSystem = eventSystem;
+	_wallView = wallView;
 	_SetupAndPopulateScenes();
 }
 
@@ -153,16 +154,12 @@ void BoidsApp::_InitSdlAndOpenGl()
 
 void BoidsApp::_SetupAndPopulateScenes()
 {
-	float w = TILE_SCREEN_HEIGHT;
-	float h = TILE_SCREEN_HEIGHT;
+	float w = _wallView->GetTotalPixelWidth();
+	float h = _wallView->GetTotalPixelHeight();
 
-	_tableScene = new Scene(w/2, 0, w * 3.2, h * 4, 100, 100);
-	_boidScene = new Scene(w * 5, h/2 + 75, w * 3, h * 3.3, 100, 100);
-
-
-//	_tableScene = new Scene(0, 0, w * 3, h * 4, 100, 100);
-//	_boidScene = new Scene(w * 4, h/2 + 75, w * 3, h * 3.3, 100, 100);
-//	_controlPanelScene = new Scene(w * 7, 0, w * 2, h * 4, 100, 200);
+	_tableScene = new Scene(0, 0, w/2, h, 100, 100);
+	float offset = h * 0.13;
+	_boidScene = new Scene(w/2, offset, w/2, h - offset*1.5, 100, 100);
 
 //	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);

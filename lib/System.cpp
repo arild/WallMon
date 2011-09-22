@@ -161,7 +161,7 @@ bool System::IsRocksvvCluster()
 	string rocks = "rocksvv.cs.uit.no";
 	if (rocks.compare(hostname) == 0)
 		return true;
-	if (hostname.compare("tile-") == 0)
+	if (hostname.compare(0, 5, "tile-") == 0)
 		return true;
 	return false;
 }

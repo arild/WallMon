@@ -24,7 +24,7 @@
 
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
-float FONT_SIZE = 4.;
+float FONT_SIZE = 3.;
 
 struct TableGroupCompareAlphabetically {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)

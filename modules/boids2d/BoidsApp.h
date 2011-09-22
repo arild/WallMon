@@ -16,7 +16,7 @@ using namespace std;
 
 class BoidsApp {
 public:
-	BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem);
+	BoidsApp(int screenWidth, int screenHeight, EventSystemBase *eventSystem, WallView *wallView);
 	virtual ~BoidsApp();
 	void Start();
 	void Stop();
@@ -35,6 +35,7 @@ private:
 	Scene *_boidScene, *_tableScene, *_controlPanelScene;
 	Table *_table;
 	EventSystemBase *_eventSystem;
+	WallView *_wallView;
 
 	void _InitSdlAndOpenGl();
 	void _RenderForever();
