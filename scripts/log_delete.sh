@@ -1,4 +1,5 @@
 #!/bin/bash
+. $(dirname $0)/incl.sh
 CMD="rm -f /tmp/*wallmon*"
-cluster-fork --bg ${CMD}
+${CLUSTER_FORK} "${CMD}"
 ${CMD}

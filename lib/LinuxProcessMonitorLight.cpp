@@ -9,7 +9,6 @@
 #include "System.h"
 #include <glog/logging.h>
 
-
 LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 {
 	_jiffy = sysconf(_SC_CLK_TCK);
@@ -61,6 +60,8 @@ bool LinuxProcessMonitorLight::Open(int pid)
 
 bool LinuxProcessMonitorLight::Update()
 {
+	_prevMinflt = _minflt;
+	_prevMajflt = _majflt;
 	_prevUserTime = _utime;
 	_prevSystemTime = _stime;
 	_prevUpdateTime = _updateTime;
@@ -72,8 +73,9 @@ bool LinuxProcessMonitorLight::Update()
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstat);
 	if (ferror(_procstat))
 		return false;
-	sscanf(_buffer, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*ld %*ld %*ld %*ld %d", &_pid, _comm,
-			&_utime, &_stime, &_numThreads);
+	sscanf(_buffer,
+			"%d %s %*c %*d %*d %*d %*d %*d %*u %lu %*lu %lu %*lu %lu %lu %*ld %*ld %*ld %*ld %d",
+			&_pid, _comm, &_minflt, &_majflt, &_utime, &_stime, &_numThreads);
 
 	rewind(_procstatm);
 	_totalNumBytesRead += fread(_buffer, 1, 300, _procstatm);
@@ -95,6 +97,40 @@ double LinuxProcessMonitorLight::SecondsSinceLastUpdate()
 	return System::GetTimeInSec() - _updateTime;
 }
 
+void LinuxProcessMonitorLight::SetUser(string user)
+{
+	_user = user;
+}
+
+void LinuxProcessMonitorLight::SetStartTime(string time)
+{
+	_startTime = time;
+}
+bool LinuxProcessMonitorLight::HasUser()
+{
+	return !_user.empty();
+}
+
+bool LinuxProcessMonitorLight::HasStartTime()
+{
+	return !_startTime.empty();
+}
+
+string LinuxProcessMonitorLight::GetUser()
+{
+	return _user;
+}
+
+string LinuxProcessMonitorLight::GetStartTime()
+{
+	return _startTime;
+}
+
+double LinuxProcessMonitorLight::GetTotalNumPageFaultsPerSec()
+{
+	unsigned long numFaultsSinceLastUpdate = (_minflt + _majflt) - (_prevMinflt + _prevMajflt);
+	return numFaultsSinceLastUpdate / (double)(_updateTime - _prevUpdateTime);
+}
 double LinuxProcessMonitorLight::GetUserTime()
 {
 	double seconds = (double) _utime / (double) _jiffy;
@@ -125,7 +161,7 @@ double LinuxProcessMonitorLight::GetSystemCpuLoad()
 
 string LinuxProcessMonitorLight::GetProcessName()
 {
-	string processName = (string)comm();
+	string processName = (string) comm();
 	// Remove '(' and ')' from the process name returned from comm()
 	processName.erase(processName.length() - 1, 1);
 	processName.erase(0, 1);
@@ -135,6 +171,15 @@ string LinuxProcessMonitorLight::GetProcessName()
 double LinuxProcessMonitorLight::GetTotalProgramSize()
 {
 	return (double) (_size * 4096.0) / (1024. * 1024.0);
+}
+
+unsigned long LinuxProcessMonitorLight::minflt()
+{
+	return _minflt;
+}
+unsigned long LinuxProcessMonitorLight::majflt()
+{
+	return _majflt;
 }
 
 int LinuxProcessMonitorLight::pid()

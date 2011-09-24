@@ -25,7 +25,7 @@ VisualBase::~VisualBase()
 
 void VisualBase::InitBoids(ProcessMessage &msg)
 {
-	float red, green, blue;
+	int red, green, blue;
 	Data::NameToRgbColor(msg.processname(), &red, &green, &blue);
 
 	cpu = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, QUAD));
@@ -196,7 +196,7 @@ string Data::_CreateProcKey(string hostName, int pid)
 	return ss.str();
 }
 
-void Data::NameToRgbColor(string name, float *r, float *g, float *b)
+void Data::NameToRgbColor(string name, int *r, int *g, int *b)
 {
 	unsigned long hash = _OatHash(name);
 	*r = hash & 0xFF;

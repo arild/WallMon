@@ -64,6 +64,12 @@ void Font::SetFontSize(int size)
 	_fontSize = size;
 }
 
+void Font::SetAlignmentPolicy(bool centerHorizontal, bool centerVertical)
+{
+	_centerHorizontal = centerHorizontal;
+	_centerVertical = centerVertical;
+}
+
 void Font::RenderText(string text, float tx, float ty)
 {
 	RenderText(text, tx, ty, _centerHorizontal, _centerVertical);

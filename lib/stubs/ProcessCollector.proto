@@ -24,6 +24,8 @@ message ProcessMessage
 	optional uint32 numThreads = 15;
 	
 	optional bool isTerminated = 16 [default = false];
+
+	optional double numpagefaultspersec = 17;
 }
 
 message ProcessCollectorMessage

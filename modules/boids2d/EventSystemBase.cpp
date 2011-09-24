@@ -107,14 +107,13 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	vector<EntityHit> entityHits = Scene::GetAllEntityHits(x, y);
 	int numEntityHits = entityHits.size();
 
-	// No entity hits within scene
-	if (!isLast) {
-		TT_touch_state_t e;
-		e.loc.x = x;
-		e.loc.y = y;
-		e.visualizeOnly = true;
-		eventQueue->Push(make_tuple((Entity *) NULL, e));
-	}
+//	if (!isLast) {
+//		TT_touch_state_t e;
+//		e.loc.x = x;
+//		e.loc.y = y;
+//		e.visualizeOnly = true;
+//		eventQueue->Push(make_tuple((Entity *) NULL, e));
+//	}
 
 	// Associate the id of the event with an entity
 	EventIdMap::iterator it = _eventIdMap.find(eventId);
@@ -143,7 +142,9 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	// Transform grid coordinates to virtual entity coordinates
 	scene->RealToVirtualCoords(x, y, &x, &y);
 
-	// Re-create shout event for compatibility with touch-manager
+	// Re-create shout event for compatibility with touch-manager.
+	// Obviously, this is not optimal performance-wise, however, it works
+	// and the functionality of provided by the touch-manager is re-used.
 	if (event->type == kEvt_type_calibrated_touch_location)
 		event = create_calibrated_touch_location_event_v2(eventId,
 				kTouch_evt_first_detect_flag | kTouch_evt_last_detect_flag, x, y, radius, 0, senderID);
@@ -154,6 +155,9 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	_touchManager->handleEvent(event);
 }
 
+/**
+ * Callback for the touch-manager
+ */
 void EventSystemBase::_HandleTouchesCallback(touchVector_t & down, touchVector_t & up)
 {
 	for (int i = 0; i < down.size(); i++) {

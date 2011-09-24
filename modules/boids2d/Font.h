@@ -22,6 +22,7 @@ public:
 
 	void SetFontType(FONT_TYPE fontType);
 	void SetFontSize(int size);
+	void SetAlignmentPolicy(bool centerHorizontal, bool centerVertical);
 	void RenderText(string text, float tx, float ty);
 	void RenderText(string text, float tx, float ty, bool centerHorizontal, bool centerVertical);
 	float GetHorizontalPixelLength(string &text);

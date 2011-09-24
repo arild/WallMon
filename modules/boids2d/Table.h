@@ -36,11 +36,12 @@ private:
 	vector< vector<TableItem *> > _items;
 	float _currentPixelIndex; // index of item residing on top of displayed list
 	float _itemHeight;
-	Font *_fontSub, _fontSubLarge, *_font, *_fontLarge;
+	Font _fontSub, _fontSubLarge, _font;
 	Table *_subTable;
 	TableItem *_selectedItem;
 	Queue<TableItem *> _addQueue, _removeQueue;
-	bool _isTopLevelTable;
+	bool _isHighlighted, _isTopLevelTable;
+	int _processTerminationIndex;
 	void _DrawTopLevelTable();
 	void _DrawSubLevelTable();
 	void _DrawBlackBorders();
@@ -55,6 +56,7 @@ private:
 	void _SortTableScore();
 	bool _IsSortable();
 	vector<TableItem *> *_LookupItemGroup(string &itemKey);
+	void _TerminateProcess(TableItem &item);
 };
 
 #endif /* TABLE_H_ */

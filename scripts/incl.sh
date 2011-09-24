@@ -16,15 +16,15 @@ DAEMON_EXECUTE="./${DAEMON_PROC_NAME} -d"
 SERVER_EXECUTE="./${SERVER_PROC_NAME} -d"
 WALLMON_DISPATCH_MODULES="python ${DISPATCHER_DIR}/main.py init"
 
-ROCKSVV_ADDR=rocksvv.cs.uit.no
-ROCKSVV=arild@${ROCKSVV_ADDR}:.
+ROCKSVV=rocksvv.cs.uit.no
+ROCKSVV_SSH=arild@${ROCKSVV}
 
-ICE_ADDR=ice.cs.uit.no
-ICE=ani027@${ICE_ADDR}:.
+ICE=ice.cs.uit.no
+ICE_SSH=ani027@${ICE}
 
-if [ $HOSTNAME = $ICE_ADDR ]; then
+if [ $HOSTNAME = $ICE ]; then
 	CLUSTER_FORK="rocks run host"	
-elif [ $HOSTNAME = $ROCKSVV_ADDR ]; then
+elif [ $HOSTNAME = $ROCKSVV ]; then
 	CLUSTER_FORK="cf"
 fi
 

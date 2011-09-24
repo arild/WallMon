@@ -64,7 +64,7 @@ void SdlMouseEventFetcher::PollEvents()
 		return;
 
 	double ts = System::GetTimeInMsec();
-	if (ts - _timestamp < 25)
+	if (ts - _timestamp < 10)
 		return;
 	_timestamp = ts;
 	_queue.Push(CreateShoutEvent(_eventId, (float)mx, (float)my));

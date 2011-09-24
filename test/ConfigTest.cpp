@@ -41,8 +41,8 @@ protected:
 
 TEST_F(ConfigTest, FontPath)
 {
-	const char *path = Config::GetTimesFontPath().c_str();
+	string path = Config::GetTimesFontPath();
 	LOG(INFO) << "Path: " << path;
-	ASSERT_STREQ("/home/arild/lib/times.ttf", path);
+	ASSERT_STREQ("/home/arild/lib/times.ttf", path.c_str());
 
 }

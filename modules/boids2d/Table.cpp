@@ -126,15 +126,19 @@ void Table::OnInit()
 		_itemHeight = 6;
 	}
 	else {
-		_itemHeight = 20;
+		_itemHeight = 15;
+		_isHighlighted = false;
+		_processTerminationIndex = -1;
 	}
-	_font = new Font(FONT_SIZE);
-	_fontLarge = new Font(FONT_SIZE + 1);
-	_fontSub = new Font(FONT_SIZE - 1, false, true);
-	_fontSub->SetFontType(FONT_MONO);
+
+	_font.SetFontSize(FONT_SIZE);
+	_fontSub.SetFontSize(FONT_SIZE - 1);
+	_fontSub.SetFontType(FONT_MONO);
+	_fontSub.SetAlignmentPolicy(false, true);
 	_fontSubLarge.SetFontSize(FONT_SIZE);
 	_fontSubLarge.SetFontType(FONT_MONO);
 	SetSwipeEventInterval(0.5);
+	SetTapEventInterval(0.5);
 }
 
 void Table::OnLoop()
@@ -150,6 +154,7 @@ void Table::OnLoop()
 			_items.clear();
 			_currentPixelIndex = 0;
 			_selectedItem = NULL;
+			_processTerminationIndex = -1;
 		}
 		else {
 			// Search through the two-dimensional space of table items.
@@ -169,15 +174,14 @@ void Table::OnLoop()
 	// Handle addition of new items
 	while (_addQueue.GetSize() > 0) {
 		TableItem *item = _addQueue.Pop();
-			// Clear (remove) all items
-			vector<TableItem *> *itemGroup = _LookupItemGroup(item->key);
-			if (itemGroup == NULL) {
-				// Group not present, create it
-				vector<TableItem *> v;
-				v.push_back(item);
-				_items.push_back(v);
-			} else
-				itemGroup->push_back(item);
+		vector<TableItem *> *itemGroup = _LookupItemGroup(item->key);
+		if (itemGroup == NULL) {
+			// Group not present, create it
+			vector<TableItem *> v;
+			v.push_back(item);
+			_items.push_back(v);
+		} else
+			itemGroup->push_back(item);
 	}
 
 }
@@ -185,12 +189,10 @@ void Table::OnLoop()
 void Table::OnRender()
 {
 	if (_isTopLevelTable) {
-		_itemHeight = 6;
 		_DrawTopLevelTable();
 	}
 	else {
 		glTranslatef(50, 0, 0);
-		_itemHeight = 20;
 		_DrawSubLevelTable();
 		_DrawCommonHeadingAndFrame();
 	}
@@ -202,7 +204,6 @@ void Table::OnCleanup()
 
 void Table::Tap(float x, float y)
 {
-	LOG(INFO) << "TAP";
 	if (y > TABLE_TOP || y < TABLE_BOTTOM)
 		return;
 	int idx = _RelativePixelToItemIndex(y);
@@ -221,17 +222,21 @@ void Table::Tap(float x, float y)
 		else {
 			_selectedItem = selectedItem;
 			_subTable->Add(group);
-			_HighlightBoids(group);
 		}
 	}
 	else {
-		LOG(INFO) << "IDX: " << idx;
+		return;
+		if (idx < 0 || idx >= _items[0].size())
+			return;
+		if (idx == _processTerminationIndex)
+			// Second tap
+			_TerminateProcess(*_items[0][idx]);
+		_processTerminationIndex = idx;
 	}
 }
 
 void Table::ScrollDown(float speed)
 {
-	LOG(INFO) << "Scroll Down";
 	_currentPixelIndex += speed;
 	int numItems = _items.size();
 	if (!_isTopLevelTable) {
@@ -248,14 +253,12 @@ void Table::ScrollDown(float speed)
 
 void Table::ScrollUp(float speed)
 {
-	LOG(INFO) << "Scroll up";
 	_currentPixelIndex -= speed;
 	_currentPixelIndex = fmax(_currentPixelIndex, -15);
 }
 
 void Table::SwipeLeft(float speed)
 {
-	LOG(INFO) << "SWIPE LEFT";
 	if (_isTopLevelTable)
 		_SortTableAlphabetically();
 }
@@ -264,6 +267,16 @@ void Table::SwipeRight(float speed)
 {
 	if (_isTopLevelTable)
 		_SortTableScore();
+	else {
+		if (_isHighlighted) {
+			_UnHighlightBoids(_items[0]);
+			_isHighlighted = false;
+		}
+		else {
+			_HighlightBoids(_items[0]);
+			_isHighlighted = true;
+		}
+	}
 }
 
 void Table::_DrawTopLevelTable()
@@ -293,19 +306,19 @@ void Table::_DrawTopLevelTable()
 		glVertex2f(6, y + 3);
 		glEnd();
 
-		stringstream ss;
+		stringstream ss, ss2;
 		ss << groupSize;
-		string s = item->_procName + " (" + ss.str() + ")";
-		s = _font->TrimHorizontal(s, 30, 4 +  ss.str().length());
-		_font->RenderText(s, 12, y);
+		ss2 << item->_procName << " (" << ss.str() << ")";
+		string s = _font.TrimHorizontal(ss2.str(), 32, 4 +  ss.str().length());
+		_font.RenderText(s, 12, y);
 
 		if (_selectedItem == item) {
 			// Draw the rectangular marker for selected entry
 			selectBoxStartPixel = y - _itemHeight / 4;
 			glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
 			float y_ = selectBoxStartPixel;
-			string s = _font->TrimHorizontal(_selectedItem->key, 30);
-			float w = _font->GetHorizontalPixelLength(s);
+			string s = _font.TrimHorizontal(_selectedItem->key, 30);
+			float w = _font.GetHorizontalPixelLength(s);
 			glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
 			glVertex2f(3, y_);
@@ -343,35 +356,35 @@ void Table::_DrawBlackBorders()
 	// Black out the top and bottom which is not part of the table
 	glColor3ub(0, 0, 0);
 	glBegin(GL_QUADS);
-	glVertex2f(0, TABLE_TOP);
+	glVertex2f(-20, TABLE_TOP);
 	glVertex2f(50, TABLE_TOP);
 	glVertex2f(50, 120);
-	glVertex2f(0, 120);
+	glVertex2f(-20, 120);
 	glEnd();
 
 	glBegin(GL_QUADS);
-	glVertex2f(0, -20);
+	glVertex2f(-20, -20);
 	glVertex2f(50, -20);
 	glVertex2f(50, TABLE_BOTTOM);
-	glVertex2f(0, TABLE_BOTTOM);
+	glVertex2f(-20, TABLE_BOTTOM);
 	glEnd();
 }
 
 void Table::_DrawCommonHeadingAndFrame()
 {
 	glColor3ub(255, 255, 255);
-	_fontLarge->RenderText("Process Explorer", 0, TABLE_TOP + 8, true, false);
+	_font.RenderText("Process Explorer", 0, TABLE_TOP + 8, true, false);
 
 }
 
 void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
 {
 	glColor3ub(item->r, item->g, item->b);
-	_fontSub->RenderText("Host:  " + item->GetHostName(), 5, y-4);
-	_fontSub->RenderText("Pid :  " + item->GetPid(), 5, y-7);
-	_fontSub->RenderText("User:  " + item->GetUser(), 5, y-10);
-	_fontSub->RenderText("Time:  " + item->GetStartTime(), 5, y-13);
-	_fontSub->RenderText("Threads:  " + item->GetNumThreads(), 5, y - 16);
+	_fontSub.RenderText("Host:  " + item->GetHostName(), 5, y-2.5);
+	_fontSub.RenderText("Pid :  " + item->GetPid(), 5, y-5);
+	_fontSub.RenderText("User:  " + item->GetUser(), 5, y-7.5);
+	_fontSub.RenderText("Time:  " + item->GetStartTime(), 5, y-10);
+	_fontSub.RenderText("Threads:  " + item->GetNumThreads(), 5, y-12.5);
 	if (highlightNumber != -1) {
 		glColor3ub(255, 0, 0);
 		stringstream ss;
@@ -446,3 +459,11 @@ vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)
 			return &_items[i];
 	return NULL;
 }
+
+void Table::_TerminateProcess(TableItem &item)
+{
+	stringstream ss;
+	ss << "ssh " << item.GetHostName() << " \"kill " << item.GetPid() << "\"";
+	System::RunCommand(ss.str());
+}
+

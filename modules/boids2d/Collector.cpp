@@ -6,7 +6,7 @@
 #include "PortForwarder.h"
 
 #define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	1000
+#define SAMPLE_FREQUENCY_MSEC 	50
 
 extern "C" ProcessCollector *create_collector()
 {
@@ -14,7 +14,7 @@ extern "C" ProcessCollector *create_collector()
 	p->context->key = KEY;
 	p->context->includeStatistics = true;
 	if (System::IsRocksvvCluster()) {
-		vector<string> servers = WallView(2,2,2,2).GetGrid();
+		vector<string> servers = WallView(2,1,2,1).GetGrid();
 //		vector<string> servers = WallView(0,0,7,4).GetGrid();
 		p->context->AddServers(servers);
 	}
@@ -39,6 +39,7 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_user("");
 	p->filter->set_starttime("");
 	p->filter->set_numthreads(0);
+	p->filter->set_numpagefaultspersec(0);
 	return p;
 }
 

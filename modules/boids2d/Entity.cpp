@@ -84,8 +84,10 @@ EntityEvent::EntityEvent()
 	_scrollSpeed = 0;
 	_swipeSpeed = 0;
 
+	_tapEventInterval = -1;
 	_scrollEventInterval = -1;
 	_swipeEventInterval = -1;
+	_previousTapEventTimestamp = -1;
 	_previousScrollEventTimestamp = -1;
 	_previousSwipeEventTimestamp = -1;
 }
@@ -97,29 +99,69 @@ EntityEvent::EntityEvent()
  */
 void EntityEvent::HandleHit(TT_touch_state_t & event)
 {
-
-//	LOG(INFO) << "Received event id " << event.oid;// << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove;
+	//LOG(INFO) << "Received event id " << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove << " | radius=" << event.radius;
 	if (_isFirstTime) {
 		_isFirstTime = false;
 		// Policies and thresholds not calculated
-		_scrollThreshold = height * 0.03;
-		_swipeThreshold = width * 0.03;
+		_scrollThreshold = height * 0.02;
+		_swipeThreshold = width * 0.02;
 		_minSpeed = height * 0.001;
 		_maxSpeed = height * 0.03;
 	}
 
-	if (event.remove) {
-		if (event.movedDistance < 5) {
-			//			LOG(INFO) << "TAP DETECTED";
+	if ((event.remove && event.movedDistance < 5) || event.radius > 20) {
+		_currentTapEventTimestamp = event.lastUpdated;
+		if (_currentTapEventTimestamp - _previousTapEventTimestamp > _tapEventInterval) {
+			_previousTapEventTimestamp = _currentTapEventTimestamp;
 			Tap(event.loc.x, event.loc.y);
 		}
 		return;
 	}
+	if (event.remove)
+		return;
+
+//	if (event.radius > 20) {
+//		_currentTapEventTimestamp = event.lastUpdated;
+//		if (_currentTapEventTimestamp - _previousTapEventTimestamp > _tapEventInterval) {
+//			_previousTapEventTimestamp = _currentTapEventTimestamp;
+//			Tap(event.loc.x, event.loc.y);
+//		}
+//	}
+
+
+//	_eventBuffer.push_back(event);
+//	if (_eventBuffer.size() < 2)
+//		return;
+//
+//	float deltaY = 0, deltaX = 0, radius = 0, numEventsProcessed = 0;
+//	for (int i = 0; i < _eventBuffer.size(); i++) {
+//		if (event.lastUpdated - _eventBuffer[i].lastUpdated < 0.2) {
+//			// Only take into account events that are close in time
+//			deltaX += _eventBuffer[i].delta.x;
+//			deltaY += _eventBuffer[i].delta.y;
+//			LOG(INFO) << "DELTA Y: " << _eventBuffer[i].delta.y;
+//			radius += _eventBuffer[i].radius;
+//			numEventsProcessed += 1;
+//		}
+//		else
+//			LOG(INFO) << "DISCARD EVENT";
+//	}
+//	if (numEventsProcessed > 0)
+//		radius = radius / (float)numEventsProcessed;
+//	_eventBuffer.clear();
+//
+//	event.delta.x = deltaX;
+//	event.delta.y = deltaY;
+//	event.radius = radius;
+//	LOG(INFO) << "NEW DELTA Y: " << deltaY;
+
+
 
 	float fy = fabs(event.delta.y);
 	float fx = fabs(event.delta.x);
 	if (fy < _scrollThreshold && fx < _swipeThreshold)
 		return;
+
 
 	// TODO: Take varied x and y axis into account
 	bool isScroll = false;
@@ -143,6 +185,11 @@ void EntityEvent::HandleHit(TT_touch_state_t & event)
 		else if (_swipeSpeed < -_minSpeed)
 			_swipeSpeed = max(_swipeSpeed, -_maxSpeed);
 	}
+}
+
+void EntityEvent::SetTapEventInterval(double seconds)
+{
+	_tapEventInterval = seconds;
 }
 
 void EntityEvent::SetScrollEventInterval(double seconds)

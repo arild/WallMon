@@ -26,6 +26,7 @@
 #include "TouchEvent.h"
 #include "Button.h"
 #include "ControlPanel.h"
+#include "System.h"
 
 boost::condition mainLoopThreadCondition;
 boost::mutex mainLoopThreadMutex;
@@ -158,8 +159,9 @@ void BoidsApp::_SetupAndPopulateScenes()
 	float h = _wallView->GetTotalPixelHeight();
 
 	_tableScene = new Scene(0, 0, w/2, h, 100, 100);
-	float offset = h * 0.13;
-	_boidScene = new Scene(w/2, offset, w/2, h - offset*1.5, 100, 100);
+	float offsetH = h * 0.13;
+	float offsetW = w * 0.05;
+	_boidScene = new Scene(w/2 + offsetW, offsetH, w/2 - offsetW*2, h - offsetH*1.5, 100, 100);
 
 //	Scene::AddScene(_controlPanelScene);
 	Scene::AddScene(_boidScene);
@@ -179,24 +181,16 @@ void BoidsApp::_SetupAndPopulateScenes()
 void BoidsApp::_HandleTouchEvents()
 {
 	_eventSystem->PollEvents();
-	int numEventesProcessed = 0;
 	while (_eventSystem->eventQueue->GetSize() > 0) {
 		EventQueueItem item = _eventSystem->eventQueue->Pop();
 		Entity *entity = item.get<0>();
 		TT_touch_state_t event = item.get<1>();
+		entity->HandleHit(event);
 
 		if (event.visualizeOnly) {
 			_VisualizeShoutEvent(event.loc.x, event.loc.y);
 			continue;
 		}
-
-		if (++numEventesProcessed == 999) {
-			// Process no more than 5 events at a time, and
-			// discard remaining events
-			_eventSystem->eventQueue->Clear();
-			break;
-		}
-		entity->HandleHit(event);
 	}
 }
 
@@ -214,7 +208,5 @@ void BoidsApp::_VisualizeShoutEvent(float x, float y)
 	glVertex2f(x + w, y + h);
 	glVertex2f(x, y + h);
 	glEnd();
-
-	SDL_GL_SwapBuffers();
 }
 

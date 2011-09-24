@@ -1,18 +1,29 @@
 . $(dirname $0)/incl.sh
 
 # Synchronizes WallMon source code and related artifacts with provided destinations
-
+REMOTE_BUILD=false
+ADDR=""
+ADDR_SSH=""
 for arg in "$@"
 do
-	if [ $arg == "ice" ]; then
-		${RSYNC} ${WMON_DIR} ${ICE}
-		${RSYNC} ${SRC_DIR} ${ICE}
-		${RSYNC} ${APP_DIR} ${ICE}
+	if [ $arg == "c" ]; then
+		REMOTE_BUILD=true
+		continue
+	elif [ $arg == "ice" ]; then
+		ADDR=${ICE}
+		ADDR_SSH=${ICE_SSH}
 	elif [ $arg == "rocksvv" ]; then
-		${RSYNC} ${WMON_DIR} ${ROCKSVV}
-		${RSYNC} ${SRC_DIR} ${ROCKSVV}
-		${RSYNC} ${APP_DIR} ${ROCKSVV}
+		ADDR=${ROCKSVV}
+		ADDR_SSH=${ROCKSVV_SSH}
 	else
 		echo "argument not defined: ${arg}"
+		continue
+	fi
+
+	${RSYNC} ${WMON_DIR} ${ADDR}:.
+	${RSYNC} ${SRC_DIR} ${ADDR}:.
+	${RSYNC} ${APP_DIR} ${ADDR}:.
+	if [ $REMOTE_BUILD == true ]; then
+		ssh ${ADDR_SSH} "cd WallMon && make && exit"
 	fi
 done

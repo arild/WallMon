@@ -78,8 +78,12 @@ void MonitorDispatcher::_ListenForever()
 					ClassLoader loader(path);
 					if (_multicastListenPort == SERVER_MULTICAST_LISTEN_PORT)
 						monitor = loader.LoadAndInstantiateHandler();
-					else
+					else {
 						monitor = loader.LoadAndInstantiateCollector();
+						// Attempt to synchronize collectors by waiting 1 second in order to make sure
+						// all collectors have been loaded from NFS
+						sleep(1);
+					}
 					LOG(INFO) << "user-defined collector successfully loaded (" << path << ")";
 				} catch (exception &e) {
 					LOG(ERROR) << "failed loading user-defined collector: " << e.what();

@@ -34,7 +34,7 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(2,2,2,2);
+	_wallView = new WallView(2,1,2,1);
 //	_wallView = new WallView(0,0,7,4);
 	if (_wallView->IsTileWithin() == false)
 		return;
@@ -139,7 +139,7 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
 		proc->visual->memory->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->memory->ctx->SetDestination(memUtil, avgMemoryUtilization);
+		proc->visual->memory->ctx->SetDestination(memUtil, msg.numpagefaultspersec());
 
 	// Network
 	double in = proc->stat->networkInUtilization;

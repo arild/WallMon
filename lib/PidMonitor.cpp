@@ -42,7 +42,7 @@ vector<int> PidMonitor::GetDifference()
 	vector<int>::iterator it = set_difference(_new->begin(), _new->end(), _old->begin(),
 			_old->end(), ret.begin());
 	ret.erase(it, ret.end());
-	_RemoveIgnored(ret);
+//	_RemoveIgnored(ret);
 	return ret;
 }
 

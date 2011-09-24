@@ -114,22 +114,35 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		if (filter->has_networkoutbytes()) {
 			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
 		}
+
 		if (filter->has_user()) {
-			processMsg->set_user(_ps.PidToUser(monitor->pid()));
+			if (!monitor->HasUser())
+				// Invoke ps only once per process
+				monitor->SetUser(_ps.PidToUser(monitor->pid()));
+			processMsg->set_user(monitor->GetUser());
 		}
 		if (filter->has_starttime()) {
-			processMsg->set_starttime(_ps.PidToStime(monitor->pid()));
+			if (!monitor->HasStartTime())
+				// Invoke ps only once per process
+				monitor->SetStartTime(_ps.PidToStime(monitor->pid()));
+			processMsg->set_starttime(monitor->GetStartTime());
 		}
 		if (filter->has_numthreads()) {
 			processMsg->set_numthreads(monitor->numthreads());
+		}
+		if (filter->has_numpagefaultspersec()) {
+			processMsg->set_numpagefaultspersec(monitor->GetTotalNumPageFaultsPerSec());
 		}
 
 		if (processMsg->isterminated())
 			delete monitor;
 	}
 
-	if (_processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true)
+	if (_processesMsg.SerializeToArray(_buffer, MESSAGE_BUF_SIZE) != true) {
 		LOG(ERROR) << "Protocol buffer serialization failed";
+		_processesMsg.Clear();
+		return;
+	}
 	msg->set_data(_buffer, _processesMsg.ByteSize());
 	_processesMsg.Clear();
 

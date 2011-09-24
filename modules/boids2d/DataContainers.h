@@ -173,7 +173,7 @@ public:
 	Data();
 	~Data();
 	Proc *Update(ProcessMessage &msg);
-	static void NameToRgbColor(string name, float *r, float *g, float *b);
+	static void NameToRgbColor(string name, int *r, int *g, int *b);
 private:
 	string _CreateProcKey(string hostName, int pid);
 	static unsigned long _OatHash(string key);

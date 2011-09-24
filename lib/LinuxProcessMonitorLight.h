@@ -35,12 +35,23 @@ public:
 	bool Update();
 	double SecondsSinceLastUpdate();
 
+	// External (via ps command)
+	void SetUser(string user);
+	void SetStartTime(string time);
+	bool HasUser();
+	bool HasStartTime();
+	string GetUser();
+	string GetStartTime();
+
 	// stat
+	double GetTotalNumPageFaultsPerSec();
 	double GetUserTime();
 	double GetSystemTime();
 	double GetUserCpuLoad(); // in percentage
 	double GetSystemCpuLoad(); // in percentage
 	string GetProcessName();
+	unsigned long minflt();
+	unsigned long majflt();
 	unsigned long utime();
 	unsigned long stime();
 	int pid();
@@ -59,11 +70,13 @@ public:
 	unsigned long wchar();
 
 private:
+	// external variables
+	string _user, _startTime;
+
 	// /proc/<pid>/stat variables
 	int _pid;
 	char _comm[4096];
-	unsigned long _utime;
-	unsigned long _stime;
+	unsigned long _minflt, _majflt, _utime, _stime;
 	unsigned int _numThreads;
 
 	// /proc/<pid>/statm variables
@@ -77,6 +90,7 @@ private:
 	long _timesinceboot;
 	char *_buffer;
 
+	unsigned long _prevMinflt, _prevMajflt;
 	unsigned long _prevUserTime;
 	unsigned long _prevSystemTime;
 	unsigned long _prevTotalNetworkRead;
