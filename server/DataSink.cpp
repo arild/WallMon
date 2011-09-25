@@ -29,7 +29,7 @@ DataSink::DataSink(DataRouter *router)
 {
 	// Static variables
 	_router = router;
-	_ioLogger = new IoLogger(1024 * 1000 * 10);
+	_ioLogger = new IoLogger(1024 * 1000 * 100);
 	_numConnectedClients = 0;
 
 	// Setup the entry socket which does the accept() call

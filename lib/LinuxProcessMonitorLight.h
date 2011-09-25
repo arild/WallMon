@@ -35,11 +35,7 @@ public:
 	bool Update();
 	double SecondsSinceLastUpdate();
 
-	// External (via ps command)
-	void SetUser(string user);
-	void SetStartTime(string time);
-	bool HasUser();
-	bool HasStartTime();
+	// Set during constructor
 	string GetUser();
 	string GetStartTime();
 

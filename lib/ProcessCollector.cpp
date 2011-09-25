@@ -54,6 +54,7 @@ void ProcessCollector::OnInit(Context *ctx)
 	else
 		_AddDefinedProcesses();
 	_processesMsg.Clear();
+	_numSamples = 0;
 
 	LOG(INFO) << "num cores detected: " << _numCores;
 	LOG(INFO) << "total memory detected: " << _totalMemoryMb << " MB";
@@ -69,7 +70,7 @@ void ProcessCollector::OnStop()
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
 	// TODO: Investigate why this causes segfault at arbirary intervals
-	if (_processNames.size() == 0)
+	if (_processNames.size() == 0)// _numSamples++ % 5 == 0)
 		_FindAllNewProcesses();
 
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
@@ -114,17 +115,10 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		if (filter->has_networkoutbytes()) {
 			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
 		}
-
 		if (filter->has_user()) {
-			if (!monitor->HasUser())
-				// Invoke ps only once per process
-				monitor->SetUser(_ps.PidToUser(monitor->pid()));
 			processMsg->set_user(monitor->GetUser());
 		}
 		if (filter->has_starttime()) {
-			if (!monitor->HasStartTime())
-				// Invoke ps only once per process
-				monitor->SetStartTime(_ps.PidToStime(monitor->pid()));
 			processMsg->set_starttime(monitor->GetStartTime());
 		}
 		if (filter->has_numthreads()) {
@@ -167,16 +161,18 @@ void ProcessCollector::_AddDefinedProcesses()
 void ProcessCollector::_AddProcess(int pid)
 {
 	LinuxProcessMonitorLight *monitor = new LinuxProcessMonitorLight();
-	if (monitor->Open(pid) == false) {
+
+	bool open = monitor->Open(pid);
+	bool update = false;
+	if (open)
+		update = monitor->Update();
+
+	if (open && update)
+		_monitors.push_back(monitor);
+	else {
 		LOG_EVERY_N(INFO, 500) << "failed opening and monitoring processes " << _numTimesFailedMonitoringProcesses++ << " times";
 		delete monitor;
-		// TODO: Some processes are not possible to monitor (need root?), however pids that are not
-		// possible monitor just increases linearly, can not ignore them all
-		//_pidMonitor->Ignore(pid);
-		return;
 	}
-	monitor->Update();
-	_monitors.push_back(monitor);
 }
 
 

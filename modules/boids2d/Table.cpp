@@ -82,7 +82,7 @@ Table::~Table()
  */
 void Table::Add(TableItem *item)
 {
-	_addQueue.Push(item);
+	_addQueue->Push(item);
 }
 
 void Table::Add(vector<TableItem *> items)
@@ -93,20 +93,21 @@ void Table::Add(vector<TableItem *> items)
 
 void Table::Remove(TableItem *item)
 {
-	_removeQueue.Push(item);
+	_removeQueue->Push(item);
 }
 
 void Table::Clear()
 {
-	_removeQueue.Push((TableItem *)NULL);
+	_removeQueue->Push((TableItem *)NULL);
 }
 
 void Table::OnInit()
 {
 	_currentPixelIndex = 0;
 	_selectedItem = NULL;
+	_addQueue = new Queue<TableItem *>(25000);
+	_removeQueue = new Queue<TableItem *>(300);
 	// Set up hit box
-
 	if (_isTopLevelTable) {
 		tx = 0;
 		ty = TABLE_BOTTOM;
@@ -137,15 +138,15 @@ void Table::OnInit()
 	_fontSub.SetAlignmentPolicy(false, true);
 	_fontSubLarge.SetFontSize(FONT_SIZE);
 	_fontSubLarge.SetFontType(FONT_MONO);
-	SetSwipeEventInterval(0.5);
-	SetTapEventInterval(0.5);
+	SetSwipeEventInterval(0.75);
+	SetTapEventInterval(1.1);
 }
 
 void Table::OnLoop()
 {
 	// Process removal of single or all items
-	while (_removeQueue.GetSize() > 0) {
-		TableItem *item = _removeQueue.Pop();
+	while (_removeQueue->GetSize() > 0) {
+		TableItem *item = _removeQueue->Pop();
 		if (item == NULL) {
 			// Clear all items
 			for (int i = 0; i < _items.size(); i++) {
@@ -172,8 +173,8 @@ void Table::OnLoop()
 	}
 
 	// Handle addition of new items
-	while (_addQueue.GetSize() > 0) {
-		TableItem *item = _addQueue.Pop();
+	while (_addQueue->GetSize() > 0) {
+		TableItem *item = _addQueue->Pop();
 		vector<TableItem *> *itemGroup = _LookupItemGroup(item->key);
 		if (itemGroup == NULL) {
 			// Group not present, create it
@@ -200,6 +201,8 @@ void Table::OnRender()
 
 void Table::OnCleanup()
 {
+	delete _addQueue;
+	delete _removeQueue;
 }
 
 void Table::Tap(float x, float y)
@@ -225,10 +228,9 @@ void Table::Tap(float x, float y)
 		}
 	}
 	else {
-		return;
 		if (idx < 0 || idx >= _items[0].size())
 			return;
-		if (idx == _processTerminationIndex)
+		//if (idx == _processTerminationIndex)
 			// Second tap
 			_TerminateProcess(*_items[0][idx]);
 		_processTerminationIndex = idx;
@@ -328,7 +330,6 @@ void Table::_DrawTopLevelTable()
 			glVertex2f(3, y_);
 			glEnd();
 		}
-
 	}
 	_DrawBlackBorders();
 	glColor3ub(255, 255, 255);
@@ -463,7 +464,7 @@ vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)
 void Table::_TerminateProcess(TableItem &item)
 {
 	stringstream ss;
-	ss << "ssh " << item.GetHostName() << " \"kill " << item.GetPid() << "\"";
+	ss << "ssh " << item.GetHostName() << " \"kill -9 " << item.GetPid() << "\"";
 	System::RunCommand(ss.str());
 }
 

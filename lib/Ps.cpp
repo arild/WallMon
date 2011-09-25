@@ -20,6 +20,8 @@ Ps::~Ps()
 string Ps::PidToUser(int pid)
 {
 	vector<string> v = _Lookup(pid);
+	if (v.size() == 0)
+		return (string)"";
 	return v[0];
 }
 
@@ -29,20 +31,12 @@ string Ps::PidToStime(int pid)
 	return v[1];
 }
 
-vector<string> Ps::_Lookup(int pid)
+bool Ps::Update()
 {
-	map<int, vector<string> >::iterator it = _data.find(pid);
-	if (it != _data.end())
-		return it->second;
-	if (_Update() == false)
-		LOG(WARNING) << "failed running ps";
-
-	it = _data.find(pid);
-	if (it != _data.end())
-		return it->second;
-	LOG(WARNING) << "failed looking up pid from ps output";
-	vector<string> v;
-	return v;
+	if (_Update())
+		return true;
+	LOG(INFO) << "failed running ps command";
+	return false;
 }
 
 bool Ps::_Update()
@@ -59,7 +53,9 @@ bool Ps::_Update()
 	vector<string> tokens;
 	boost::split(tokens, buf, boost::is_any_of(" \n"));
 	tokens.pop_back();
-	CHECK(tokens.size() % 3 == 0);
+	if (tokens.size() % 3 != 0)
+		return false;
+
 	for (int i = 0; i < tokens.size(); i+=3) {
 		vector<string> val;
 		val.push_back(tokens[i]);
@@ -68,4 +64,19 @@ bool Ps::_Update()
 	}
 	return true;
 }
+
+vector<string> Ps::_Lookup(int pid)
+{
+	map<int, vector<string> >::iterator it = _data.find(pid);
+	if (it != _data.end())
+		return it->second;
+	Update();
+	it = _data.find(pid);
+	if (it != _data.end())
+		return it->second;
+	LOG(INFO) << "failed looking up pid from ps output";
+	vector<string> v;
+	return v;
+}
+
 

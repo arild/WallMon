@@ -38,11 +38,11 @@ public:
 private:
 	vector<LinuxProcessMonitorLight *> _monitors;
 	PidMonitor *_pidMonitor;
-	Ps _ps;
 	list<string> _processNames;
 	char *_buffer;
 	int _numCores;
 	double _totalMemoryMb;
+	unsigned int _numSamples;
 	ProcessCollectorMessage _processesMsg;
 	IProcessCollectorController *_controller;
 	void _FindAllNewProcesses();

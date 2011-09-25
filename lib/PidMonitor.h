@@ -19,16 +19,11 @@ class PidMonitor {
 public:
 	PidMonitor();
 	virtual ~PidMonitor();
-	void Update(vector<int> &pids);
 	void Update();
 	vector<int> GetDifference();
-	void Ignore(int pid);
 
 private:
-	vector<int> *_new;
-	vector<int> *_old;
-	set<int> *_ignored;
-	void _RemoveIgnored(vector<int> &pids);
+	vector<int> *_new, *_old;
 };
 
 #endif /* PIDMONITOR_H_ */

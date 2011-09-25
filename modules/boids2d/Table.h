@@ -39,7 +39,7 @@ private:
 	Font _fontSub, _fontSubLarge, _font;
 	Table *_subTable;
 	TableItem *_selectedItem;
-	Queue<TableItem *> _addQueue, _removeQueue;
+	Queue<TableItem *> *_addQueue, *_removeQueue;
 	bool _isHighlighted, _isTopLevelTable;
 	int _processTerminationIndex;
 	void _DrawTopLevelTable();

@@ -184,6 +184,11 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 		}
 	}
 
+	if (msg.has_data() == false) {
+		LOG(INFO) << "data field not present in collector messsage";
+		return;
+	}
+
 	if (event->ctx->includeStatistics) {
 		event->numSamples += 1;
 		event->numSamplesLastSecond += 1;

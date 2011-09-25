@@ -73,7 +73,7 @@ int System::GetPid(string processName)
 	return atoi(processName.c_str());
 }
 
-void _TokenizeFile(FILE *file, vector<int> *v)
+void _TokenizeFile(FILE *file, vector<int> &v)
 {
 	char *word;
 	char buf[101];
@@ -84,21 +84,32 @@ void _TokenizeFile(FILE *file, vector<int> *v)
 		fscanf(file, "%*[^a-zA-Z0-9'_]");
 		/* Scan up to 100 letters */
 		if (fscanf(file, "%100[a-zA-Z0-9'_]", buf) == 1) {
-			v->push_back(atoi(buf));
+			v.push_back(atoi(buf));
 		}
 	}
 }
 
-vector<int> *System::GetAllPids()
+vector<int> System::GetAllPids()
 {
 	string cmd = "ps ax | awk '{print $1}'";
 	FILE *fp = popen(cmd.c_str(), "r");
+	vector<int> pids;
 	if (fp == NULL)
-		return NULL;
-	vector<int> *v = new vector<int> ;
-	_TokenizeFile(fp, v);
+		return pids;
+	_TokenizeFile(fp, pids);
 	pclose(fp);
-	return v;
+	return pids;
+}
+
+bool System::GetAllPids(vector<int> &pids)
+{
+	string cmd = "ls /proc | awk 'function isnum(x){return(x==x+0)}{if (isnum($1)) print $1}'";
+	FILE *fp = popen(cmd.c_str(), "r");
+	if (fp == NULL)
+		return false;
+	_TokenizeFile(fp, pids);
+	pclose(fp);
+	return true;
 }
 
 double System::GetTimeInSec()
@@ -157,7 +168,7 @@ int System::GetTotalMemory()
 
 bool System::IsRocksvvCluster()
 {
-	string hostname = RunCommand("hostname");;
+	string hostname = RunCommand("hostname");
 	string rocks = "rocksvv.cs.uit.no";
 	if (rocks.compare(hostname) == 0)
 		return true;
@@ -247,12 +258,12 @@ void System::BringWallmonServerWindowToFront()
 
 string System::RunCommand(string cmd)
 {
-	char buf[4096];
+	char buf[8000];
 
 	FILE *fp = popen(cmd.c_str(), "r");
 	if (fp == NULL)
 		return "";
-	void *res = fgets(buf, 4096, fp);
+	void *res = fgets(buf, 8000, fp);
 	pclose(fp);
 	if (res == NULL)
 		return "";
@@ -262,7 +273,7 @@ string System::RunCommand(string cmd)
 	return retval.erase(retval.length() - 1, 1);
 }
 
-string System::RunCommand(char *cmd)
+string System::RunCommand(const char *cmd)
 {
 	return RunCommand((string)cmd);
 }

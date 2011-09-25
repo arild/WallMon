@@ -21,10 +21,11 @@ public:
 	virtual ~Ps();
 	string PidToUser(int pid);
 	string PidToStime(int pid);
+	bool Update();
 private:
-	map<int, vector<string> > _data;
-	vector<string> _Lookup(int pid);
 	bool _Update();
+	map<int, vector<string> > _data; // pid -> ['user', 'time']
+	vector<string> _Lookup(int pid);
 };
 
 #endif /* GENERALPROCESSINFO_H_ */

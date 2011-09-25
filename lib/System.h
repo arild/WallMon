@@ -17,7 +17,9 @@ class System {
 public:
 	static void Daemonize();
 	static int GetPid(string processName);
-	static vector<int> *GetAllPids();
+	static vector<int> GetAllPids();
+	static bool GetAllPids(vector<int> &pids);
+
 	static double GetTimeInSec();
 	static double GetTimeInMsec();
 	static string &GetHostname();
@@ -38,7 +40,7 @@ public:
 	static string ExpandUserPath(string path);
 	static void BringWallmonServerWindowToFront();
 	static string RunCommand(string cmd);
-	static string RunCommand(char *cmd);
+	static string RunCommand(const char *cmd);
 };
 
 #endif /* SYSTEM_H_ */

@@ -55,6 +55,12 @@ bool LinuxProcessMonitorLight::Open(int pid)
 	if (_procio == NULL)
 		return false;
 
+	stringstream userss, datess;
+	userss << "stat -c %U /proc/" << pid;
+	_user = System::RunCommand(userss.str());
+	datess << "date +\"%b%d %k:%M\" -r /proc/" << pid;
+	_startTime = System::RunCommand(datess.str());
+
 	return true;
 }
 
@@ -95,25 +101,6 @@ bool LinuxProcessMonitorLight::Update()
 double LinuxProcessMonitorLight::SecondsSinceLastUpdate()
 {
 	return System::GetTimeInSec() - _updateTime;
-}
-
-void LinuxProcessMonitorLight::SetUser(string user)
-{
-	_user = user;
-}
-
-void LinuxProcessMonitorLight::SetStartTime(string time)
-{
-	_startTime = time;
-}
-bool LinuxProcessMonitorLight::HasUser()
-{
-	return !_user.empty();
-}
-
-bool LinuxProcessMonitorLight::HasStartTime()
-{
-	return !_startTime.empty();
 }
 
 string LinuxProcessMonitorLight::GetUser()

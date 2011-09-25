@@ -100,14 +100,12 @@ void BoidAxis::OnRender()
 	glVertex2f(X, Y + H + S);
 	glEnd();
 
-	// Ticks along x-axis and y-axis
+	// Ticks along bottom x-axis and left y-axis
 	int numTicks = (_stop - _start) / _tickSize;
 	float w = 0.7;
 	float h = 1.4;
 	float b = Y;
 	float l = X;
-
-
 	for (int i = 0; i <= numTicks; i++) {
 
 		// Render tick markers
@@ -138,10 +136,11 @@ void BoidAxis::OnRender()
 			_font->RenderText(ss.str(), x + w / (float) 2, -9);
 		_font->RenderText(ss.str(), -10, y + w, false, true);
 	}
+
+	// Ticks along top x-axis and right y-axis
 	float top = Y + H;
 	float right = X + W;
 	for (int i = 0; i < 9; i++) {
-
 		// Render tick markers
 		float step = i * (float)(100 / (float)8) - w/2;
 		glColor3f(0, 1, 0);
@@ -155,14 +154,17 @@ void BoidAxis::OnRender()
 			glVertex2f(step, b);
 			glEnd();
 		}
-		glBegin(GL_QUADS);
-		glVertex2f(right, step);
-		glVertex2f(right + h, step);
-		glVertex2f(right + h, step + w);
-		glVertex2f(right, step + w);
-		glEnd();
-		// Render tick sizes
+
+		// Skip the ticks and numbers along right vertical axis
+//		glBegin(GL_QUADS);
+//		glVertex2f(right, step);
+//		glVertex2f(right + h, step);
+//		glVertex2f(right + h, step + w);
+//		glVertex2f(right, step + w);
+//		glEnd();
+//		// Render tick sizes
 		glColor3f(1, 0, 0);
+//		_font->RenderText(ss.str(), 105, step + w / (float) 2, false, true);
 		stringstream ss;
 		if (i == 0)
 			ss << 0;
@@ -170,12 +172,8 @@ void BoidAxis::OnRender()
 			ss << (float)pow((float)2, i - 1);
 		if (BoidSharedContext::useLogarithmicAxis)
 			_font->RenderText(ss.str(), step + w / (float) 2, -9);
-		_font->RenderText(ss.str(), 105, step + w / (float) 2, false, true);
 	}
 
-
-	_DrawLinearTicks();
-	_DrawLogarithmicTicks();
 	glColor3f(0, 1, 0);
 	_font->RenderText("Metric Utilization", 50, -15);
 

@@ -17,7 +17,7 @@
 template<class T>
 class Queue {
 public:
-	Queue(int capacity=100);
+	Queue(int capacity=500);
 	int GetSize();
 	void Clear();
 	void Push(T item);
