@@ -174,6 +174,7 @@ void BoidsApp::_SetupAndPopulateScenes()
 	axis->Set(0, 100, 25);
 	_boidScene->AddEntity(axis);
 
+	Scene::current = _tableScene;
 	_table = new Table();
 	_tableScene->AddEntity(_table);
 }

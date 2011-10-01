@@ -57,6 +57,7 @@ private:
 	bool _IsSortable();
 	vector<TableItem *> *_LookupItemGroup(string &itemKey);
 	void _TerminateProcess(TableItem &item);
+	int _GetTotalNumItems();
 };
 
 #endif /* TABLE_H_ */

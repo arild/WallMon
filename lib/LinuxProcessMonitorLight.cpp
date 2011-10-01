@@ -12,8 +12,10 @@
 LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 {
 	_jiffy = sysconf(_SC_CLK_TCK);
-	_buffer = new char[300]; // size is 200 but we use 300 for future versions (ubuntu version for example has many more fields...)
-	memset(_buffer, 0, 300);
+	// size is 200 but we use 300 for future versions (ubuntu version for example has many more fields...)
+	memset(_bufStat, 0, 300);
+	memset(_bufStatm, 0, 300);
+	memset(_bufIo, 0, 300);
 
 	_procstat = NULL;
 	_procstatm = NULL;
@@ -21,6 +23,9 @@ LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 	_utime = _stime = _rchar = _wchar = 0;
 	_updateTime = 0.;
 	_totalNumBytesRead = 0;
+
+	_statReadProcfs = NULL;
+	_statParseProcfs = NULL;
 }
 
 LinuxProcessMonitorLight::~LinuxProcessMonitorLight()
@@ -31,6 +36,12 @@ LinuxProcessMonitorLight::~LinuxProcessMonitorLight()
 		fclose(_procstatm);
 	if (_procio)
 		fclose(_procio);
+}
+
+void LinuxProcessMonitorLight::SetStatistics(Stat<double> *readProcfs, Stat<double> *parseProcfs)
+{
+	_statReadProcfs = readProcfs;
+	_statParseProcfs = parseProcfs;
 }
 
 bool LinuxProcessMonitorLight::Open(int pid)
@@ -76,24 +87,32 @@ bool LinuxProcessMonitorLight::Update()
 	_updateTime = System::GetTimeInSec();
 
 	rewind(_procstat);
-	_totalNumBytesRead += fread(_buffer, 1, 300, _procstat);
+	_totalNumBytesRead += fread(_bufStat, 1, 300, _procstat);
 	if (ferror(_procstat))
 		return false;
-	sscanf(_buffer,
-			"%d %s %*c %*d %*d %*d %*d %*d %*u %lu %*lu %lu %*lu %lu %lu %*ld %*ld %*ld %*ld %d",
-			&_pid, _comm, &_minflt, &_majflt, &_utime, &_stime, &_numThreads);
-
 	rewind(_procstatm);
-	_totalNumBytesRead += fread(_buffer, 1, 300, _procstatm);
+	_totalNumBytesRead += fread(_bufStatm, 1, 300, _procstatm);
 	if (ferror(_procstatm))
 		return false;
-	sscanf(_buffer, "%lu", &_size);
-
 	rewind(_procio);
-	_totalNumBytesRead += fread(_buffer, 1, 300, _procio);
+	_totalNumBytesRead += fread(_bufIo, 1, 300, _procio);
 	if (ferror(_procio))
 		return false;
-	sscanf(_buffer, "%*s %lu %*s %lu", &_rchar, &_wchar);
+
+	double afterReadProcfs;
+	if (_statReadProcfs != NULL) {
+		afterReadProcfs = System::GetTimeInMsec();
+		_statReadProcfs->Add(afterReadProcfs - _updateTime * (double)1000);
+	}
+
+	sscanf(_bufStat,
+			"%d %s %*c %*d %*d %*d %*d %*d %*u %lu %*lu %lu %*lu %lu %lu %*ld %*ld %*ld %*ld %d",
+			&_pid, _comm, &_minflt, &_majflt, &_utime, &_stime, &_numThreads);
+	sscanf(_bufStatm, "%lu", &_size);
+	sscanf(_bufIo, "%*s %lu %*s %lu", &_rchar, &_wchar);
+
+	if (_statReadProcfs != NULL)
+		_statParseProcfs->Add(System::GetTimeInMsec() - afterReadProcfs);
 
 	return true;
 }

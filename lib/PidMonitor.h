@@ -21,7 +21,6 @@ public:
 	virtual ~PidMonitor();
 	void Update();
 	vector<int> GetDifference();
-
 private:
 	vector<int> *_new, *_old;
 };

@@ -13,9 +13,6 @@
 #include "IMonitorManager.h"
 #include "MonitorDispatcher.h"
 #include "DataSink.h"
-#ifdef Darwin
-#include <SDL/SDL.h>
-#endif
 
 using namespace std;
 

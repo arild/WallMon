@@ -21,16 +21,17 @@
 //#include <linux/limits.h>
 #include <sys/times.h>
 #include <iomanip>
+#include "Stat.h"
 
 using namespace std;
 
 class LinuxProcessMonitorLight {
 
 public:
-
 	LinuxProcessMonitorLight();
 	virtual ~LinuxProcessMonitorLight();
 
+	void SetStatistics(Stat<double> *readProcfs, Stat<double> *parseProcfs);
 	bool Open(int pid=-1);
 	bool Update();
 	double SecondsSinceLastUpdate();
@@ -66,6 +67,9 @@ public:
 	unsigned long wchar();
 
 private:
+	// User must call NewSample()
+	Stat<double> *_statReadProcfs, *_statParseProcfs;
+
 	// external variables
 	string _user, _startTime;
 
@@ -84,7 +88,7 @@ private:
 
 	long _jiffy; // (USER_HZ)
 	long _timesinceboot;
-	char *_buffer;
+	char _bufStat[300], _bufStatm[300], _bufIo[300];
 
 	unsigned long _prevMinflt, _prevMajflt;
 	unsigned long _prevUserTime;

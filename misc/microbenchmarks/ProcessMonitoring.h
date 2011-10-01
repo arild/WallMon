@@ -10,14 +10,17 @@
 
 #include "LinuxProcessMonitorLight.h"
 #include <vector>
+#include "Stat.h"
+
 
 using namespace std;
 
 class ProcessMonitoring {
 public:
+	Stat<double> protobufPackSamples, protobufSerializationSamples, procfsReadSamples, procfsParseSamples;
 	ProcessMonitoring();
 	virtual ~ProcessMonitoring();
-	void RunProcfsBenchmark(int numSamples, bool verboseProcfs=false, bool includeProtobuf=false, bool verboseProtobuf=false);
+	void RunProcfsBenchmark(int numSamples);
 	void RunProtobufBenchmark();
 private:
 	vector<LinuxProcessMonitorLight *> _monitors;

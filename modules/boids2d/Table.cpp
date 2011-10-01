@@ -25,6 +25,7 @@
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
 float FONT_SIZE = 3.;
+Table *topTable = NULL;
 
 struct TableGroupCompareAlphabetically {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
@@ -64,6 +65,44 @@ struct TableGroupCompareUtilization {
 Table::Table(bool isTopLevelTable)
 {
 	_isTopLevelTable = isTopLevelTable;
+	_currentPixelIndex = 0;
+	_selectedItem = NULL;
+	_addQueue = new Queue<TableItem *>(25000);
+	_removeQueue = new Queue<TableItem *>(300);
+	// Set up hit box
+	if (_isTopLevelTable) {
+		topTable = this;
+		tx = 0;
+		ty = TABLE_BOTTOM;
+		width = 50;
+		height = TABLE_TOP;
+
+		// Create and setup hitbox for the sub-table
+		// Note: Entities created by other entities are automatically
+		// added to current scene
+		_subTable = new Table(false);
+		Scene::AddEntityCurrent(_subTable);
+		_subTable->tx = 50;
+		_subTable->ty = 0;
+		_subTable->width = 50;
+		_subTable->height = 100;
+
+		_itemHeight = 6;
+	}
+	else {
+		_itemHeight = 15;
+		_isHighlighted = false;
+		_processTerminationIndex = -1;
+	}
+
+	_font.SetFontSize(FONT_SIZE);
+	_fontSub.SetFontSize(FONT_SIZE - 1);
+	_fontSub.SetFontType(FONT_MONO);
+	_fontSub.SetAlignmentPolicy(false, true);
+	_fontSubLarge.SetFontSize(FONT_SIZE);
+	_fontSubLarge.SetFontType(FONT_MONO);
+	SetSwipeEventInterval(0.75);
+	SetTapEventInterval(1.1);
 }
 
 Table::~Table()
@@ -103,43 +142,6 @@ void Table::Clear()
 
 void Table::OnInit()
 {
-	_currentPixelIndex = 0;
-	_selectedItem = NULL;
-	_addQueue = new Queue<TableItem *>(25000);
-	_removeQueue = new Queue<TableItem *>(300);
-	// Set up hit box
-	if (_isTopLevelTable) {
-		tx = 0;
-		ty = TABLE_BOTTOM;
-		width = 50;
-		height = TABLE_TOP;
-
-		// Create and setup hitbox for the sub-table
-		// Note: Entities created by other entities are automatically
-		// added to current scene
-		_subTable = new Table(false);
-		Scene::AddEntityCurrent(_subTable);
-		_subTable->tx = 50;
-		_subTable->ty = 0;
-		_subTable->width = 50;
-		_subTable->height = 100;
-
-		_itemHeight = 6;
-	}
-	else {
-		_itemHeight = 15;
-		_isHighlighted = false;
-		_processTerminationIndex = -1;
-	}
-
-	_font.SetFontSize(FONT_SIZE);
-	_fontSub.SetFontSize(FONT_SIZE - 1);
-	_fontSub.SetFontType(FONT_MONO);
-	_fontSub.SetAlignmentPolicy(false, true);
-	_fontSubLarge.SetFontSize(FONT_SIZE);
-	_fontSubLarge.SetFontType(FONT_MONO);
-	SetSwipeEventInterval(0.75);
-	SetTapEventInterval(1.1);
 }
 
 void Table::OnLoop()
@@ -228,7 +230,7 @@ void Table::Tap(float x, float y)
 		}
 	}
 	else {
-		if (idx < 0 || idx >= _items[0].size())
+		if (_items.size() == 0 || idx < 0 || idx >= _items[0].size())
 			return;
 		//if (idx == _processTerminationIndex)
 			// Second tap
@@ -270,6 +272,9 @@ void Table::SwipeRight(float speed)
 	if (_isTopLevelTable)
 		_SortTableScore();
 	else {
+		if (_items.size() == 0)
+			// No items present in sub-table (tap not performed)
+			return;
 		if (_isHighlighted) {
 			_UnHighlightBoids(_items[0]);
 			_isHighlighted = false;
@@ -374,8 +379,11 @@ void Table::_DrawBlackBorders()
 void Table::_DrawCommonHeadingAndFrame()
 {
 	glColor3ub(255, 255, 255);
-	_font.RenderText("Process Explorer", 0, TABLE_TOP + 8, true, false);
-
+	_font.RenderText("Process Explorer", 0, TABLE_TOP + 9, true, false);
+	glColor3f(1, 0, 0);
+	stringstream ss;
+	ss << "monitoring " << topTable->_GetTotalNumItems() << " processes";
+	_fontSub.RenderText(ss.str(), 0, TABLE_TOP + 5, true, false);
 }
 
 void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
@@ -467,4 +475,14 @@ void Table::_TerminateProcess(TableItem &item)
 	ss << "ssh " << item.GetHostName() << " \"kill -9 " << item.GetPid() << "\"";
 	System::RunCommand(ss.str());
 }
+
+int Table::_GetTotalNumItems()
+{
+	int num = 0;
+	for (int i = 0; i < _items.size(); i++) {
+		num += _items[i].size();
+	}
+	return num;
+}
+
 

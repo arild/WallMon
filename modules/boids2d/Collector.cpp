@@ -6,7 +6,7 @@
 #include "PortForwarder.h"
 
 #define KEY		"BOIDS"
-#define SAMPLE_FREQUENCY_MSEC 	25
+#define SAMPLE_FREQUENCY_MSEC 	750
 
 extern "C" ProcessCollector *create_collector()
 {
