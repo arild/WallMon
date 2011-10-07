@@ -13,7 +13,7 @@
 #include "System.h"
 #include "unistd.h"
 
-#define KEY						"PROCESS_ALL_MON"
+#define KEY						"CHART"
 #define MESSAGE_BUF_SIZE		1024 * 1000
 #define SAMPLE_FREQUENCY_MSEC 	1000
 #define FRAMES_PER_SEC			2
@@ -58,7 +58,7 @@ void Handler::Handle(WallmonMessage *msg)
 
 	// Go through all process specific messages and read statistics
 	for (int i = 0; i < _message->processmessage_size(); i++) {
-		ProcessCollectorMessage::ProcessMessage *processMessage = _message->mutable_processmessage(i);
+		ProcessMessage *processMessage = _message->mutable_processmessage(i);
 
 		// Lookup keys
 		string processName = processMessage->processname();
@@ -91,7 +91,7 @@ void Handler::Handle(WallmonMessage *msg)
 
 	totalBytesReceived += length;
 	numMessagesReceived += 1;
-	totalSampleTime += msg->sampletimemsec();
+	totalSampleTime += msg->sampledurationmsec();
 	totalSampleFrequency += msg->samplefrequencymsec();
 	timestampPreviousMsec = timestampNowMsec;
 	timestampNowMsec = msg->timestampmsec();

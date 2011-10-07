@@ -14,8 +14,7 @@
 #include <sstream>
 
 #include "Wallmon.h"
-#include "Protocol.pb.h"
-#include "Wallmon.pb.h"
+#include "stubs/ProcessCollector.pb.h"
 #include "BarChart.h"
 
 using namespace std;
