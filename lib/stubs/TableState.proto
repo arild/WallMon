@@ -1,0 +1,7 @@
+
+message TableStateMessage
+{
+  required bool isTopTable = 1;
+  required float pixelIndex = 2;
+  optional int32 selectedIndex = 3;
+}

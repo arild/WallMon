@@ -31,13 +31,16 @@ string HOSTNAMES[WALL_WIDHT * WALL_HEIGHT] = { "tile-0-0", "tile-1-0", "tile-2-0
  *
  * Later operations in this instance will take this grid into account
  */
-WallView::WallView(int x, int y, int width, int height)
+WallView::WallView(int x, int y, int width, int height, string hostname)
 {
 	_x = x;
 	_y = y;
 	_w = width;
 	_h = height;
-	_hostname = System::GetHostname();
+
+	_hostname = hostname;
+	if (_hostname.empty())
+		_hostname = System::GetHostname();
 
 	// Traverse row-wise
 	for (int i = _y; i < _y + _h && i < WALL_HEIGHT; i++) {
@@ -66,6 +69,18 @@ bool WallView::IsTileWithin()
 	if (_GetIndex(_hostname) == -1)
 		return false;
 	return true;
+}
+
+/**
+ * Determines if a tile is at the lower left position of the grid.
+ *
+ * This method is intended to be used to select a master within the grid.
+ */
+bool WallView::IsLowerLeft()
+{
+	if (_GetIndex(_hostname) == 0)
+		return true;
+	return false;
 }
 
 /**

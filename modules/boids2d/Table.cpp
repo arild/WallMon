@@ -62,11 +62,12 @@ struct TableGroupCompareUtilization {
 };
 
 
-Table::Table(bool isTopLevelTable)
+Table::Table(bool isMaster, bool isTopLevelTable)
 {
 	_isTopLevelTable = isTopLevelTable;
 	_currentPixelIndex = 0;
 	_selectedItem = NULL;
+	_selectedItemIndex = -1;
 	_addQueue = new Queue<TableItem *>(25000);
 	_removeQueue = new Queue<TableItem *>(300);
 	// Set up hit box
@@ -76,11 +77,15 @@ Table::Table(bool isTopLevelTable)
 		ty = TABLE_BOTTOM;
 		width = 50;
 		height = TABLE_TOP;
+		_state = new TableStateSynchronizer();
+		_state->Start();
+
 
 		// Create and setup hitbox for the sub-table
 		// Note: Entities created by other entities are automatically
 		// added to current scene
-		_subTable = new Table(false);
+		_subTable = new Table(isMaster, false);
+		_subTable->SetTableStateSynchronizer(_state);
 		Scene::AddEntityCurrent(_subTable);
 		_subTable->tx = 50;
 		_subTable->ty = 0;
@@ -94,7 +99,7 @@ Table::Table(bool isTopLevelTable)
 		_isHighlighted = false;
 		_processTerminationIndex = -1;
 	}
-
+	_isMaster = isMaster;
 	_font.SetFontSize(FONT_SIZE);
 	_fontSub.SetFontSize(FONT_SIZE - 1);
 	_fontSub.SetFontType(FONT_MONO);
@@ -108,6 +113,11 @@ Table::Table(bool isTopLevelTable)
 Table::~Table()
 {
 	delete _subTable;
+}
+
+void Table::SetTableStateSynchronizer(TableStateSynchronizer *state)
+{
+	_state = state;
 }
 
 /**
@@ -146,6 +156,40 @@ void Table::OnInit()
 
 void Table::OnLoop()
 {
+	// Process state messages
+	Queue<TableStateMessage> *stateQueue = _state->GetStateMessageQueue(_isTopLevelTable);
+	while (stateQueue->GetSize() > 0) {
+		LOG(INFO) << "processing state message";
+		TableStateMessage msg = stateQueue->Pop();
+		_currentPixelIndex = msg.pixelindex();
+		int idx = msg.selectedindex();
+		if (_isTopLevelTable) {
+			if (idx < 0 || idx >= _items.size())
+				return;
+			TableItem *selectedItem = _items[idx][0];
+			// Populate the sub-table with all items in selected group
+			vector<TableItem *> group = _items[idx];
+			_subTable->Clear();
+			if (idx == _selectedItemIndex) {
+				// Unhighlight
+				_selectedItemIndex = -1;
+			}
+			else {
+				_selectedItemIndex = idx;
+				_subTable->Add(group);
+			}
+		}
+		else {
+			if (_items.size() == 0 || idx < 0 || idx >= _items[0].size())
+				return;
+			//if (idx == _processTerminationIndex)
+				// Second tap
+				_TerminateProcess(*_items[0][idx]);
+			_processTerminationIndex = idx;
+		}
+
+	}
+
 	// Process removal of single or all items
 	while (_removeQueue->GetSize() > 0) {
 		TableItem *item = _removeQueue->Pop();
@@ -156,7 +200,7 @@ void Table::OnLoop()
 			}
 			_items.clear();
 			_currentPixelIndex = 0;
-			_selectedItem = NULL;
+			_selectedItemIndex = -1;
 			_processTerminationIndex = -1;
 		}
 		else {
@@ -209,39 +253,20 @@ void Table::OnCleanup()
 
 void Table::Tap(float x, float y)
 {
+	if (!_isMaster)
+		return;
+
 	if (y > TABLE_TOP || y < TABLE_BOTTOM)
 		return;
 	int idx = _RelativePixelToItemIndex(y);
-
-	if (_isTopLevelTable) {
-		if (idx < 0 || idx >= _items.size())
-			return;
-		TableItem *selectedItem = _items[idx][0];
-		// Populate the sub-table with all items in selected group
-		vector<TableItem *> group = _items[idx];
-		_subTable->Clear();
-		if (selectedItem == _selectedItem) {
-			// Unhighlight
-			_selectedItem = NULL;
-		}
-		else {
-			_selectedItem = selectedItem;
-			_subTable->Add(group);
-		}
-	}
-	else {
-		if (_items.size() == 0 || idx < 0 || idx >= _items[0].size())
-			return;
-		//if (idx == _processTerminationIndex)
-			// Second tap
-			_TerminateProcess(*_items[0][idx]);
-		_processTerminationIndex = idx;
-	}
+	_SynchronizeState(_currentPixelIndex, idx);
 }
 
 void Table::ScrollDown(float speed)
 {
-	_currentPixelIndex += speed;
+	if (!_isMaster)
+		return;
+	float currentPixelIndex = _currentPixelIndex + speed;
 	int numItems = _items.size();
 	if (!_isTopLevelTable) {
 		if (_items.size() == 0)
@@ -252,13 +277,17 @@ void Table::ScrollDown(float speed)
 	// Allow half an item to fade on top
 	numItems = max(numItems, 2);
 	int maxPixelIndex = (numItems * _itemHeight) - _itemHeight*(float)1.5;
-	_currentPixelIndex = fmin(_currentPixelIndex, (float)maxPixelIndex);
+	currentPixelIndex = fmin(currentPixelIndex, (float)maxPixelIndex);
+	_SynchronizeState(currentPixelIndex, _selectedItemIndex);
 }
 
 void Table::ScrollUp(float speed)
 {
-	_currentPixelIndex -= speed;
-	_currentPixelIndex = fmax(_currentPixelIndex, -15);
+	if (!_isMaster)
+		return;
+	float currentPixelIndex = _currentPixelIndex - speed;
+	currentPixelIndex = fmax(currentPixelIndex, -15);
+	_SynchronizeState(currentPixelIndex, _selectedItemIndex);
 }
 
 void Table::SwipeLeft(float speed)
@@ -319,12 +348,12 @@ void Table::_DrawTopLevelTable()
 		string s = _font.TrimHorizontal(ss2.str(), 32, 4 +  ss.str().length());
 		_font.RenderText(s, 12, y);
 
-		if (_selectedItem == item) {
+		if (_selectedItemIndex == i) {
 			// Draw the rectangular marker for selected entry
 			selectBoxStartPixel = y - _itemHeight / 4;
-			glColor3ub(_selectedItem->r, _selectedItem->g, _selectedItem->b);
+			glColor3ub(item->r, item->g, item->b);
 			float y_ = selectBoxStartPixel;
-			string s = _font.TrimHorizontal(_selectedItem->key, 30);
+			string s = _font.TrimHorizontal(item->key, 30);
 			float w = _font.GetHorizontalPixelLength(s);
 			glLineWidth(2);
 			glBegin(GL_LINE_STRIP);
@@ -483,6 +512,21 @@ int Table::_GetTotalNumItems()
 		num += _items[i].size();
 	}
 	return num;
+}
+
+void Table::_SynchronizeState(float pixelIndex, int selectedIndex)
+{
+	TableStateMessage msg = GetStateMessage();
+	msg.set_pixelindex(pixelIndex);
+	msg.set_selectedindex(selectedIndex);
+	_state->SynchronizeState(msg);
+}
+
+TableStateMessage Table::GetStateMessage()
+{
+	TableStateMessage msg;
+	msg.set_istoptable(_isTopLevelTable);
+	return msg;
 }
 
 

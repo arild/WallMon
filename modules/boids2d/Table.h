@@ -9,14 +9,16 @@
 #include "Font.h"
 #include "TableItem.h"
 #include "BoidSharedContext.h"
+#include "TableStateSynchronizer.h"
 
 using namespace std;
 
 class Table: public EntityEvent {
 public:
-	Table(bool isTopLevelTable=true);
+	Table(bool isMaster, bool isTopLevelTable=true);
 	virtual ~Table();
 
+	void SetTableStateSynchronizer(TableStateSynchronizer *state);
 	void Add(TableItem *item);
 	void Add(vector<TableItem *> items);
 	void Remove(TableItem *item);
@@ -38,9 +40,11 @@ private:
 	float _itemHeight;
 	Font _fontSub, _fontSubLarge, _font;
 	Table *_subTable;
+	int _selectedItemIndex;
 	TableItem *_selectedItem;
 	Queue<TableItem *> *_addQueue, *_removeQueue;
-	bool _isHighlighted, _isTopLevelTable;
+	TableStateSynchronizer *_state;
+	bool _isHighlighted, _isTopLevelTable, _isMaster;
 	int _processTerminationIndex;
 	void _DrawTopLevelTable();
 	void _DrawSubLevelTable();
@@ -58,6 +62,8 @@ private:
 	vector<TableItem *> *_LookupItemGroup(string &itemKey);
 	void _TerminateProcess(TableItem &item);
 	int _GetTotalNumItems();
+	void _SynchronizeState(float pixelIndex, int selectedIndex=-1);
+	TableStateMessage GetStateMessage();
 };
 
 #endif /* TABLE_H_ */

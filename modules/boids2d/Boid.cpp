@@ -28,7 +28,7 @@ Boid::Boid(BoidSharedContext *ctx_)
 	ty = 0;
 	_visible = false;
 	_font.SetFontType(FONT_MONO);
-	_font.SetFontSize(3);
+	_font.SetFontSize(2);
 }
 
 Boid::~Boid()

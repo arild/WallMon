@@ -20,7 +20,7 @@
 #define KEY							"BOIDS"
 #define MESSAGE_BUF_SIZE			1024 * 1000
 double FILTER_THRESHOLD = 1.0;
-double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 10;
+double NETWORK_MAX_IN_AND_OUT_BYTES = 1024 * 1024 * 50;
 int numUniqueProcesses = 0;
 
 void Handler::OnInit(Context *ctx)
@@ -53,7 +53,7 @@ void Handler::OnInit(Context *ctx)
 	 */
 	//	_wallView = new WallView(3, 0, 3, 4);
 	//	_eventSystem = new ShoutEventSystem();
-	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT);
+	_wallView = new WallView(0, 0, WALL_WIDHT, WALL_HEIGHT, "tile-0-0");
 	_eventSystem = new SdlMouseEventFetcher();
 	_boidsApp = new BoidsApp(1600, 768, _eventSystem, _wallView);
 
@@ -145,15 +145,15 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	double in = proc->stat->networkInUtilization;
 	double out = proc->stat->networkOutUtilization;
 	double networkUtilization = in + out;
-	double outNetworkRelativeShare = 50;
+	double inNetworkRelativeShare = 50;
+	if (networkUtilization > 0)
+		inNetworkRelativeShare = (in / networkUtilization) * (double) 100;
 	if (BoidSharedContext::useLogarithmicAxis)
 		networkUtilization = _LinearToLogarithmicAxisValue(networkUtilization);
-	if (networkUtilization > 0)
-		outNetworkRelativeShare = (out / networkUtilization) * (double) 100;
 	if (networkUtilization < FILTER_THRESHOLD)
 		proc->visual->network->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->network->ctx->SetDestination(networkUtilization, outNetworkRelativeShare);
+		proc->visual->network->ctx->SetDestination(networkUtilization, inNetworkRelativeShare);
 
 	// Table visual
 	TableItem *item = proc->visual->tableItem;

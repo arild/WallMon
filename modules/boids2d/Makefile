@@ -6,7 +6,7 @@ ifeq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
 ROCKSVV = -D ROCKSVV
 endif
 
-LIBS=-lm -lConfig -lSystem -lSTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs` -lGL -lProcessCollector -lshout
+LIBS=-lm -lConfig -lSystem -lSTouchManager -lWallView -lpthread -lboost_thread -lglog -lfreetype -lz -lftgl `sdl-config --libs` -lGL -lProcessCollector -lshout -lTableStateMessage
 
 all: libboids2d.so
 			

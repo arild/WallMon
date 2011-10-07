@@ -175,7 +175,7 @@ void BoidsApp::_SetupAndPopulateScenes()
 	_boidScene->AddEntity(axis);
 
 	Scene::current = _tableScene;
-	_table = new Table();
+	_table = new Table(_wallView->IsLowerLeft());
 	_tableScene->AddEntity(_table);
 }
 

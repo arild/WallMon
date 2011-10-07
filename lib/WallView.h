@@ -25,9 +25,10 @@ using namespace std;
 
 class WallView {
 public:
-	WallView(int x, int y, int width, int height);
+	WallView(int x, int y, int width, int height, string hostname="");
 	vector<string> GetGrid();
 	bool IsTileWithin();
+	bool IsLowerLeft();
 	bool IsCordsWithin(float x, float y);
 	void GlobalToGridCoords(float *x, float *y);
 	void GetDisplayArea(double *x, double *y, double *width, double *height, string hostname);
