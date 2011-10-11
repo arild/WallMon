@@ -162,6 +162,8 @@ void Table::OnLoop()
 		LOG(INFO) << "processing state message";
 		TableStateMessage msg = stateQueue->Pop();
 		_currentPixelIndex = msg.pixelindex();
+		if (!msg.has_selectedindex())
+			continue;
 		int idx = msg.selectedindex();
 		if (_isTopLevelTable) {
 			if (idx < 0 || idx >= _items.size())
@@ -278,7 +280,7 @@ void Table::ScrollDown(float speed)
 	numItems = max(numItems, 2);
 	int maxPixelIndex = (numItems * _itemHeight) - _itemHeight*(float)1.5;
 	currentPixelIndex = fmin(currentPixelIndex, (float)maxPixelIndex);
-	_SynchronizeState(currentPixelIndex, _selectedItemIndex);
+	_SynchronizeState(currentPixelIndex);
 }
 
 void Table::ScrollUp(float speed)
@@ -287,7 +289,7 @@ void Table::ScrollUp(float speed)
 		return;
 	float currentPixelIndex = _currentPixelIndex - speed;
 	currentPixelIndex = fmax(currentPixelIndex, -15);
-	_SynchronizeState(currentPixelIndex, _selectedItemIndex);
+	_SynchronizeState(currentPixelIndex);
 }
 
 void Table::SwipeLeft(float speed)
@@ -518,7 +520,8 @@ void Table::_SynchronizeState(float pixelIndex, int selectedIndex)
 {
 	TableStateMessage msg = GetStateMessage();
 	msg.set_pixelindex(pixelIndex);
-	msg.set_selectedindex(selectedIndex);
+	if (selectedIndex != -1)
+		msg.set_selectedindex(selectedIndex);
 	_state->SynchronizeState(msg);
 }
 
