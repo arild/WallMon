@@ -2,6 +2,8 @@
 message TableStateMessage
 {
   required bool isTopTable = 1;
-  required float pixelIndex = 2;
+  optional float pixelIndex = 2;
   optional int32 selectedIndex = 3;
+  optional float swipeLeft = 4;
+  optional float swipeRight = 5;
 }

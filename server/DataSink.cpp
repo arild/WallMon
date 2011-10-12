@@ -125,7 +125,7 @@ void DataSink::_ReadCallback(ev::io &watcher, int revents)
 	ByteBuffer *buf = (ByteBuffer *) watcher.data;
 	buf->Defragment();
 	int len = buf->GetContinuousBytesLeft();
-	unsigned int numBytesReceived = read(watcher.fd, buf->GetWriteReference(), len);
+	unsigned int numBytesReceived = recv(watcher.fd, buf->GetWriteReference(), len, MSG_NOSIGNAL);
 	buf->BytesWritten(numBytesReceived);
 	if (numBytesReceived < 0) {
 		LOG(ERROR) << "failed reading socket - client probably disconnected";

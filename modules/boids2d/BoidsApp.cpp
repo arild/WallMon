@@ -27,6 +27,7 @@
 #include "Button.h"
 #include "ControlPanel.h"
 #include "System.h"
+#include "Xserver.h"
 
 boost::condition mainLoopThreadCondition;
 boost::mutex mainLoopThreadMutex;
@@ -113,8 +114,8 @@ void BoidsApp::_RenderForever()
 		Scene::RunAllScenes();
 		_HandleTouchEvents();
 		EntityEvent::RunAllCallbacks();
-
 		SDL_GL_SwapBuffers();
+		Xserver::BringToFront();
 		Fps::fpsControl.OnLoop();
 		char Buffer[255];
 		sprintf(Buffer, "WallMon - FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());

@@ -62,7 +62,7 @@ private:
 	vector<TableItem *> *_LookupItemGroup(string &itemKey);
 	void _TerminateProcess(TableItem &item);
 	int _GetTotalNumItems();
-	void _SynchronizeState(float pixelIndex, int selectedIndex=-1);
+	void _SynchronizeState(float pixelIndex, int selectedIndex=-1, float swipeLeft=-1, float swipeRight=-1);
 	TableStateMessage GetStateMessage();
 };
 

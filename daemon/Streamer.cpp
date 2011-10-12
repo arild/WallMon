@@ -163,7 +163,7 @@ int Streamer::_SendAll(int sockFd, char *message, int len)
 {
 	int numBytesSent = 0;
 	do {
-		int retval = write(sockFd, message + numBytesSent, len - numBytesSent);
+		int retval = send(sockFd, message + numBytesSent, len - numBytesSent, MSG_NOSIGNAL);
 		if (retval == -1)
 			return numBytesSent;
 		numBytesSent += retval;

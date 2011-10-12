@@ -162,32 +162,51 @@ void Table::OnLoop()
 		LOG(INFO) << "processing state message";
 		TableStateMessage msg = stateQueue->Pop();
 		_currentPixelIndex = msg.pixelindex();
-		if (!msg.has_selectedindex())
-			continue;
-		int idx = msg.selectedindex();
-		if (_isTopLevelTable) {
-			if (idx < 0 || idx >= _items.size())
-				return;
-			TableItem *selectedItem = _items[idx][0];
-			// Populate the sub-table with all items in selected group
-			vector<TableItem *> group = _items[idx];
-			_subTable->Clear();
-			if (idx == _selectedItemIndex) {
-				// Unhighlight
-				_selectedItemIndex = -1;
+		if (msg.has_selectedindex()) {
+			int idx = msg.selectedindex();
+			if (_isTopLevelTable) {
+				if (idx < 0 || idx >= _items.size())
+					return;
+				TableItem *selectedItem = _items[idx][0];
+				// Populate the sub-table with all items in selected group
+				vector<TableItem *> group = _items[idx];
+				_subTable->Clear();
+				if (idx == _selectedItemIndex) {
+					// Unhighlight
+					_selectedItemIndex = -1;
+				}
+				else {
+					_selectedItemIndex = idx;
+					_subTable->Add(group);
+				}
 			}
 			else {
-				_selectedItemIndex = idx;
-				_subTable->Add(group);
+				if (_items.size() == 0 || idx < 0 || idx >= _items[0].size())
+					return;
+				//if (idx == _processTerminationIndex)
+					// Second tap
+					_TerminateProcess(*_items[0][idx]);
+				_processTerminationIndex = idx;
 			}
 		}
-		else {
-			if (_items.size() == 0 || idx < 0 || idx >= _items[0].size())
-				return;
-			//if (idx == _processTerminationIndex)
-				// Second tap
-				_TerminateProcess(*_items[0][idx]);
-			_processTerminationIndex = idx;
+		if (msg.has_swipeleft() && _isTopLevelTable)
+			_SortTableAlphabetically();
+		if (msg.has_swiperight()) {
+			if (_isTopLevelTable)
+				_SortTableScore();
+			else {
+				if (_items.size() == 0)
+					// No items present in sub-table (tap not performed)
+					return;
+				if (_isHighlighted) {
+					_UnHighlightBoids(_items[0]);
+					_isHighlighted = false;
+				}
+				else {
+					_HighlightBoids(_items[0]);
+					_isHighlighted = true;
+				}
+			}
 		}
 
 	}
@@ -294,27 +313,16 @@ void Table::ScrollUp(float speed)
 
 void Table::SwipeLeft(float speed)
 {
-	if (_isTopLevelTable)
-		_SortTableAlphabetically();
+	if (!_isMaster)
+		return;
+	_SynchronizeState(_currentPixelIndex, -1, speed, -1);
 }
 
 void Table::SwipeRight(float speed)
 {
-	if (_isTopLevelTable)
-		_SortTableScore();
-	else {
-		if (_items.size() == 0)
-			// No items present in sub-table (tap not performed)
-			return;
-		if (_isHighlighted) {
-			_UnHighlightBoids(_items[0]);
-			_isHighlighted = false;
-		}
-		else {
-			_HighlightBoids(_items[0]);
-			_isHighlighted = true;
-		}
-	}
+	if (!_isMaster)
+		return;
+	_SynchronizeState(_currentPixelIndex, -1, -1, speed);
 }
 
 void Table::_DrawTopLevelTable()
@@ -419,12 +427,14 @@ void Table::_DrawCommonHeadingAndFrame()
 
 void Table::_DrawSubLevelItem(TableItem *item, float y, int highlightNumber)
 {
+	// Note: Getters on item not used due to some strange bug causing
+	// a crash when copying variables (only for strings have been observed)
 	glColor3ub(item->r, item->g, item->b);
-	_fontSub.RenderText("Host:  " + item->GetHostName(), 5, y-2.5);
-	_fontSub.RenderText("Pid :  " + item->GetPid(), 5, y-5);
-	_fontSub.RenderText("User:  " + item->GetUser(), 5, y-7.5);
-	_fontSub.RenderText("Time:  " + item->GetStartTime(), 5, y-10);
-	_fontSub.RenderText("Threads:  " + item->GetNumThreads(), 5, y-12.5);
+	_fontSub.RenderText("Host:  " + item->_hostName, 5, y-2.5);
+	_fontSub.RenderText("Pid :  " + item->_pid, 5, y-5);
+	_fontSub.RenderText("User:  " + item->_user, 5, y-7.5);
+	_fontSub.RenderText("Time:  " + item->_time, 5, y-10);
+	_fontSub.RenderText("Threads:  " + item->_numThreads, 5, y-12.5);
 	if (highlightNumber != -1) {
 		glColor3ub(255, 0, 0);
 		stringstream ss;
@@ -516,12 +526,16 @@ int Table::_GetTotalNumItems()
 	return num;
 }
 
-void Table::_SynchronizeState(float pixelIndex, int selectedIndex)
+void Table::_SynchronizeState(float pixelIndex, int selectedIndex, float swipeLeft, float swipeRight)
 {
 	TableStateMessage msg = GetStateMessage();
 	msg.set_pixelindex(pixelIndex);
-	if (selectedIndex != -1)
+	if (selectedIndex > 0)
 		msg.set_selectedindex(selectedIndex);
+	if (swipeLeft > 0)
+		msg.set_swipeleft(swipeLeft);
+	if (swipeRight > 0)
+		msg.set_swiperight(swipeRight);
 	_state->SynchronizeState(msg);
 }
 
