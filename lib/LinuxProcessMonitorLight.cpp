@@ -23,6 +23,7 @@ LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 	_utime = _stime = _rchar = _wchar = 0;
 	_updateTime = 0.;
 	_totalNumBytesRead = 0;
+	_totalNumSamples = 0;
 
 	_statReadProcfs = NULL;
 	_statParseProcfs = NULL;
@@ -85,6 +86,7 @@ bool LinuxProcessMonitorLight::Update()
 	_prevTotalNetworkRead = _rchar;
 	_prevTotalNetworkWrite = _wchar;
 	_updateTime = System::GetTimeInSec();
+	_totalNumSamples += 1;
 
 	rewind(_procstat);
 	_totalNumBytesRead += fread(_bufStat, 1, 300, _procstat);
@@ -120,6 +122,17 @@ bool LinuxProcessMonitorLight::Update()
 double LinuxProcessMonitorLight::SecondsSinceLastUpdate()
 {
 	return System::GetTimeInSec() - _updateTime;
+}
+
+/**
+ * Requires three or more calls to Update() for not being first time,
+ * with only two calls, only the first interval has been measured
+ */
+bool LinuxProcessMonitorLight::IsFirstTime()
+{
+	if (_totalNumSamples < 3)
+		return true;
+	return false;
 }
 
 string LinuxProcessMonitorLight::GetUser()

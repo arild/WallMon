@@ -35,6 +35,7 @@ public:
 	bool Open(int pid=-1);
 	bool Update();
 	double SecondsSinceLastUpdate();
+	bool IsFirstTime();
 
 	// Set during constructor
 	string GetUser();
@@ -107,5 +108,6 @@ private:
 	FILE *_procio;
 
 	unsigned long _totalNumBytesRead;
+	unsigned long _totalNumSamples;
 };
 #endif /* LINUXPROCESSMONITORLIGHT_H_ */

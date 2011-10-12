@@ -115,10 +115,10 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 		if (filter->has_networkoutbytes()) {
 			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
 		}
-		if (filter->has_user()) {
+		if (filter->has_user() && monitor->IsFirstTime()) {
 			processMsg->set_user(monitor->GetUser());
 		}
-		if (filter->has_starttime()) {
+		if (filter->has_starttime() && monitor->IsFirstTime()) {
 			processMsg->set_starttime(monitor->GetStartTime());
 		}
 		if (filter->has_numthreads()) {
