@@ -159,7 +159,6 @@ void Table::OnLoop()
 	// Process state messages
 	Queue<TableStateMessage> *stateQueue = _state->GetStateMessageQueue(_isTopLevelTable);
 	while (stateQueue->GetSize() > 0) {
-		LOG(INFO) << "processing state message";
 		TableStateMessage msg = stateQueue->Pop();
 		_currentPixelIndex = msg.pixelindex();
 		if (msg.has_selectedindex()) {

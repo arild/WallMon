@@ -20,7 +20,7 @@ LinuxProcessMonitorLight::LinuxProcessMonitorLight()
 	_procstat = NULL;
 	_procstatm = NULL;
 	_procio = NULL;
-	_utime = _stime = _rchar = _wchar = 0;
+	_utime = _stime = _rchar = _wchar = _syscr = _syscw = _read_bytes = _write_bytes = 0;
 	_updateTime = 0.;
 	_totalNumBytesRead = 0;
 	_totalNumSamples = 0;
@@ -83,8 +83,12 @@ bool LinuxProcessMonitorLight::Update()
 	_prevUserTime = _utime;
 	_prevSystemTime = _stime;
 	_prevUpdateTime = _updateTime;
-	_prevTotalNetworkRead = _rchar;
-	_prevTotalNetworkWrite = _wchar;
+	_prevRchar = _rchar;
+	_prevWchar = _wchar;
+	_prevSyscr = _syscr;
+	_prevSyscw = _syscw;
+	_prevReadBytes = _read_bytes;
+	_prevWriteBytes = _write_bytes;
 	_updateTime = System::GetTimeInSec();
 	_totalNumSamples += 1;
 
@@ -111,7 +115,7 @@ bool LinuxProcessMonitorLight::Update()
 			"%d %s %*c %*d %*d %*d %*d %*d %*u %lu %*lu %lu %*lu %lu %lu %*ld %*ld %*ld %*ld %d",
 			&_pid, _comm, &_minflt, &_majflt, &_utime, &_stime, &_numThreads);
 	sscanf(_bufStatm, "%lu", &_size);
-	sscanf(_bufIo, "%*s %lu %*s %lu", &_rchar, &_wchar);
+	sscanf(_bufIo, "%*s %lu %*s %lu %*s %lu %*s %lu %*s %lu %*s %lu", &_rchar, &_wchar, &_syscr, &_syscw, &_read_bytes, &_write_bytes);
 
 	if (_statReadProcfs != NULL)
 		_statParseProcfs->Add(System::GetTimeInMsec() - afterReadProcfs);
@@ -235,6 +239,56 @@ unsigned long LinuxProcessMonitorLight::size()
 	return _size;
 }
 
+unsigned long LinuxProcessMonitorLight::GetTotalIoInBytes()
+{
+	return _rchar - _prevRchar;
+}
+
+unsigned long LinuxProcessMonitorLight::GetTotalIoOutBytes()
+{
+	return _wchar - _prevWchar;
+}
+
+unsigned long LinuxProcessMonitorLight::GetNetworkInBytes()
+{
+	unsigned long ioInBytes = GetTotalIoInBytes();
+	unsigned long storageInBytes = GetStorageInBytes();
+	if (storageInBytes > ioInBytes)
+		return 0;
+	return ioInBytes - storageInBytes;
+}
+
+unsigned long LinuxProcessMonitorLight::GetNetworkOutBytes()
+{
+	unsigned long ioOutBytes = GetTotalIoOutBytes();
+	unsigned long storageOutBytes = GetStorageOutBytes();
+	if (storageOutBytes > ioOutBytes)
+		return 0;
+	return ioOutBytes - storageOutBytes;
+}
+
+unsigned long LinuxProcessMonitorLight::GetStorageInBytes()
+{
+	return _read_bytes - _prevReadBytes;
+}
+
+unsigned long LinuxProcessMonitorLight::GetStorageOutBytes()
+{
+	return _write_bytes - _prevWriteBytes;
+}
+
+float LinuxProcessMonitorLight::GetNumReadSysCallsPerSec()
+{
+	return (_syscr - _prevSyscr) / (float)(_updateTime - _prevUpdateTime);
+}
+
+float LinuxProcessMonitorLight::GetNumWriteSysCallsPerSec()
+{
+	return (_syscw - _prevSyscw) / (float)(_updateTime - _prevUpdateTime);
+}
+
+
+
 unsigned long LinuxProcessMonitorLight::rchar()
 {
 	return _rchar;
@@ -245,13 +299,25 @@ unsigned long LinuxProcessMonitorLight::wchar()
 	return _wchar;
 }
 
-unsigned long LinuxProcessMonitorLight::GetNetworkInInBytes()
+unsigned long LinuxProcessMonitorLight::syscr()
 {
-	return _rchar - _prevTotalNetworkRead;
+	return _syscr;
 }
 
-unsigned long LinuxProcessMonitorLight::GetNetworkOutInBytes()
+unsigned long LinuxProcessMonitorLight::syscw()
 {
-	return _wchar - _prevTotalNetworkWrite;
+	return _syscw;
 }
+
+unsigned long LinuxProcessMonitorLight::readbytes()
+{
+	return _read_bytes;
+}
+
+unsigned long LinuxProcessMonitorLight::writechar()
+{
+	return _write_bytes;
+}
+
+
 

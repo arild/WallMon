@@ -166,17 +166,6 @@ int System::GetTotalMemory()
 	return atoi(RunCommand(cmd).c_str());
 }
 
-bool System::IsRocksvvCluster()
-{
-	string hostname = RunCommand("hostname");
-	string rocks = "rocksvv.cs.uit.no";
-	if (rocks.compare(hostname) == 0)
-		return true;
-	if (hostname.compare(0, 5, "tile-") == 0)
-		return true;
-	return false;
-}
-
 bool System::IsValidIpAddress(string ipAddress)
 {
 	struct sockaddr_in sa;
@@ -208,6 +197,24 @@ void System::AttachToLocalDisplay()
 string System::GetCurrentUser()
 {
 	return RunCommand("whoami");
+}
+
+bool System::IsRocksvvCluster()
+{
+	if (IsRocksvvClusterRootNode())
+		return true;
+	if (RunCommand("hostname").compare(0, 5, "tile-") == 0)
+		return true;
+	return false;
+}
+
+bool System::IsIceCluster()
+{
+	if (IsRocksvvClusterRootNode())
+		return true;
+	if (RunCommand("hostname").compare(0, 8, "compute-") == 0)
+		return true;
+	return false;
 }
 
 bool System::IsRocksvvClusterRootNode()

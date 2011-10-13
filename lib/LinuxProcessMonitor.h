@@ -98,8 +98,8 @@ public:
 	unsigned long write_bytes();
 	unsigned long cancelled_write_bytes();
 
-	unsigned long GetNetworkInInBytes();
-	unsigned long GetNetworkOutInBytes();
+	unsigned long GetTotalIoInBytes();
+	unsigned long GetTotalIoOutBytes();
 
 
 private:

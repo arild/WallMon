@@ -109,24 +109,41 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			util = monitor->GetTotalProgramSize() / (double)_totalMemoryMb;
  			processMsg->set_memoryutilization(util * 100.);
 		}
-		if (filter->has_networkinbytes()) {
-			processMsg->set_networkinbytes(monitor->GetNetworkInInBytes());
-		}
-		if (filter->has_networkoutbytes()) {
-			processMsg->set_networkoutbytes(monitor->GetNetworkOutInBytes());
-		}
-		if (filter->has_user() && monitor->IsFirstTime()) {
+		if (filter->has_ioinbytes())
+			processMsg->set_ioinbytes(monitor->GetTotalIoInBytes());
+
+		if (filter->has_iooutbytes())
+			processMsg->set_iooutbytes(monitor->GetTotalIoOutBytes());
+
+		if (filter->has_networkinbytes())
+			processMsg->set_networkinbytes(monitor->GetNetworkInBytes());
+
+		if (filter->has_networkoutbytes())
+			processMsg->set_networkoutbytes(monitor->GetNetworkOutBytes());
+
+		if (filter->has_storageinbytes())
+			processMsg->set_storageinbytes(monitor->GetStorageInBytes());
+
+		if (filter->has_storageoutbytes())
+			processMsg->set_storageoutbytes(monitor->GetStorageOutBytes());
+
+		if (filter->has_numreadsystemcallspersec())
+			processMsg->set_numreadsystemcallspersec(monitor->GetNumReadSysCallsPerSec());
+
+		if (filter->has_numwritesystemcallspersec())
+			processMsg->set_numwritesystemcallspersec(monitor->GetNumWriteSysCallsPerSec());
+
+		if (filter->has_user() && monitor->IsFirstTime())
 			processMsg->set_user(monitor->GetUser());
-		}
-		if (filter->has_starttime() && monitor->IsFirstTime()) {
+
+		if (filter->has_starttime() && monitor->IsFirstTime())
 			processMsg->set_starttime(monitor->GetStartTime());
-		}
-		if (filter->has_numthreads()) {
+
+		if (filter->has_numthreads())
 			processMsg->set_numthreads(monitor->numthreads());
-		}
-		if (filter->has_numpagefaultspersec()) {
+
+		if (filter->has_numpagefaultspersec())
 			processMsg->set_numpagefaultspersec(monitor->GetTotalNumPageFaultsPerSec());
-		}
 
 		if (processMsg->isterminated())
 			delete monitor;

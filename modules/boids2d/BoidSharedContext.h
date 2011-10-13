@@ -23,7 +23,7 @@ public:
 	static float tailLength;
 
 	// Which type of boids to show within a metric
-	static bool showCpuBoid, showMemoryBoid, showNetworkBoid, showStorageBoid;
+	static bool showCpuBoid, showMemoryBoid, showIoInBoid, showIoOutBoid;
 
 	BoidSharedContext(int red_, int green_, int blue_, Shape shape_);
 

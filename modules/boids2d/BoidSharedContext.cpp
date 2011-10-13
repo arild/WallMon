@@ -13,8 +13,8 @@ float BoidSharedContext::tailLength = 0.;
 bool BoidSharedContext::useLogarithmicAxis = false;
 bool BoidSharedContext::showCpuBoid = true;
 bool BoidSharedContext::showMemoryBoid = true;
-bool BoidSharedContext::showNetworkBoid = true;
-bool BoidSharedContext::showStorageBoid = true;
+bool BoidSharedContext::showIoInBoid = true;
+bool BoidSharedContext::showIoOutBoid = true;
 
 BoidSharedContext::BoidSharedContext(int red_, int green_, int blue_, Shape shape_)
 {

@@ -10,31 +10,52 @@
 #include "Scene.h"
 #include "ControlPanel.h"
 #include <glog/logging.h>
+//#include "SOIL.h"
+//#include "IL/il.h"
 
-
+bool loadImage = false;
 void ControlPanel::OnInit()
 {
+//	string path = "/home/arild/img_test.png";
+//
+//	ilInit();
+//	ilLoadImage(path.c_str());
+//	ILuint Width, Height;
+//	width = ilGetInteger(IL_IMAGE_WIDTH);
+//	height = ilGetInteger(IL_IMAGE_HEIGHT);
+//
+//	LOG(INFO) << "w=" << width << " | h=" << height;
+//	ILubyte *data = ilGetData();
+//
+//	//	_tex2d = _GetTexture(path);
+//	int id = 11;
+//	glBindTexture(GL_TEXTURE_2D, id);
+//	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+//	glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
 	// Metric types
-	Button *b = new Button(8, 170, 15, 15, QUAD);
+	Button *b = new Button(30, 235, 40, 40, QUAD);
 	b->SetCallback(&CpuBoidButtonCallback);
-	b->ButtonClick();
+	Scene::AddEntityCurrent((Entity *) b);
 
-	b = new Button(31, 170, 15, 15, TRIANGLE);
+	b = new Button(30, 150, 40, 40, TRIANGLE_UP);
 	b->SetCallback(&MemoryBoidButtonCallback);
-	b->ButtonClick();
+	Scene::AddEntityCurrent((Entity *) b);
 
-	b = new Button(54, 170, 15, 15, DIAMOND);
+	b = new Button(30, 65, 40, 40, DIAMOND);
 	b->SetCallback(&NetworkBoidButtonCallback);
+	Scene::AddEntityCurrent((Entity *) b);
 
-	b = new Button(77, 170, 15, 15, POLYGON);
+	b = new Button(30, -20, 40, 40, POLYGON);
 	b->SetCallback(&StorageBoidButtonCallback);
+	Scene::AddEntityCurrent((Entity *) b);
 
-	// Configuration
-	b = new Button(8, 90, 15, 15);
-	b->SetCallback(&BoidTailCallback);
-
-	_font = new Font(4, true, true);
-	_fontLarge = new Font(5, true, true);
+	_font = new Font(45, true, true);
 }
 
 void ControlPanel::OnLoop()
@@ -43,27 +64,53 @@ void ControlPanel::OnLoop()
 
 void ControlPanel::OnRender()
 {
-	glColor3ub(0, 100, 0);
-	_font->RenderText("CPU", 15.5, 168);
-	_font->RenderText("Memory", 38.5, 168);
-	_font->RenderText("Network", 61.5, 168);
-	_font->RenderText("Storage", 84.5, 168);
+//	glBindTexture(GL_TEXTURE_2D, 11);
+//	glBegin(GL_QUADS);
+//	glTexCoord2f(0.0, 0.0);
+//	glVertex3f(0.0, 0.0, 0.0);
+//	glTexCoord2f(1.0, 0.0);
+//	glVertex3f(100.0, 0.0, 0.0);
+//	glTexCoord2f(1.0, 1.0);
+//	glVertex3f(100.0, 100.0, 0.0);
+//	glTexCoord2f(0.0, 1.0);
+//	glVertex3f(0.0, 100.0, 0.0);
+//	glEnd();
+//	return;
+	glColor3ub(0, 60, 0);
+	_font->RenderText("CPU", 50, 290);
+	_font->RenderText("Memory", 50, 205);
+	_font->RenderText("Network", 50, 120);
+	_font->RenderText("Storage", 50, 35);
 
-	_font->RenderText("Core", 15.5, 128);
-	_font->RenderText("Process", 38.5, 128);
-	_font->RenderText("Process Name", 61.5, 128);
-	_font->RenderText("Node", 84.5, 128);
-
-	_font->RenderText("Tail", 15.5, 88);
-
-	glColor3f(1, 1, 1);
-	_fontLarge->RenderText("Metric Types", 50, 192);
-	_fontLarge->RenderText("Data Views", 50, 152);
-	_fontLarge->RenderText("Configuration", 50, 112);
 }
 
 void ControlPanel::OnCleanup()
 {
+}
+
+void ControlPanel::Tap(float x, float y)
+{
+
+}
+
+void ControlPanel::ScrollDown(float speed)
+{
+
+}
+
+void ControlPanel::ScrollUp(float speed)
+{
+
+}
+
+void ControlPanel::SwipeLeft(float speed)
+{
+	loadImage == true ? loadImage = false : loadImage = true;
+}
+
+void ControlPanel::SwipeRight(float speed)
+{
+	loadImage == true ? loadImage = false : loadImage = true;
 }
 
 void ControlPanel::CpuBoidButtonCallback()
@@ -80,19 +127,12 @@ void ControlPanel::MemoryBoidButtonCallback()
 
 void ControlPanel::NetworkBoidButtonCallback()
 {
-	BoidSharedContext::showNetworkBoid == true ? BoidSharedContext::showNetworkBoid = false
-			: BoidSharedContext::showNetworkBoid = true;
+	BoidSharedContext::showIoInBoid == true ? BoidSharedContext::showIoInBoid = false
+			: BoidSharedContext::showIoInBoid = true;
 }
 
 void ControlPanel::StorageBoidButtonCallback()
 {
-	BoidSharedContext::showStorageBoid == true ? BoidSharedContext::showStorageBoid = false
-			: BoidSharedContext::showStorageBoid = true;
+	BoidSharedContext::showIoOutBoid == true ? BoidSharedContext::showIoOutBoid = false
+			: BoidSharedContext::showIoOutBoid = true;
 }
-
-void ControlPanel::BoidTailCallback()
-{
-	BoidSharedContext::tailLength == 0 ? BoidSharedContext::tailLength = 75
-			: BoidSharedContext::tailLength = 0;
-}
-

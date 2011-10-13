@@ -59,7 +59,6 @@ void TableStateSynchronizer::SynchronizeState(TableStateMessage &msg)
 		return;
 	}
 	_socket->sendTo(buf, msg.ByteSize(), MULITCAST_ADDRESS, STATE_MULTICAST_LISTEN_PORT);
-	LOG(INFO) << "state message sent";
 }
 
 void TableStateSynchronizer::_ListenForever()
@@ -82,7 +81,6 @@ void TableStateSynchronizer::_ListenForever()
 			LOG(ERROR) << "state synchronizer failed: " << e.what();
 			break;
 		}
-		LOG(INFO) << "state message received, forwarding it";
 		if (msg.istoptable())
 			_topTableMessageQueue.Push(msg);
 		else

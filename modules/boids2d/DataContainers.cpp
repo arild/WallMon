@@ -29,8 +29,9 @@ void VisualBase::InitBoids(ProcessMessage &msg)
 	Data::NameToRgbColor(msg.processname(), &red, &green, &blue);
 
 	cpu = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, QUAD));
-	memory = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, TRIANGLE));
+	memory = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, TRIANGLE_UP));
 	network = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, DIAMOND));
+	storage = boidsApp->CreateBoid(new BoidSharedContext(red, green, blue, POLYGON));
 
 	// Put the boids contexts into a table that presents them visually
 	// in another way, and allows for events
@@ -38,6 +39,7 @@ void VisualBase::InitBoids(ProcessMessage &msg)
 	tableItem->AddBoid(cpu->ctx);
 	tableItem->AddBoid(memory->ctx);
 	tableItem->AddBoid(network->ctx);
+	tableItem->AddBoid(storage->ctx);
 	table->Add(tableItem);
 }
 
@@ -46,26 +48,18 @@ StatBase::StatBase()
 	userCpuUtilization = 0;
 	systemCpuUtilization = 0;
 	memoryUtilization = 0;
+	ioInUtilization = 0;
+	ioOutUtilization = 0;
 	networkInUtilization = 0;
 	networkOutUtilization = 0;
-	storageReadUtilization = 0;
-	storageWriteUtilization = 0;
+	storageInUtilization = 0;
+	storageOutUtilization = 0;
 
 	userCpuUtilizationSum = 0;
 	systemCpuUtilizationSum = 0;
 	memoryUtilizationSum = 0;
-	networkInUtilizationSum = 0;
-	networkOutUtilizationSum = 0;
-	storageReadUtilizationSum = 0;
-	storageWriteUtilizationSum = 0;
-
-//	totalUserCpuUtilization = 0;
-//	totalSystemCpuUtilization = 0;
-//	totalMemoryUtilization = 0;
-//	totalNetworkInUtilization = 0;
-//	totalNetworkOutUtilization = 0;
-//	totalStorageReadUtilization = 0;
-//	totalStorageWriteUtilization = 0;
+	ioInUtilizationSum = 0;
+	ioOutUtilizationSum = 0;
 
 	numSamples = 0;
 }
@@ -173,6 +167,7 @@ Proc *Data::Update(ProcessMessage &msg)
 			app->RemoveBoid(proc->visual->cpu);
 			app->RemoveBoid(proc->visual->memory);
 			app->RemoveBoid(proc->visual->network);
+			app->RemoveBoid(proc->visual->storage);
 			proc->visual->table->Remove(proc->visual->tableItem);
 		}
 

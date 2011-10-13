@@ -44,7 +44,7 @@ void LocalSampler::_RunForever()
 		_monitor.Update();
 		_intervalTimeMsec.erase(_intervalTimeMsec.begin());
 
-		unsigned int avgPerSec = (unsigned int)(_monitor.GetNetworkInInBytes() / (double)(intervalMsec / (double)1000));
+		unsigned int avgPerSec = (unsigned int)(_monitor.GetIoInBytesouble)(intervalMsec / (double)1000));
 		_networkUsageBytes.push_back(avgPerSec);
 	}
 }

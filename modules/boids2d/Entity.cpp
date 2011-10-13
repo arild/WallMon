@@ -45,19 +45,40 @@ void EntityShape::DrawEntityShape()
 		glVertex2f(x, y + height);
 		glEnd();
 		break;
-	case TRIANGLE:
-		glBegin(GL_TRIANGLES);
-		glVertex2f(x, y);
-		glVertex2f(x + width, y);
-		glVertex2f(x + width / 2, y + height);
-		glEnd();
-		break;
 	case DIAMOND:
 		glBegin(GL_QUADS);
 		glVertex2f(x, y + height / 2);
 		glVertex2f(x + width / 2, y);
 		glVertex2f(x + width, y + height / 2);
 		glVertex2f(x + width / 2, y + height);
+		glEnd();
+		break;
+	case TRIANGLE_UP:
+		glBegin(GL_TRIANGLES);
+		glVertex2f(x, y);
+		glVertex2f(x + width, y);
+		glVertex2f(x + width / 2, y + height);
+		glEnd();
+		break;
+	case TRIANGLE_DOWN:
+		glBegin(GL_TRIANGLES);
+		glVertex2f(x + width / 2, y);
+		glVertex2f(x + width, y + height);
+		glVertex2f(x, y + height);
+		glEnd();
+		break;
+	case TRIANGLE_LEFT:
+		glBegin(GL_TRIANGLES);
+		glVertex2f(x, y + height/2);
+		glVertex2f(x + width, y);
+		glVertex2f(x + width, y + height);
+		glEnd();
+		break;
+	case TRIANGLE_RIGHT:
+		glBegin(GL_TRIANGLES);
+		glVertex2f(x, y);
+		glVertex2f(x + width, y + height/2);
+		glVertex2f(x, y + height);
 		glEnd();
 		break;
 	case POLYGON:

@@ -12,11 +12,11 @@ message ProcessMessage
 	
 	optional double memoryUtilization = 7;
 	
-	optional uint32 networkInUtilization = 8;
-	optional uint32 networkOutUtilization = 9;
+	optional uint32 ioInBytes = 8;
+	optional uint32 ioOutBytes = 9;
 	
-	optional uint32 networkInBytes = 10;
-	optional uint32 networkOutBytes = 11;
+	optional uint32 numReadSystemCallsPerSec = 10;
+	optional uint32 numWriteSystemCallsPerSec = 11;
 	
 	optional string hostname = 12;
 	optional string user = 13;
@@ -25,7 +25,13 @@ message ProcessMessage
 	
 	optional bool isTerminated = 16 [default = false];
 
-	optional double numpagefaultspersec = 17;
+	optional double numPageFaultsPerSec = 17;
+
+	optional uint32 networkInBytes = 18;
+	optional uint32 networkOutBytes = 19;
+
+	optional uint32 storageInBytes = 20;
+	optional uint32 storageOutBytes = 21;
 }
 
 message ProcessCollectorMessage

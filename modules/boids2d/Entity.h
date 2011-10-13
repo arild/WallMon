@@ -11,8 +11,11 @@ using namespace std;
 
 enum Shape {
 	QUAD,
-	TRIANGLE,
 	DIAMOND,
+	TRIANGLE_UP,
+	TRIANGLE_DOWN,
+	TRIANGLE_LEFT,
+	TRIANGLE_RIGHT,
 	POLYGON
 };
 

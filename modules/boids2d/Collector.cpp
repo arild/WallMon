@@ -13,31 +13,29 @@ extern "C" ProcessCollector *create_collector()
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 	p->context->includeStatistics = true;
-	if (System::IsRocksvvCluster()) {
-		vector<string> servers = WallView(2,1,3,2).GetGrid();
-//		vector<string> servers = WallView(2,1,1,1).GetGrid();
-
-		//		vector<string> servers = WallView(0,0,7,4).GetGrid();
+	vector<string> servers = WallView(2,1,3,2).GetGrid();
+	if (System::IsRocksvvCluster())
 		p->context->AddServers(servers);
-	}
-	else if (System::GetHostname().compare(0, 5, "arild") == 0) {
+	else if (System::IsIceCluster())
+		p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
+	else if (System::GetHostname().compare(0, 5, "arild") == 0)
 		p->context->AddServer("localhost");
-	}
-	else {
+	else
 		// Forward to desktop
 		p->context->AddServer("arild.dyndns-work.com");
-		//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
-	}
+
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	p->filter->set_processname("");
 	p->filter->set_pid(0);
 	p->filter->set_usercpuutilization(0);
 	p->filter->set_systemcpuutilization(0);
 	p->filter->set_memoryutilization(0);
-//	p->filter->set_networkinutilization(0);
-//	p->filter->set_networkoututilization(0);
 	p->filter->set_networkinbytes(0);
 	p->filter->set_networkoutbytes(0);
+	p->filter->set_storageinbytes(0);
+	p->filter->set_storageoutbytes(0);
+	p->filter->set_numreadsystemcallspersec(0);
+	p->filter->set_numwritesystemcallspersec(0);
 	p->filter->set_user("");
 	p->filter->set_starttime("");
 	p->filter->set_numthreads(0);

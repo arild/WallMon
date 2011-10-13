@@ -49,18 +49,18 @@ public:
 	double userCpuUtilization;
 	double systemCpuUtilization;
 	double memoryUtilization;
+	double ioInUtilization;
+	double ioOutUtilization;
 	double networkInUtilization;
 	double networkOutUtilization;
-	double storageReadUtilization;
-	double storageWriteUtilization;
+	double storageInUtilization;
+	double storageOutUtilization;
 
 	double userCpuUtilizationSum;
 	double systemCpuUtilizationSum;
 	double memoryUtilizationSum;
-	double networkInUtilizationSum;
-	double networkOutUtilizationSum;
-	double storageReadUtilizationSum;
-	double storageWriteUtilizationSum;
+	double ioInUtilizationSum;
+	double ioOutUtilizationSum;
 
 	unsigned int numSamples;
 	StatBase();

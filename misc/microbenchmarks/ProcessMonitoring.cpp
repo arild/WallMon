@@ -77,10 +77,7 @@ void ProcessMonitoring::RunProcfsBenchmark(int numSamples)
 			util = m->GetTotalProgramSize() / (double) totalMemoryMb;
 			procMsg->set_memoryutilization(util * 100.);
 
-			procMsg->set_networkinbytes(m->GetNetworkInInBytes());
-			procMsg->set_networkoutbytes(m->GetNetworkOutInBytes());
-
-			protobufPackSamples.Add(System::GetTimeInMsec() - startProtobufPackMsec);
+			procMsg->set_networkinbytes(m->GetRequestedIoInBytesIoInBytes	procMsg->set_networkoutbytes(m->GetRequestedIoOutBytesoOutBytes		protobufPackSamples.Add(System::GetTimeInMsec() - startProtobufPackMsec);
 		}
 
 		startSerializationMsec = System::GetTimeInMsec();
@@ -162,11 +159,7 @@ void ProcessMonitoring::RunProtobufBenchmark()
 		util = m->GetTotalProgramSize() / (double) totalMemoryMb;
 		procMsg->set_memoryutilization(util * 100.);
 
-		procMsg->set_networkinbytes(m->GetNetworkInInBytes());
-		procMsg->set_networkoutbytes(m->GetNetworkOutInBytes());
-	}
-
-	cout << endl << "Probuf serialization size benchmark:" << endl;
+		procMsg->set_networkinbytes(m->GetIGetIoOutInBytesrocMsg->set_networkoutbytes(m->GetIoOuGetIoOutBytes << endl << "Probuf serialization size benchmark:" << endl;
 	cout << "************" << endl;
 	cout << "serializing process data for " << _monitors.size() << " processes" << endl;
 	if (procsMsg.SerializeToArray(buf, bufSize) != true)

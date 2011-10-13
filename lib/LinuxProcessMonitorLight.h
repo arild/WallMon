@@ -62,11 +62,21 @@ public:
 	unsigned long size();
 
 	// io
-	unsigned long GetNetworkInInBytes();
-	unsigned long GetNetworkOutInBytes();
+	unsigned long GetTotalIoInBytes();
+	unsigned long GetTotalIoOutBytes();
+	unsigned long GetNetworkInBytes();
+	unsigned long GetNetworkOutBytes();
+	unsigned long GetStorageInBytes();
+	unsigned long GetStorageOutBytes();
+	float GetNumReadSysCallsPerSec();
+	float GetNumWriteSysCallsPerSec();
+
 	unsigned long rchar();
 	unsigned long wchar();
-
+	unsigned long syscr();
+	unsigned long syscw();
+	unsigned long readbytes();
+	unsigned long writechar();
 private:
 	// User must call NewSample()
 	Stat<double> *_statReadProcfs, *_statParseProcfs;
@@ -84,8 +94,8 @@ private:
 	unsigned long _size;
 
 	// /proc/<pid>/io variables
-	unsigned long _rchar;
-	unsigned long _wchar;
+	unsigned long _rchar, _wchar, _syscr, _syscw, _read_bytes, _write_bytes;
+	unsigned long _prevRchar, _prevWchar, _prevSyscr, _prevSyscw, _prevReadBytes, _prevWriteBytes;
 
 	long _jiffy; // (USER_HZ)
 	long _timesinceboot;
@@ -94,8 +104,6 @@ private:
 	unsigned long _prevMinflt, _prevMajflt;
 	unsigned long _prevUserTime;
 	unsigned long _prevSystemTime;
-	unsigned long _prevTotalNetworkRead;
-	unsigned long _prevTotalNetworkWrite;
 	double _updateTime;
 	double _prevUpdateTime;
 

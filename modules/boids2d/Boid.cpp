@@ -136,16 +136,16 @@ void Boid::_DrawBoid()
 		if (BoidSharedContext::showCpuBoid == false)
 			return;
 		break;
-	case TRIANGLE:
+	case DIAMOND:
 		if (BoidSharedContext::showMemoryBoid == false)
 			return;
 		break;
-	case DIAMOND:
-		if (BoidSharedContext::showNetworkBoid == false)
+	case TRIANGLE_DOWN:
+		if (BoidSharedContext::showIoInBoid == false)
 			return;
 		break;
-	case POLYGON:
-		if (BoidSharedContext::showStorageBoid == false)
+	case TRIANGLE_UP:
+		if (BoidSharedContext::showIoOutBoid == false)
 			return;
 		break;
 	}

@@ -34,10 +34,10 @@ void Handler::OnInit(Context *ctx)
 	 * On the display wall cluster it is likely that only a a sub-set of available
 	 * tiles should be used. In such a situation, the display area of each tile must be adjusted
 	 */
-	_wallView = new WallView(2,1,3,2);
-//	_wallView = new WallView(0,0,7,4);
+	_wallView = new WallView(2,1,4,2);
+	//	_wallView = new WallView(0,0,7,4);
 	if (_wallView->IsTileWithin() == false)
-		return;
+	return;
 	System::AttachToLocalDisplay(); // Does not seem to be required on rocksvv cluster
 	double x, y, width, height;
 	_eventSystem = new ShoutEventSystem();
@@ -112,9 +112,7 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 		// Resources related to process deleted
 		return;
 
-	//_UpdateCommonAggregatedStatistics(msg, *proc->stat, *procName->stat);
 	_UpdateProcessStatistics(msg, *proc->stat);
-
 
 	// CPU
 	double user = proc->stat->userCpuUtilization;
@@ -139,21 +137,35 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	if (proc->stat->memoryUtilization < FILTER_THRESHOLD)
 		proc->visual->memory->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->memory->ctx->SetDestination(memUtil, msg.numpagefaultspersec());
+		proc->visual->memory->ctx->SetDestination(memUtil, msg.numpagefaultspersec() * 0.1);
 
 	// Network
 	double in = proc->stat->networkInUtilization;
 	double out = proc->stat->networkOutUtilization;
 	double networkUtilization = in + out;
-	double inNetworkRelativeShare = 50;
+	double networkRelativeShare = 50;
 	if (networkUtilization > 0)
-		inNetworkRelativeShare = (in / networkUtilization) * (double) 100;
+		networkRelativeShare = (out / networkUtilization) * (double) 100;
 	if (BoidSharedContext::useLogarithmicAxis)
 		networkUtilization = _LinearToLogarithmicAxisValue(networkUtilization);
 	if (networkUtilization < FILTER_THRESHOLD)
 		proc->visual->network->ctx->SetDestination(-1, -1);
 	else
-		proc->visual->network->ctx->SetDestination(networkUtilization, inNetworkRelativeShare);
+		proc->visual->network->ctx->SetDestination(networkUtilization, networkRelativeShare);
+
+	// Storage
+	in = proc->stat->storageInUtilization;
+	out = proc->stat->storageOutUtilization;
+	double storageUtilization = in + out;
+	double inStorageRelativeShare = 50;
+	if (storageUtilization > 0)
+		inStorageRelativeShare = (out / storageUtilization) * (double) 100;
+	if (BoidSharedContext::useLogarithmicAxis)
+		storageUtilization = _LinearToLogarithmicAxisValue(storageUtilization);
+	if (storageUtilization < FILTER_THRESHOLD)
+		proc->visual->storage->ctx->SetDestination(-1, -1);
+	else
+		proc->visual->storage->ctx->SetDestination(storageUtilization, inStorageRelativeShare);
 
 	// Table visual
 	TableItem *item = proc->visual->tableItem;
@@ -177,42 +189,11 @@ void Handler::_HandleProcessMessage(ProcessMessage &msg)
 	}
 
 	// Ranking of processes. Computation of score takes all metrics into account
-	// and weighs them equally
 	float newScore = (proc->stat->userCpuUtilization + proc->stat->systemCpuUtilization)
-			+ (proc->stat->networkInUtilization + proc->stat->networkOutUtilization) * 2
+			+ (proc->stat->networkInUtilization + proc->stat->networkOutUtilization) * 1.5
+			+ (proc->stat->storageInUtilization + proc->stat->storageOutUtilization) * 1.5
 			+ proc->stat->memoryUtilization * 0.5;
 	proc->visual->tableItem->SetScore(newScore);
-}
-
-/**
- * Boiler plate code for maintaining aggregated values
- *
- * @param msg  A process specific message with fresh data
- * @param pstat  The old values for the same process (in the message)
- * @param astat  The aggregated statistics for some metric
- */
-void Handler::_UpdateCommonAggregatedStatistics(ProcessMessage &msg, StatBase &pstat,
-		StatBase &astat)
-{
-	// CPU
-	// Subtract old values
-	astat.userCpuUtilization -= pstat.userCpuUtilization;
-	astat.systemCpuUtilization -= pstat.systemCpuUtilization;
-	// Add updated values
-	astat.userCpuUtilization += msg.usercpuutilization();
-	astat.systemCpuUtilization += msg.systemcpuutilization();
-
-	// Memory
-	astat.memoryUtilization -= pstat.memoryUtilization;
-	astat.memoryUtilization += msg.memoryutilization();
-
-	// Network
-	astat.networkInUtilization -= pstat.networkInUtilization;
-	astat.networkOutUtilization -= pstat.networkOutUtilization;
-	astat.networkInUtilization += msg.networkinutilization();
-	astat.networkOutUtilization += msg.networkoututilization();
-
-	astat.numSamples += 1;
 }
 
 void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
@@ -225,14 +206,11 @@ void Handler::_UpdateProcessStatistics(ProcessMessage &msg, StatBase &pstat)
 			* (double) 100;
 	pstat.networkOutUtilization = (msg.networkoutbytes() / (double) NETWORK_MAX_IN_AND_OUT_BYTES)
 			* (double) 100;
-	//	pstat.networkInUtilization = msg.networkinutilization();
-	//	pstat.networkOutUtilization = msg.networkoututilization();
 
-	pstat.userCpuUtilizationSum += pstat.userCpuUtilization;
-	pstat.systemCpuUtilizationSum += pstat.systemCpuUtilization;
-	pstat.memoryUtilizationSum += pstat.memoryUtilization;
-	pstat.networkInUtilizationSum += pstat.networkInUtilization;
-	pstat.networkOutUtilizationSum += pstat.networkOutUtilization;
+	pstat.storageInUtilization = (msg.storageinbytes() / (double) NETWORK_MAX_IN_AND_OUT_BYTES)
+			* (double) 100;
+	pstat.storageOutUtilization = (msg.storageoutbytes() / (double) NETWORK_MAX_IN_AND_OUT_BYTES)
+			* (double) 100;
 
 	pstat.numSamples += 1;
 }

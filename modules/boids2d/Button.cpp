@@ -11,7 +11,6 @@
 #include "System.h"
 #include "Fps.h"
 
-bool activateButton = false;
 
 Button::Button(float x, float y, float w, float h, Shape buttonShape, bool slowActivation)
 {
@@ -21,7 +20,7 @@ Button::Button(float x, float y, float w, float h, Shape buttonShape, bool slowA
 	height = h;
 	entityShape = buttonShape;
 	centerShape = false;
-	_isActivated = false;
+	_isActivated = true;
 	_offset = 0;
 	_timestampSec = System::GetTimeInSec();
 	_slowActivation = slowActivation;

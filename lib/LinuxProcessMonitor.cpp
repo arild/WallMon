@@ -398,12 +398,12 @@ unsigned long LinuxProcessMonitor::cancelled_write_bytes()
 	return _cancelled_write_bytes;
 }
 
-unsigned long LinuxProcessMonitor::GetNetworkInInBytes()
+unsigned long LinuxProcessMonitor::GetTotalIoInBytes()
 {
 	return _rchar - _prevTotalNetworkRead;
 }
 
-unsigned long LinuxProcessMonitor::GetNetworkOutInBytes()
+unsigned long LinuxProcessMonitor::GetTotalIoOutBytes()
 {
 	return _wchar - _prevTotalNetworkWrite;
 }

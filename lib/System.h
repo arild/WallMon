@@ -26,12 +26,13 @@ public:
 	static int GetNumLogicalCores();
 	static int GetNumRealCores();
 	static int GetTotalMemory();
-	static bool IsRocksvvCluster();
 	static bool IsValidIpAddress(string ipAddress);
 	static vector<string> HostnameToIpAddress(string hostname);
 	static void AttachToLocalDisplay();
 
 	static string GetCurrentUser();
+	static bool IsRocksvvCluster();
+	static bool IsIceCluster();
 	static bool IsRocksvvClusterRootNode();
 	static bool IsIceClusterRootNode();
 	static bool IsLinux();
