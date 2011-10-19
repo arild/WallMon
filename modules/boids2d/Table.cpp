@@ -493,12 +493,18 @@ void Table::_UnHighlightBoids(vector<TableItem *> group)
 
 void Table::_SortTableAlphabetically()
 {
+	// Preserve the item visually selected
+	TableItem *selected = _items[_selectedItemIndex][0];
 	sort(_items.begin(), _items.end(), TableGroupCompareAlphabetically());
+	_selectedItemIndex = _TableItemToIndex(selected);
 }
 
 void Table::_SortTableScore()
 {
+	// Preserve the item visually selected
+	TableItem *selected = _items[_selectedItemIndex][0];
 	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
+	_selectedItemIndex = _TableItemToIndex(selected);
 }
 
 vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)
@@ -529,7 +535,7 @@ void Table::_SynchronizeState(float pixelIndex, int selectedIndex, float swipeLe
 {
 	TableStateMessage msg = GetStateMessage();
 	msg.set_pixelindex(pixelIndex);
-	if (selectedIndex > 0)
+	if (selectedIndex >= 0)
 		msg.set_selectedindex(selectedIndex);
 	if (swipeLeft > 0)
 		msg.set_swipeleft(swipeLeft);
@@ -545,4 +551,10 @@ TableStateMessage Table::GetStateMessage()
 	return msg;
 }
 
-
+int Table::_TableItemToIndex(TableItem *item)
+{
+	for (int i = 0; i < _items.size(); i++)
+		if (item == _items[i][0])
+			return i;
+	return -1;
+}

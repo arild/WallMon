@@ -210,7 +210,7 @@ bool System::IsRocksvvCluster()
 
 bool System::IsIceCluster()
 {
-	if (IsRocksvvClusterRootNode())
+	if (IsIceClusterRootNode())
 		return true;
 	if (RunCommand("hostname").compare(0, 8, "compute-") == 0)
 		return true;

@@ -67,7 +67,7 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 	if (_serverMap->count(serverAddress) > 0)
 		return (*_serverMap)[serverAddress];
 
-	LOG(INFO) << "new server, connecting...";
+	LOG(INFO) << "new server: " << serverAddress << ":" << serverPort;
 	string serverIpAddress = serverAddress;
 	if (System::IsValidIpAddress(serverIpAddress) == false) {
 		// Translate hostname to an ip address
@@ -78,7 +78,7 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 		}
 		serverIpAddress = tmp[0];
 		if (System::IsValidIpAddress(serverIpAddress) == false) {
-			LOG(ERROR) << "invalid ip address: " << serverIpAddress;
+			LOG(ERROR) << "resolved hostname to invalid ip address: " << serverIpAddress;
 			return -1;
 		}
 	}
@@ -91,7 +91,19 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 
 	int fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (fd < 0) {
-		LOG(ERROR) << "failed creating socket";
+		LOG(ERROR) << "failed creating socket" << fd;
+		if (fd == EPROTONOSUPPORT)
+			LOG(ERROR) << "EPROTONOSUPPORT";
+		else if (fd == EAFNOSUPPORT)
+			LOG(ERROR) << "EAFNOSUPPORT";
+		else if (fd == EMFILE)
+			LOG(ERROR) << "EMFILE";
+		else if (fd == EACCES)
+			LOG(ERROR) << "EACCES";
+		else if (fd == EINVAL)
+			LOG(ERROR) << "EINVAL";
+		else
+			LOG(ERROR) << "UNKNOWN";
 		return -1;
 	}
 	int ret = connect(fd, (struct sockaddr *) &addr, sizeof(addr));

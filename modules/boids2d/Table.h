@@ -64,6 +64,7 @@ private:
 	int _GetTotalNumItems();
 	void _SynchronizeState(float pixelIndex, int selectedIndex=-1, float swipeLeft=-1, float swipeRight=-1);
 	TableStateMessage GetStateMessage();
+	int _TableItemToIndex(TableItem *item);
 };
 
 #endif /* TABLE_H_ */

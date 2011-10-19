@@ -13,11 +13,12 @@ extern "C" ProcessCollector *create_collector()
 	ProcessCollector *p = new ProcessCollector();
 	p->context->key = KEY;
 	p->context->includeStatistics = true;
-	vector<string> servers = WallView(2,1,3,2).GetGrid();
+//	vector<string> servers = WallView(2,1,4,2).GetGrid();
+	vector<string> servers = WallView(2,1,1,1).GetGrid();
 	if (System::IsRocksvvCluster())
 		p->context->AddServers(servers);
 	else if (System::IsIceCluster())
-		p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
+		p->context->AddServer("129.242.19.57");//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	else if (System::GetHostname().compare(0, 5, "arild") == 0)
 		p->context->AddServer("localhost");
 	else

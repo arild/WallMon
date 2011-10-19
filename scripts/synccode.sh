@@ -20,9 +20,9 @@ do
 		continue
 	fi
 
-	${RSYNC} ${WMON_DIR} ${ADDR}:.
-	${RSYNC} ${SRC_DIR} ${ADDR}:.
-	${RSYNC} ${APP_DIR} ${ADDR}:.
+	${RSYNC} ${WMON_DIR} ${ADDR_SSH}:.
+	${RSYNC} ${SRC_DIR} ${ADDR_SSH}:.
+	${RSYNC} ${APP_DIR} ${ADDR_SSH}:.
 	if [ $REMOTE_BUILD == true ]; then
 		ssh ${ADDR_SSH} "cd WallMon && make && exit"
 	fi
