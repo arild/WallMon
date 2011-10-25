@@ -494,17 +494,23 @@ void Table::_UnHighlightBoids(vector<TableItem *> group)
 void Table::_SortTableAlphabetically()
 {
 	// Preserve the item visually selected
-	TableItem *selected = _items[_selectedItemIndex][0];
+	TableItem *selected;
+	if (_selectedItemIndex > -1)
+		selected = _items[_selectedItemIndex][0];
 	sort(_items.begin(), _items.end(), TableGroupCompareAlphabetically());
-	_selectedItemIndex = _TableItemToIndex(selected);
+	if (_selectedItemIndex > -1)
+		_selectedItemIndex = _TableItemToIndex(selected);
 }
 
 void Table::_SortTableScore()
 {
 	// Preserve the item visually selected
-	TableItem *selected = _items[_selectedItemIndex][0];
+	TableItem *selected;
+	if (_selectedItemIndex > -1)
+		selected = _items[_selectedItemIndex][0];
 	sort(_items.begin(), _items.end(), TableGroupCompareUtilization());
-	_selectedItemIndex = _TableItemToIndex(selected);
+	if (_selectedItemIndex > -1)
+		_selectedItemIndex = _TableItemToIndex(selected);
 }
 
 vector<TableItem *> *Table::_LookupItemGroup(string &itemKey)
@@ -556,5 +562,5 @@ int Table::_TableItemToIndex(TableItem *item)
 	for (int i = 0; i < _items.size(); i++)
 		if (item == _items[i][0])
 			return i;
-	return -1;
+	return 0;
 }

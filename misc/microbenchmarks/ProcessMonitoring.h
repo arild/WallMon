@@ -17,7 +17,7 @@ using namespace std;
 
 class ProcessMonitoring {
 public:
-	Stat<double> protobufPackSamples, protobufSerializationSamples, procfsReadSamples, procfsParseSamples;
+	Stat<double> protobufPopulateSamples, protobufSerializationSamples, procfsReadSamples, procfsParseSamples, totalSample, otherSample;
 	ProcessMonitoring();
 	virtual ~ProcessMonitoring();
 	void RunProcfsBenchmark(int numSamples);

@@ -21,9 +21,10 @@ template<class T>
 class Stat {
 public:
 	Stat() {}
-	void Add(T value) {_samples[_samples.size() - 1].push_back(value);}
-	void Add(T value, int idx) {_samples[idx].push_back(value);}
-	void NewSample() {vector<T> s; _samples.push_back(s);}//_samples.resize(_samples.size() + 1);}
+	void Add(T value) {Add(value, NumSamples() - 1);} // Assumes last sample
+	void Add(T value, int sampleIdx) {_samples[sampleIdx].push_back(value);}
+	T Get(int sampleIdx, int valueIdx) {return _samples[sampleIdx][valueIdx];} // returns a specified value from a specified sample
+	void NewSample() {vector<T> s; _samples.push_back(s);}
 	int NumSamples() {return _samples.size();}
 	int NumSamples(int idx) {return _samples[idx].size();}
 	int NumSamplesTotal();
@@ -73,7 +74,7 @@ T Stat<T>::Sum(int idx)
 {
 	T sum = 0;
 	for (int i = 0; i < NumSamples(idx); i++)
-		sum += _samples[idx][i];
+		sum += Get(idx, i);
 	return sum;
 }
 
@@ -149,7 +150,7 @@ T Stat<T>::Variance(int idx)
 	T avg = Avg(idx);
 	T var = 0;
 	for (int i = 0; i < NumSamples(idx); i++)
-		var += pow(_samples[idx][i] - avg, 2.0);
+		var += pow(Get(idx, i) - avg, 2.0);
 	return var / (T)NumSamples(idx);
 }
 
@@ -192,10 +193,10 @@ T Stat<T>::StandardDeviationAvg()
 template<class T>
 T Stat<T>::MinVal(int idx)
 {
-	double min = _samples[idx][0];
+	double min = Get(idx, 0);
 	for (int i = 1; i < NumSamples(idx); i++)
-		if (_samples[idx][i] < min)
-			min = _samples[idx][i];
+		if (Get(idx, i) < min)
+			min = Get(idx, i);
 	return min;
 }
 
@@ -220,10 +221,10 @@ T Stat<T>::MinVal()
 template<class T>
 T Stat<T>::MaxVal(int idx)
 {
-	double max = _samples[idx][0];
+	double max = Get(idx, 0);
 	for (int i = 1; i < NumSamples(idx); i++)
-		if (_samples[idx][i] > max)
-			max = _samples[idx][i];
+		if (Get(idx, i) > max)
+			max = Get(idx, i);
 	return max;
 }
 

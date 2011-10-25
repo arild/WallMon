@@ -16,12 +16,6 @@ int main(int argc, char *argv[]) {
 	cout << "running " << numSamples << " samples" << endl << endl;
 
 	ProcessMonitoring p;
-
-	// Include protobuf - minimal measurements
-//	ProfilerStart("procfs.prof");
-//	p.RunProcfsBenchmark(numSamples, false, true, false);
-//	ProfilerStop();
-//	sleep(1);
-
 	p.RunProcfsBenchmark(numSamples);
+	p.RunProtobufBenchmark();
 }

@@ -4,6 +4,7 @@
 - *.c
 - *.d
 - *.mk
++ .hg
 - .*
 - **/Debug/
 - **/server/wallmons
