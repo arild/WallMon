@@ -48,6 +48,8 @@ struct TableGroupCompareUtilization {
 	{
 		float aScore = 0;
 		float bScore = 0;
+
+		// Calculate score sum
 		int len = max(a.size(), b.size());
 		for (int i = 0; i < len; i++) {
 			if (i < a.size())
@@ -55,8 +57,14 @@ struct TableGroupCompareUtilization {
 			if (i < b.size())
 				bScore += b[i]->GetScore();
 		}
-		aScore /= (float)(a.size() * (float)0.95);
-		bScore /= (float)(b.size() * (float)0.95);
+		// Calculate score average
+		aScore /= (float)a.size();
+		bScore /= (float)b.size();
+
+		// Favor process groups with many members
+		aScore += aScore * 0.03 * a.size();
+		bScore += bScore * 0.03 * b.size();
+
 		return aScore > bScore;
 	}
 };

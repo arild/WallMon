@@ -18,7 +18,7 @@ extern "C" ProcessCollector *create_collector()
 	if (System::IsRocksvvCluster())
 		p->context->AddServers(servers);
 	else if (System::IsIceCluster())
-		p->context->AddServer("129.242.19.57");//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
+		p->context->AddServer("arild.dyndns.tv");//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	else if (System::GetHostname().compare(0, 5, "arild") == 0)
 		p->context->AddServer("localhost");
 	else

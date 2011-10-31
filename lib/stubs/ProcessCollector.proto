@@ -32,6 +32,8 @@ message ProcessMessage
 
 	optional uint32 storageInBytes = 20;
 	optional uint32 storageOutBytes = 21;
+	
+	optional uint64 memoryInBytes = 22;
 }
 
 message ProcessCollectorMessage

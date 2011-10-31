@@ -14,6 +14,7 @@
 #include <functional>
 #include <numeric>
 #include <cmath>
+#include <string>
 
 using namespace std;
 
