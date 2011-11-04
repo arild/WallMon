@@ -15,13 +15,20 @@
 #include <numeric>
 #include <cmath>
 #include <string>
+#include <sstream>
+#include <iostream>
+#include <stdio.h>
+#include <glog/logging.h>
+#include "System.h"
 
 using namespace std;
 
 template<class T>
 class Stat {
 public:
-	Stat() {}
+	Stat(string prefix="no prefix") {_prefix=prefix;}
+	void Start() {_startTimeMsec = System::GetTimeInMsec();}
+	void Sample() {Add(System::GetTimeInMsec() - _startTimeMsec);}
 	void Add(T value) {Add(value, NumSamples() - 1);} // Assumes last sample
 	void Add(T value, int sampleIdx) {_samples[sampleIdx].push_back(value);}
 	T Get(int sampleIdx, int valueIdx) {return _samples[sampleIdx][valueIdx];} // returns a specified value from a specified sample
@@ -44,9 +51,14 @@ public:
 	T MinVal();
 	T MaxVal(int idx);
 	T MaxVal();
-	bool Save(string filePath="");
+	string GetPrefix() {return _prefix;}
+	bool Save(vector<Stat<T> > data, string filename="tmp.dat", bool generateHorizontalAxis=false);
+	void PrintToScreen();
 private:
 	vector<vector<T> > _samples;
+	double _startTimeMsec;
+	string _prefix;
+
 };
 
 template<class T>
@@ -244,11 +256,50 @@ T Stat<T>::MaxVal()
 	return max;
 }
 
+/**
+ * Assumes that each sample only contains one sub-sample.
+ */
 template<class T>
-bool Stat<T>::Save(string filePath)
+bool Stat<T>::Save(vector<Stat<T> > data, string filename, bool generateHorizontalAxis)
 {
+	stringstream firstLine;
+	firstLine << "# Sample number";
+	for (int i = 0; i < data.size(); i++)
+		firstLine << " | " << data[i].GetPrefix();
+
+	FILE *f = fopen(filename.c_str(), "w");
+	if (f == NULL)
+		LOG(FATAL) << "failed creating file for gnuplot data";
+	fprintf(f, "%s\n", firstLine.str().c_str());
+
+	for (int i = 0; i < data[0].NumSamples(); i++) {
+		stringstream values;
+		for (int j = 0; j < data.size(); j++)
+			values << data[j].Get(i, 0) << " ";
+		if (generateHorizontalAxis)
+			fprintf(f, "%d %s\n", i, values.str().c_str());
+		else
+			fprintf(f, "%s\n", values.str().c_str());
+	}
+	fclose(f);
+	LOG(INFO) << "done writing to file";
 
 }
+
+template<class T>
+void Stat<T>::PrintToScreen()
+{
+	cout << "*** Sample data for: " << _prefix << " ***" << endl;
+	cout << "----------------------------" << endl;
+	cout << "sum total: " << SumTotal() << endl;
+	cout << "avg      : " << SumAvg() << endl;
+	cout << "avg var  : " << VarianceAvg() << endl;
+	cout << "sd msec  : " << StandardDeviationAvg() << endl;
+	cout << "sum min  : " << SumMin() << endl;
+	cout << "sum max  : " << SumMax() << endl;
+	cout << "----------------------------" << endl;
+}
+
 
 
 #endif /* STAT_H_ */

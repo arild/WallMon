@@ -13,3 +13,5 @@
 - *.gch
 - *.orig
 - *.pdf
+- *.dat
+- *.ps

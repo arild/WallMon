@@ -1,4 +1,4 @@
-CC=g++ -g -Wno-multichar
+CC=g++ -O2 -Wno-multichar
 
 # Determine the path to the home directory
 USER = $(shell whoami)

@@ -105,8 +105,10 @@ bool System::GetAllPids(vector<int> &pids)
 {
 	string cmd = "ls /proc | awk 'function isnum(x){return(x==x+0)}{if (isnum($1)) print $1}'";
 	FILE *fp = popen(cmd.c_str(), "r");
-	if (fp == NULL)
+	if (fp == NULL) {
+		LOG(INFO) << "failed opening pipe";
 		return false;
+	}
 	_TokenizeFile(fp, pids);
 	pclose(fp);
 	return true;

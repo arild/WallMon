@@ -12,7 +12,7 @@
 #include "System.h"
 #include "unistd.h"
 
-#define MESSAGE_BUF_SIZE				1024 * 50 // 50KB (350 processes ~ 15 KB)
+#define MESSAGE_BUF_SIZE				1024 * 1024 // 50KB (350 processes ~ 15 KB)
 
 int _numTimesFailedMonitoringProcesses = 0;
 
@@ -72,7 +72,7 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 	// TODO: Investigate why this causes segfault at arbirary intervals
 	if (_processNames.size() == 0)// _numSamples++ % 5 == 0)
 		_FindAllNewProcesses();
-
+	LOG(INFO) << "monitoring num processes: " << _monitors.size();
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (int i = 0; i < _monitors.size(); i++) {
 		LinuxProcessMonitorLight *monitor = _monitors[i];

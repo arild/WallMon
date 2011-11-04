@@ -53,6 +53,9 @@ WallView: WallView.o
 
 PidMonitor: PidMonitor.o
 	${MAKE_STATIC_LIB}
+	
+Plot: Plot.o
+	${MAKE_STATIC_LIB}
 
 # Note that the protobuf stub (MonitorDispatcher.pb.o) is included
 MonitorDispatcher: MonitorDispatcher.o PracticalSocket.o ClassLoader.o

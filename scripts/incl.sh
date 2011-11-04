@@ -6,6 +6,7 @@ WMON_DIR=~/WallMon
 DAEMON_DIR=${WMON_DIR}/daemon
 SERVER_DIR=${WMON_DIR}/server
 DISPATCHER_DIR=${WMON_DIR}/dispatcher
+SCRIPTS_DIR=${WMON_DIR}/scripts
 SRC_DIR=~/src
 APP_DIR=~/apps
 
