@@ -11,6 +11,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h> // inet_addr()
 #include <boost/foreach.hpp>
+#include <netinet/tcp.h> // TCP_NODELAY
+#include <stdio.h> // perror
 #include "Config.h"
 #include "Streamer.h"
 #include "System.h"
@@ -91,22 +93,16 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 
 	int fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (fd < 0) {
-		LOG(ERROR) << "failed creating socket" << fd;
-		if (fd == EPROTONOSUPPORT)
-			LOG(ERROR) << "EPROTONOSUPPORT";
-		else if (fd == EAFNOSUPPORT)
-			LOG(ERROR) << "EAFNOSUPPORT";
-		else if (fd == EMFILE)
-			LOG(ERROR) << "EMFILE";
-		else if (fd == EACCES)
-			LOG(ERROR) << "EACCES";
-		else if (fd == EINVAL)
-			LOG(ERROR) << "EINVAL";
-		else
-			LOG(ERROR) << "UNKNOWN";
-		return -1;
+		perror("failed creating socket: ");
+		LOG(FATAL);
 	}
-	int ret = connect(fd, (struct sockaddr *) &addr, sizeof(addr));
+
+	// Disable the Nagle (TCP No Delay) algorithm
+	int flag = 1;
+	int ret = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag));
+	LOG_IF(FATAL, ret == -1) << "setting TCP_NODELAY failed";
+
+	ret = connect(fd, (struct sockaddr *) &addr, sizeof(addr));
 	if (ret < 0) {
 		LOG(ERROR) << "failed connecting to server";
 		return -1;
