@@ -72,7 +72,6 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 	// TODO: Investigate why this causes segfault at arbirary intervals
 	if (_processNames.size() == 0)// _numSamples++ % 5 == 0)
 		_FindAllNewProcesses();
-	LOG(INFO) << "monitoring num processes: " << _monitors.size();
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (int i = 0; i < _monitors.size(); i++) {
 		LinuxProcessMonitorLight *monitor = _monitors[i];
@@ -86,6 +85,15 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			// and after that delete it
 		}
 
+//		if (monitor->GetProcessName().compare(0, 7, "wallmon") == 0) {
+//			LOG(INFO) << monitor->GetProcessName();
+//			LOG(INFO) << "---------------";
+//			LOG(INFO) << "Network receive: " << monitor->GetNetworkInBytes() / (double)1024 << " KB";
+//			LOG(INFO) << "Network send   : " << monitor->GetNetworkOutBytes() / (double)1024 << " KB";
+//			LOG(INFO) << "Storage read   : " << monitor->GetStorageInBytes() / (double)1024 << " KB";
+//			LOG(INFO) << "Storage write  : " << monitor->GetStorageOutBytes() / (double)1024 << " KB";
+//			LOG(INFO) << "---------------";
+//		}
 		double util;
 		if (filter->has_processname()) {
 			processMsg->set_processname(monitor->GetProcessName());
@@ -109,6 +117,9 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			util = monitor->GetTotalProgramSize() / (double)_totalMemoryMb;
  			processMsg->set_memoryutilization(util * 100.);
 		}
+		if (filter->has_memorybytes())
+			processMsg->set_memorybytes(monitor->GetTotalProgramSizeBytes());
+
 		if (filter->has_ioinbytes())
 			processMsg->set_ioinbytes(monitor->GetTotalIoInBytes());
 

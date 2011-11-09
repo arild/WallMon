@@ -23,36 +23,48 @@
 
 using namespace std;
 
+class StorageFlags {
+public:
+	string filename;
+	bool avg, variance, stdDev, min, max, generateLinearStartColumn;
+	vector<int> *startColumn;
+	StorageFlags(string filename_="tmp.dat", bool avg_=true, bool variance_=false, bool stdDev_=false, bool min_=false,
+			bool max_=false, bool generateLinearStartColumn_=false, vector<int> *startColumn_=NULL) : filename(filename_), avg(avg_), variance(variance_),
+			stdDev(stdDev_), min(min_), max(max_), generateLinearStartColumn(generateLinearStartColumn_), startColumn(startColumn_) {}
+};
+
+
 template<class T>
 class Stat {
 public:
-	Stat(string prefix="no prefix") {_prefix=prefix;}
+	Stat(string prefix = "no prefix") {_prefix = prefix;}
 	void Start() {_startTimeMsec = System::GetTimeInMsec();}
 	void Sample() {Add(System::GetTimeInMsec() - _startTimeMsec);}
 	void Add(T value) {Add(value, NumSamples() - 1);} // Assumes last sample
 	void Add(T value, int sampleIdx) {_samples[sampleIdx].push_back(value);}
 	T Get(int sampleIdx, int valueIdx) {return _samples[sampleIdx][valueIdx];} // returns a specified value from a specified sample
+	void Remove(int sampleIdx) {_samples.erase(_samples.begin() + sampleIdx);}
 	void NewSample() {vector<T> s; _samples.push_back(s);}
 	int NumSamples() {return _samples.size();}
 	int NumSamples(int idx) {return _samples[idx].size();}
 	int NumSamplesTotal();
 	T Sum(int idx);
-	T SumAvg();
+	double SumAvg();
 	T SumTotal();
 	T SumMin();
 	T SumMax();
-	T Avg(int idx);
-	T AvgAvg();
-	T Variance(int idx);
-	T VarianceAvg();
-	T StandardDeviation(int idx);
-	T StandardDeviationAvg();
+	double Avg(int idx);
+	double AvgAvg();
+	double Variance(int idx);
+	double VarianceAvg();
+	double StandardDeviation(int idx);
+	double StandardDeviationAvg();
 	T MinVal(int idx);
 	T MinVal();
 	T MaxVal(int idx);
 	T MaxVal();
 	string GetPrefix() {return _prefix;}
-	bool Save(vector<Stat<T> > data, string filename="tmp.dat", bool generateHorizontalAxis=false);
+	bool Save(StorageFlags flags);
 	void PrintToScreen();
 private:
 	vector<vector<T> > _samples;
@@ -74,9 +86,9 @@ int Stat<T>::NumSamplesTotal()
  * Average of the different sums for the sample sets
  */
 template<class T>
-T Stat<T>::SumAvg()
+double Stat<T>::SumAvg()
 {
-	return SumTotal() / (T)NumSamples();
+	return SumTotal() / (double) NumSamples();
 }
 
 /**
@@ -137,53 +149,53 @@ T Stat<T>::SumMax()
  * Average of specified sample
  */
 template<class T>
-T Stat<T>::Avg(int idx)
+double Stat<T>::Avg(int idx)
 {
-	return Sum(idx) / (T)NumSamples(idx);
+	return Sum(idx) / (double) NumSamples(idx);
 }
 
 /**
  * Average of all averages (this is not the same as average of all values in all samples)
  */
 template<class T>
-T Stat<T>::AvgAvg()
+double Stat<T>::AvgAvg()
 {
 	T avg = 0;
 	for (int i = 0; i < NumSamples(); i++)
 		avg += Avg(i);
-	return avg / (T)NumSamples();
+	return avg / (double) NumSamples();
 }
 
 /**
  * Variance for specified sample
  */
 template<class T>
-T Stat<T>::Variance(int idx)
+double Stat<T>::Variance(int idx)
 {
-	T avg = Avg(idx);
-	T var = 0;
+	double avg = Avg(idx);
+	double var = 0;
 	for (int i = 0; i < NumSamples(idx); i++)
-		var += pow(Get(idx, i) - avg, 2.0);
-	return var / (T)NumSamples(idx);
+		var += pow((double)Get(idx, i) - avg, 2.0);
+	return var / (double) NumSamples(idx);
 }
 
 /**
  * Average variance for all samples
  */
 template<class T>
-T Stat<T>::VarianceAvg()
+double Stat<T>::VarianceAvg()
 {
-	T var = 0;
+	double var = 0;
 	for (int i = 0; i < NumSamples(); i++)
 		var += Variance(i);
-	return var / (T)NumSamples();
+	return var / (double) NumSamples();
 }
 
 /**
  * SD for a specified sample
  */
 template<class T>
-T Stat<T>::StandardDeviation(int idx)
+double Stat<T>::StandardDeviation(int idx)
 {
 	return sqrt(Variance(idx));
 }
@@ -192,12 +204,12 @@ T Stat<T>::StandardDeviation(int idx)
  * Average SD for all samples
  */
 template<class T>
-T Stat<T>::StandardDeviationAvg()
+double Stat<T>::StandardDeviationAvg()
 {
-	T sd = 0;
+	double sd = 0;
 	for (int i = 0; i < NumSamples(); i++)
 		sd += StandardDeviation(i);
-	return sd / (T)NumSamples();
+	return sd / (double) NumSamples();
 }
 
 /**
@@ -206,7 +218,7 @@ T Stat<T>::StandardDeviationAvg()
 template<class T>
 T Stat<T>::MinVal(int idx)
 {
-	double min = Get(idx, 0);
+	T min = Get(idx, 0);
 	for (int i = 1; i < NumSamples(idx); i++)
 		if (Get(idx, i) < min)
 			min = Get(idx, i);
@@ -234,7 +246,7 @@ T Stat<T>::MinVal()
 template<class T>
 T Stat<T>::MaxVal(int idx)
 {
-	double max = Get(idx, 0);
+	T max = Get(idx, 0);
 	for (int i = 1; i < NumSamples(idx); i++)
 		if (Get(idx, i) > max)
 			max = Get(idx, i);
@@ -260,30 +272,61 @@ T Stat<T>::MaxVal()
  * Assumes that each sample only contains one sub-sample.
  */
 template<class T>
-bool Stat<T>::Save(vector<Stat<T> > data, string filename, bool generateHorizontalAxis)
+bool Stat<T>::Save(StorageFlags flags)
 {
-	stringstream firstLine;
-	firstLine << "# Sample number";
-	for (int i = 0; i < data.size(); i++)
-		firstLine << " | " << data[i].GetPrefix();
+	if (flags.startColumn != NULL) {
+		LOG(INFO) << flags.startColumn->size() << " | " << NumSamples();
+		CHECK(flags.startColumn->size() == NumSamples());
+	}
 
-	FILE *f = fopen(filename.c_str(), "w");
+	stringstream info;
+	info << "# Statistical data for: " << GetPrefix();
+
+	info << "\n# Data format for populations:\n#";
+	if (flags.generateLinearStartColumn)
+		info << " auto generated |";
+	if (flags.startColumn != NULL)
+		info << " custom defined |";
+	if (flags.avg)
+		info << " average |";
+	if (flags.variance)
+		info << " variance |";
+	if (flags.stdDev)
+		info << " std dev |";
+	if (flags.min)
+		info << " min |";
+	if (flags.max)
+		info << " max |";
+	string path = "/home/" + System::GetCurrentUser() + "/WallMon/modules/gnuplot/data/" + flags.filename;// + "_" + System::GetHostname();
+	FILE *f = fopen(path.c_str(), "w");
 	if (f == NULL)
 		LOG(FATAL) << "failed creating file for gnuplot data";
-	fprintf(f, "%s\n", firstLine.str().c_str());
+	string s = info.str().erase(info.str().length() - 1, 1);
+	fprintf(f, "%s\n", s.c_str());
 
-	for (int i = 0; i < data[0].NumSamples(); i++) {
-		stringstream values;
-		for (int j = 0; j < data.size(); j++)
-			values << data[j].Get(i, 0) << " ";
-		if (generateHorizontalAxis)
-			fprintf(f, "%d %s\n", i, values.str().c_str());
-		else
-			fprintf(f, "%s\n", values.str().c_str());
+	for (int i = 0; i < NumSamples(); i++) {
+		stringstream line;
+		if (flags.avg)
+			line << Avg(i) << " ";
+		if (flags.variance)
+			line << Variance(i) << " ";
+		if (flags.stdDev)
+			line << StandardDeviation(i) << " ";
+		if (flags.min)
+			line << MinVal(i) << " ";
+		if (flags.max)
+			line << MaxVal(i) << " ";
+
+		if (flags.generateLinearStartColumn)
+			fprintf(f, "%d ", i);
+		if (flags.startColumn != NULL)
+			fprintf(f, "%d ", flags.startColumn->at(i));
+		fprintf(f, " %s", line.str().c_str());
+		fprintf(f, " # Based on %d samples\n", NumSamples(i));
 	}
+	fprintf(f, "# avg variance = %f  |  avg std dev = %f\n", VarianceAvg(), StandardDeviationAvg());
 	fclose(f);
 	LOG(INFO) << "done writing to file";
-
 }
 
 template<class T>
@@ -299,7 +342,5 @@ void Stat<T>::PrintToScreen()
 	cout << "sum max  : " << SumMax() << endl;
 	cout << "----------------------------" << endl;
 }
-
-
 
 #endif /* STAT_H_ */

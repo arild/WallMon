@@ -10,8 +10,9 @@
 #include <string.h>
 #include <stdlib.h> // For NULL
 #include <glog/logging.h>
-#include "DataRouter.h"
 #include <typeinfo>
+#include "System.h"
+#include "DataRouter.h"
 
 DataRouter::DataRouter()
 {
@@ -95,17 +96,37 @@ void DataRouter::_RouteForever()
 			LOG(WARNING) << "no handler for key=" << _msg->key();
 		}
 		else {
-			_msg->set_networkmessagesizebytes(item->length);
-			_msg->set_messagenumber(_messageNumber++);
 			HandlerEvent *event = it->second;
+			if (event->ctx->includeStatistics) {
+				_msg->set_networkmessagesizebytes(item->length);
+				_msg->set_messagenumber(_messageNumber++);
+				_msg->set_serverqueuesize(_queue->GetSize());
+				_msg->set_servertimestampmsec(System::GetTimeInMsec());
+			}
 			if (event->handler)
 				event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
 			else if (event->handlerProtobuf)
 				event->handlerProtobuf->Handle(_msg);
 			else
 				LOG(FATAL) << "unknown handler type";
+
+			if (event->ctx->__exit) {
+				if (event->handler)
+					event->handler->OnStop();
+				else
+					event->handlerProtobuf->OnStop();
+				_DeleteHandler(event);
+			}
 		}
 		delete item;
 	}
+}
+
+void DataRouter::_DeleteHandler(HandlerEvent *event)
+{
+	_handlers->erase(event->ctx->key);
+	delete event->ctx;
+	delete event->handler;
+	delete event;
 }
 

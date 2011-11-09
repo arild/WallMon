@@ -7,6 +7,7 @@ DAEMON_DIR=${WMON_DIR}/daemon
 SERVER_DIR=${WMON_DIR}/server
 DISPATCHER_DIR=${WMON_DIR}/dispatcher
 SCRIPTS_DIR=${WMON_DIR}/scripts
+MODULES_DIR=${WMON_DIR}/modules
 SRC_DIR=~/src
 APP_DIR=~/apps
 

@@ -4,13 +4,19 @@ message WallmonMessage
 	required string key = 1;
 	required bytes data = 2;
 	
-	optional double timestampMsec = 3;
+	optional double daemonTimestampMsec = 3;
 	optional string hostname = 4;
 	optional double sampleFrequencyMsec = 5;
 	optional double sampleDurationMsec = 6;
 	optional double scheduleDriftMsec = 7;
 	optional double scheduleDurationMsec = 8;
-	optional uint32 hz = 9;
+	optional uint32 actualHz = 9;
 	optional uint32 networkMessageSizeBytes = 10;
 	optional uint32 messageNumber = 11;
+	
+	optional uint32 daemonQueueSize = 12;
+	optional uint32 serverQueueSize = 13;
+	optional uint32 daemonNumServerConnections = 14;
+	optional double serverTimestampMsec = 15;
+	optional uint64 serverNumBytesPerSecNetworkReceive = 16;
 }

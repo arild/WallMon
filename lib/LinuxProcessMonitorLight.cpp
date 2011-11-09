@@ -193,7 +193,12 @@ string LinuxProcessMonitorLight::GetProcessName()
 
 double LinuxProcessMonitorLight::GetTotalProgramSize()
 {
-	return (double) (_size * 4096.0) / (1024. * 1024.0);
+	return  GetTotalProgramSizeBytes() / (double)(1024 * 1024);
+}
+
+uint64_t LinuxProcessMonitorLight::GetTotalProgramSizeBytes()
+{
+	return _size * 4096;
 }
 
 unsigned long LinuxProcessMonitorLight::minflt()

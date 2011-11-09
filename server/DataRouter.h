@@ -66,6 +66,7 @@ private:
 	WallmonMessage *_msg;
 	unsigned int _messageNumber;
 	void _RouteForever();
+	void _DeleteHandler(HandlerEvent *event);
 };
 
 #endif /* DATAROUTER_H_ */

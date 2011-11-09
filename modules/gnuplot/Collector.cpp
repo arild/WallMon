@@ -9,6 +9,7 @@
 #include "System.h"
 #include "ProcessCollector.h"
 #include "Common.h"
+#include "WallView.h"
 
 using namespace std;
 
@@ -33,19 +34,15 @@ void Controller::AfterSample(Context *ctx)
 		sleep(2); // make sure data is sent before termination
 		exit(0);
 	}
-	_numSamples += 1;
-//	LOG(INFO) << _numSamples << "/" << get_num_samples(_sampleIntervalIndex);
-	if (_numSamples == get_num_samples(_sampleIntervalIndex)) {
+	if (++_numSamples == get_num_samples(_sampleIntervalIndex)) {
 		_sampleIntervalIndex += 1;
 		_numSamples = 0;
 
 		// Change frequency if we are not on last sample
 		if (_sampleIntervalIndex != NUM_SAMPLE_INTERVALS) {
-			// At interval change, wait some in order to increase the probability of
-			// synchronizing all collectors
-			LOG(INFO) << "changing sample frequency from " << get_frequency_in_msec(
-					_sampleIntervalIndex - 1) << " to " << get_frequency_in_msec(
-					_sampleIntervalIndex);
+			LOG(INFO) << "changing sample frequency from " <<
+					get_frequency_in_msec(_sampleIntervalIndex - 1) << " to "
+					<< get_frequency_in_msec(_sampleIntervalIndex);
 			ctx->sampleFrequencyMsec = get_frequency_in_msec(_sampleIntervalIndex);
 		}
 	}
@@ -55,11 +52,14 @@ extern "C" ProcessCollector *create_collector()
 {
 	ProcessCollector *p = new ProcessCollector(new Controller);
 
-	if (System::GetHostname().compare(0, 5, "arild") == 0)
-		p->context->AddServer("localhost");
+	if (System::IsRocksvvCluster()) {
+		vector<string> servers = WallView(0,0,7,4).GetGrid();
+		//vector<string> servers = WallView(0, 0, 6, 1).GetGrid();
+		p->context->AddServers(servers);
+		p->context->AddServer("rocksvv.cs.uit.no");
+	}
 	else
-		// Assume ice cluster
-		p->context->AddServer("ice.cs.uit.no");
+		p->context->AddServer("arild.dyndns.tv");
 
 	p->context->key = KEY;
 	p->context->sampleFrequencyMsec = get_frequency_in_msec(0);
@@ -68,7 +68,7 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_pid(0);
 	p->filter->set_usercpuutilization(0);
 	p->filter->set_systemcpuutilization(0);
-	p->filter->set_memoryutilization(0);
+	p->filter->set_memorybytes(0);
 	p->filter->set_networkinbytes(0);
 	p->filter->set_networkoutbytes(0);
 	return p;

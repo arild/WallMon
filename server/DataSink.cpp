@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <arpa/inet.h> // inet_ntoa()
 #include <boost/foreach.hpp>
+#include <stdio.h>
 #include <glog/logging.h>
 #include "DataSink.h"
 #include "Config.h"
@@ -47,7 +48,10 @@ DataSink::DataSink(DataRouter *router)
 	LOG_IF(FATAL, ret < 0) << "failed setting so_reuseaddr";
 
 	ret = ::bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
-	LOG_IF(FATAL, ret != 0) << "failed binding socket";
+	if (ret == -1) {
+		perror("socket bind error: ");
+		LOG(FATAL) << "failed binding socket";
+	}
 
 	ret = listen(sockfd, 2);
 	LOG_IF(FATAL, ret < 0) << "failed listening on socket";

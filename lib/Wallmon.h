@@ -22,9 +22,10 @@ class Context {
 public:
 	string key;
 	vector< tuple<string, int> > servers;
-	int sampleFrequencyMsec;
+	double sampleFrequencyMsec;
 	bool concurrentExecution;
 	bool includeStatistics;
+	bool __exit;
 
 	Context()
 	{
@@ -32,6 +33,7 @@ public:
 		sampleFrequencyMsec = 1000;
 		concurrentExecution = false;
 		includeStatistics = false;
+		__exit = false;
 	}
 
 	~Context()
@@ -66,7 +68,10 @@ public:
 			AddServer(serverAddresses[i], STREAMER_ENTRY_PORT);
 	}
 
-
+	void Exit()
+	{
+		__exit = true;
+	}
 };
 
 class IBase {

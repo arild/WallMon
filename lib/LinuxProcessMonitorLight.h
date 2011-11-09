@@ -59,6 +59,7 @@ public:
 
 	// statm
 	double GetTotalProgramSize(); // in megabytes
+	uint64_t GetTotalProgramSizeBytes();
 	unsigned long size();
 
 	// io

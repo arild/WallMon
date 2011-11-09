@@ -123,6 +123,16 @@ void Streamer::Stream(StreamItem &item)
 	_queue->Push(&item);
 }
 
+unsigned int Streamer::GetNumPendingItems()
+{
+	return _queue->GetSize();
+}
+
+unsigned int Streamer::GetNumServerConnections()
+{
+	return _serverMap->size();
+}
+
 /**
  * Removes packet from FIFO queue and sends them on an open socket,
  * which should have been created and set up by Streamer::Connect().

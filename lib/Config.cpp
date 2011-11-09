@@ -17,3 +17,11 @@ string Config::GetMonoFontPath()
 {
 	return System::GetHomePath() + "/lib/mono.ttf";
 }
+
+string Config::GetWallMonPath()
+{
+	return "/home/" + System::GetCurrentUser() + "/WallMon";
+}
+
+
+

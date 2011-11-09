@@ -19,6 +19,8 @@ public:
 	void Stop();
 	int SetupStream(string serverAddress, int serverPort);
 	void Stream(StreamItem &item);
+	unsigned int GetNumPendingItems();
+	unsigned int GetNumServerConnections();
 
 private:
 	boost::thread _thread;

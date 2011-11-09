@@ -28,7 +28,6 @@
 #include "ControlPanel.h"
 #include "System.h"
 #include "Xserver.h"
-#include "Stat.h"
 
 boost::condition mainLoopThreadCondition;
 boost::mutex mainLoopThreadMutex;
@@ -102,20 +101,7 @@ void BoidsApp::_RenderForever()
 	mainLoopThreadCondition.notify_one();
 	LOG(INFO) << "BoidsApp entering infinite loop";
 
-	Stat<double> numEntitiesSample("Num Objects"), clearSample("Clear"), runScenesSample("Run Scenes"), handleTouchSample("Handle Events"),
-			runCallbacksSample("Run Callbacks"), swapBuffersSample("Swap Buffers"),
-			totalSample("Total"), otherSample("Other");
-
 	while (_running) {
-		numEntitiesSample.NewSample();
-		clearSample.NewSample();
-		runScenesSample.NewSample();
-		handleTouchSample.NewSample();
-		runCallbacksSample.NewSample();
-		swapBuffersSample.NewSample();
-		totalSample.NewSample();
-		totalSample.Start();
-
 		if (_updateOrtho) {
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -124,61 +110,19 @@ void BoidsApp::_RenderForever()
 			glLoadIdentity();
 			_updateOrtho = false;
 		}
-		clearSample.Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		clearSample.Sample();
 
-		runScenesSample.Start();
 		Scene::RunAllScenes();
-		runScenesSample.Sample();
-
-		handleTouchSample.Start();
 		_HandleTouchEvents();
-		handleTouchSample.Sample();
-
-		runCallbacksSample.Start();
 		EntityEvent::RunAllCallbacks();
-		runCallbacksSample.Sample();
 
-		swapBuffersSample.Start();
 		SDL_GL_SwapBuffers();
-		swapBuffersSample.Sample();
 
 //		Xserver::BringToFront();
-		totalSample.Sample();
-		numEntitiesSample.Add((double)Scene::GetTotalNumEntities());
 		char Buffer[255];
 		sprintf(Buffer, "WallMon - FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());
 		SDL_WM_SetCaption(Buffer, Buffer);
 		Fps::fpsControl.OnLoop();
-
-
-		if (clearSample.NumSamples() == 1000 && _wallView->IsLowerLeft()) {
-			for (int i = 0; i < totalSample.NumSamples(); i++) {
-				double sumOther = totalSample.Sum(i) - (clearSample.Sum(i) +
-							runScenesSample.Sum(i) + handleTouchSample.Sum(i) +
-							runCallbacksSample.Sum(i) + swapBuffersSample.Sum(i));
-				otherSample.NewSample();
-				otherSample.Add(sumOther);
-			}
-
-			clearSample.PrintToScreen();
-			runScenesSample.PrintToScreen();
-			handleTouchSample.PrintToScreen();
-			runCallbacksSample.PrintToScreen();
-			swapBuffersSample.PrintToScreen();
-			otherSample.PrintToScreen();
-
-			vector<Stat<double> > v;
-			v.push_back(clearSample);
-			v.push_back(runScenesSample);
-			v.push_back(handleTouchSample);
-			v.push_back(runCallbacksSample);
-			v.push_back(swapBuffersSample);
-			v.push_back(otherSample);
-			v.push_back(numEntitiesSample);
-			clearSample.Save(v, "/home/arild/WallMon/scripts/visualization_engine.dat", true);
-		}
 	}
 }
 

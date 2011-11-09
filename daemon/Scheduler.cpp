@@ -192,24 +192,29 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 	if (event->ctx->includeStatistics) {
 		event->numSamples += 1;
 		event->numSamplesLastSecond += 1;
-		msg.set_timestampmsec(tsBeforeSampleSec * (double)1000);
+		msg.set_daemontimestampmsec(tsBeforeSampleSec * (double)1000);
 		msg.set_hostname(System::GetHostname());
 		msg.set_samplefrequencymsec(oldSampleFrequencyMsec);
 		msg.set_sampledurationmsec(sampleDurationSec * (double)1000);
 		if (event->previousTsBeforeSampleSec > 0) {
 			double actualFrequencyMsec = (tsBeforeSampleSec - event->previousTsBeforeSampleSec) * (double)1000;
-			msg.set_scheduledriftmsec(actualFrequencyMsec - oldSampleFrequencyMsec);
+			msg.set_scheduledriftmsec(actualFrequencyMsec - (double)oldSampleFrequencyMsec);
 		}
 		if (event->scheduleDurationSec > 0)
 			msg.set_scheduledurationmsec(event->scheduleDurationSec * (double)1000);
 
 		double diff = tsAfterSampleSec - (double)event->tsNumSamplesPerSecond;
 		if (tsAfterSampleSec - (double)event->tsNumSamplesPerSecond > 1.) {
-			msg.set_hz(event->numSamplesLastSecond);
+			msg.set_actualhz(event->numSamplesLastSecond);
 			event->numSamplesLastSecond = 0;
 			event->tsNumSamplesPerSecond = tsAfterSampleSec;
 		}
+		msg.set_daemonqueuesize(Scheduler::streamer->GetNumPendingItems());
+		unsigned int numConnections = Scheduler::streamer->GetNumServerConnections();
+		if (numConnections > 0)
+			msg.set_daemonnumserverconnections(Scheduler::streamer->GetNumServerConnections());
 	}
+
 	// Compose network message
 	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
