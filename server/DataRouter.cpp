@@ -19,7 +19,8 @@ DataRouter::DataRouter()
 	_queue = new Queue<RouterItem *> (100);
 	_handlers = new handlerMap();
 	_msg = new WallmonMessage();
-	_messageNumber = 0;
+	_sequenceNumber;
+	_handlerExecutionTimeMsec = -1;
 }
 
 DataRouter::~DataRouter()
@@ -97,11 +98,15 @@ void DataRouter::_RouteForever()
 		}
 		else {
 			HandlerEvent *event = it->second;
+			double timestampMsec;
 			if (event->ctx->includeStatistics) {
 				_msg->set_networkmessagesizebytes(item->length);
-				_msg->set_messagenumber(_messageNumber++);
+				_msg->set_serversequencenumber(_sequenceNumber++);
 				_msg->set_serverqueuesize(_queue->GetSize());
-				_msg->set_servertimestampmsec(System::GetTimeInMsec());
+				timestampMsec = System::GetTimeInMsec();
+				_msg->set_servertimestampmsec(timestampMsec);
+				if (_handlerExecutionTimeMsec > 0)
+					_msg->set_previoushandlerexecutiontimemsec(_handlerExecutionTimeMsec);
 			}
 			if (event->handler)
 				event->handler->Handle((void *)_msg->data().c_str(), _msg->data().length());
@@ -109,6 +114,9 @@ void DataRouter::_RouteForever()
 				event->handlerProtobuf->Handle(_msg);
 			else
 				LOG(FATAL) << "unknown handler type";
+
+			if (event->ctx->includeStatistics)
+				_handlerExecutionTimeMsec = System::GetTimeInMsec() - timestampMsec;
 
 			if (event->ctx->__exit) {
 				if (event->handler)

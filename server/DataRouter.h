@@ -64,7 +64,8 @@ private:
 	Queue<RouterItem *> *_queue;
 	handlerMap *_handlers;
 	WallmonMessage *_msg;
-	unsigned int _messageNumber;
+	unsigned int _sequenceNumber;
+	double _handlerExecutionTimeMsec;
 	void _RouteForever();
 	void _DeleteHandler(HandlerEvent *event);
 };

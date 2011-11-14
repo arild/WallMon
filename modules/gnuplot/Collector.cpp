@@ -71,6 +71,14 @@ extern "C" ProcessCollector *create_collector()
 	p->filter->set_memorybytes(0);
 	p->filter->set_networkinbytes(0);
 	p->filter->set_networkoutbytes(0);
+	p->filter->set_storageinbytes(0);
+	p->filter->set_storageoutbytes(0);
+	p->filter->set_numreadsystemcallspersec(0);
+	p->filter->set_numwritesystemcallspersec(0);
+	p->filter->set_user("");
+	p->filter->set_starttime("");
+	p->filter->set_numthreads(0);
+	p->filter->set_numpagefaultspersec(0);
 	return p;
 }
 

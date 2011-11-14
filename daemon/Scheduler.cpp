@@ -190,6 +190,7 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 	}
 
 	if (event->ctx->includeStatistics) {
+		msg.set_collectorsequencenumber(event->numSamples);
 		event->numSamples += 1;
 		event->numSamplesLastSecond += 1;
 		msg.set_daemontimestampmsec(tsBeforeSampleSec * (double)1000);

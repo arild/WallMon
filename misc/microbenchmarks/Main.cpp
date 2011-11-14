@@ -1,5 +1,4 @@
 
-#include <google/profiler.h>
 #include <iostream>
 #include <stdlib.h>
 #include "System.h"

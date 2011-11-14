@@ -2,7 +2,7 @@ USER = $(shell whoami)
 include /home/$(USER)/WallMon/Makefile.inc
 
 SRC=*.cpp
-LIB=-lprotobuf -lSystem -lLinuxProcessMonitorLight -lProcessCollectorMessage -lprofiler -lglog
+LIB=-lprotobuf -lSystem -lLinuxProcessMonitorLight -lProcessCollectorMessage -lglog
 
 all: benchmark
 

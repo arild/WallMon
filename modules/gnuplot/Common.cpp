@@ -9,7 +9,7 @@
 #include <glog/logging.h>
 
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1,30}, {2,30}, {4,30}, {8,30}, {16,30}, {32,30}, {64,30}, {128,30}, {256,30}, {512,30}};
-const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1,30}, {2,30}, {4,30}, {8,60}, {16,60}, {32,60}, {64,120}, {128,200}, {256,200}, {512,200}};
+const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1,60}, {2,60}, {4,60}, {8,60}, {16,60}, {32,120}, {64,120}, {128,120}, {256,300}, {512,300}};
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1,3}, {2,3}, {4,3}, {8,3}, {16,3}, {32,3}, {64,3}, {128,3}, {256,3}, {512,3}};
 //const SAMPLE_INTERVAL SAMPLE_INTERVALS[] = {{1,30}, {512, 300}};
 

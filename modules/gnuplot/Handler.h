@@ -32,6 +32,9 @@ typedef map<string,  HzToProcsContainer *> ProcNameToHzContainer;
 // Hz -> wallmon messages
 typedef map<uint32_t, vector<WallmonMessage> *> HzToWallmonMessagesContainer;
 
+// Hz -> Seq num -> timestamps
+typedef map<uint32_t, vector<WallmonMessage> > SeqNumToTimestampsContainer;
+typedef map<uint32_t, SeqNumToTimestampsContainer *> HzToSeqNumContainer;
 
 class GnuplotHandler: public IDataHandlerProtobuf {
 public:
@@ -46,6 +49,9 @@ private:
 	ProcNameToHostContainer _procNameToHost;
 	ProcNameToHzContainer _procNameToHz;
 	HzToWallmonMessagesContainer _hzToWallmonMessages;
+
+	HzToSeqNumContainer _hzToSeqNum;
+
 	Stat<unsigned int> _numServerConnections;
 	Stat<double> _networkReceiveMegaBytesPerSec;
 	double _previousTimestamp;

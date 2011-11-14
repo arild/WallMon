@@ -126,25 +126,25 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 		/* GENERAL DATA */
 
 		// process name -> hostname
-		ProcNameToHostContainer::iterator it2 = _procNameToHost.find(procMsg->processname());
-		HostToProcsContainer *hostToProcs;
-		if (it2 == _procNameToHost.end()) {
-			hostToProcs = new map<string, vector<ProcessMessage> *>;
-			_procNameToHost[procMsg->processname()] = hostToProcs;
-		} else {
-			hostToProcs = it2->second;
-		}
-
-		// hostname -> process messages
-		HostToProcsContainer::iterator it3 = hostToProcs->find(msg->hostname());
-		vector<ProcessMessage> *procs;
-		if (it3 == hostToProcs->end()) {
-			procs = new vector<ProcessMessage>;
-			hostToProcs->insert(make_pair(msg->hostname(), procs));
-		} else {
-			procs = it3->second;
-		}
-		procs->push_back(*procMsg);
+//		ProcNameToHostContainer::iterator it2 = _procNameToHost.find(procMsg->processname());
+//		HostToProcsContainer *hostToProcs;
+//		if (it2 == _procNameToHost.end()) {
+//			hostToProcs = new map<string, vector<ProcessMessage> *>;
+//			_procNameToHost[procMsg->processname()] = hostToProcs;
+//		} else {
+//			hostToProcs = it2->second;
+//		}
+//
+//		// hostname -> process messages
+//		HostToProcsContainer::iterator it3 = hostToProcs->find(msg->hostname());
+//		vector<ProcessMessage> *procs;
+//		if (it3 == hostToProcs->end()) {
+//			procs = new vector<ProcessMessage>;
+//			hostToProcs->insert(make_pair(msg->hostname(), procs));
+//		} else {
+//			procs = it3->second;
+//		}
+//		procs->push_back(*procMsg);
 
 
 		/* WALLMON SPECIFIC DATA */
@@ -161,6 +161,7 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 
 		// Hz -> process messages
 		HzToProcsContainer::iterator it5 = hzToProcs->find(hz);
+		vector<ProcessMessage> *procs;
 		if (it5 == hzToProcs->end()) {
 			procs = new vector<ProcessMessage>;
 			hzToProcs->insert(make_pair(hz, procs));
@@ -168,6 +169,26 @@ void GnuplotHandler::Handle(WallmonMessage *msg)
 			procs = it5->second;
 		}
 		procs->push_back(*procMsg);
+
+		// hz-> Seq num
+		HzToSeqNumContainer::iterator it6 = _hzToSeqNum.find(hz);
+		SeqNumToTimestampsContainer *seqNumToServerTimestamps;
+		if (it6 == _hzToSeqNum.end()) {
+			seqNumToServerTimestamps = new SeqNumToTimestampsContainer;
+			_hzToSeqNum.insert(make_pair(hz, seqNumToServerTimestamps));
+		} else {
+			seqNumToServerTimestamps = it6->second;
+		}
+
+		// Seq num -> server timestamp
+		SeqNumToTimestampsContainer::iterator it7 = seqNumToServerTimestamps->find(msg->collectorsequencenumber());
+		if (it7 == seqNumToServerTimestamps->end()) {
+			vector<WallmonMessage> v;
+			v.push_back(*msg);
+			seqNumToServerTimestamps->insert(make_pair(msg->collectorsequencenumber(), v));
+		} else {
+			it7->second.push_back(*msg);
+		}
 
 		LOG_EVERY_N(INFO, 500) << "Sampling status: " << _numSamples << "/" << _expectedNumSamplesPerNode << " | " << msg->hostname();
 		if (_numSamples == _expectedTotalNumSamples) {
@@ -318,7 +339,7 @@ void GnuplotHandler::_SaveWallmonSamplingRateData()
 
 	// Generate statistics from WallmonMessages
 	Stat<uint32_t> serverQueueSize, daemonQueueSize, actualHz;
-	Stat<double> wallmonPacketLatencyMsec, sampleDurationMsec;
+	Stat<double> wallmonPacketLatencyMsec, sampleDurationMsec, handlerDurationMsec;
 
 	// Go trough Hz
 	BOOST_FOREACH (HzToWallmonMessagesContainer::value_type &item, _hzToWallmonMessages) {
@@ -326,6 +347,7 @@ void GnuplotHandler::_SaveWallmonSamplingRateData()
 		daemonQueueSize.NewSample();
 		wallmonPacketLatencyMsec.NewSample();
 		sampleDurationMsec.NewSample();
+		handlerDurationMsec.NewSample();
 		actualHz.NewSample();
 
 		BOOST_FOREACH(WallmonMessage msg, *item.second) {
@@ -335,9 +357,38 @@ void GnuplotHandler::_SaveWallmonSamplingRateData()
 			sampleDurationMsec.Add(msg.sampledurationmsec());
 			if (msg.has_actualhz())
 				actualHz.Add(msg.actualhz());
+			if (msg.has_previoushandlerexecutiontimemsec())
+				handlerDurationMsec.Add(msg.previoushandlerexecutiontimemsec());
 		}
 
 	}
+
+	Stat<double> collectorTimeAlignment, collectorTimeAlignment2;
+	// Go trough Hz
+	BOOST_FOREACH (HzToSeqNumContainer::value_type &item, _hzToSeqNum) {
+		collectorTimeAlignment.NewSample();
+		collectorTimeAlignment2.NewSample();
+
+		// Go through sequence numbers with in Hz interval
+		BOOST_FOREACH (SeqNumToTimestampsContainer::value_type &item2, *item.second) {
+			vector<WallmonMessage> timestamps = item2.second;
+
+			double min = timestamps[0].servertimestampmsec();
+			double max = timestamps[timestamps.size() - 1].servertimestampmsec();
+			collectorTimeAlignment.Add(max - min);
+
+			min = -1;
+			max = -1;
+			BOOST_FOREACH(WallmonMessage m, timestamps) {
+				if (min < 0 || m.daemontimestampmsec() < min)
+					min = m.daemontimestampmsec();
+				if (m.daemontimestampmsec() > max)
+					max = m.daemontimestampmsec();
+			}
+			collectorTimeAlignment2.Add(max - min);
+		}
+	}
+
 	flags.filename = "server_queue_size.dat";
 	serverQueueSize.Save(flags);
 
@@ -350,8 +401,17 @@ void GnuplotHandler::_SaveWallmonSamplingRateData()
 	flags.filename = "wallmond_sample_duration_msec.dat";
 	sampleDurationMsec.Save(flags);
 
+	flags.filename = "wallmons_handler_duration_msec.dat";
+	handlerDurationMsec.Save(flags);
+
 	flags.filename = "wallmond_actual_hz.dat";
 	actualHz.Save(flags);
+
+	flags.filename = "collector_time_alignment.dat";
+	collectorTimeAlignment.Save(flags);
+
+	flags.filename = "collector_time_alignment_daemon.dat";
+	collectorTimeAlignment2.Save(flags);
 
 	flags.startColumn = NULL;
 	flags.generateLinearStartColumn = true;
@@ -361,6 +421,7 @@ void GnuplotHandler::_SaveWallmonSamplingRateData()
 	flags.filename = "num_server_connections.dat";
 	flags.generateLinearStartColumn = false;
 	_numServerConnections.Save(flags);
+
 }
 
 void GnuplotHandler::_MaintainNetworkReceivePerSec(WallmonMessage *msg)

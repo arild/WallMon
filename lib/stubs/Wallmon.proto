@@ -12,11 +12,13 @@ message WallmonMessage
 	optional double scheduleDurationMsec = 8;
 	optional uint32 actualHz = 9;
 	optional uint32 networkMessageSizeBytes = 10;
-	optional uint32 messageNumber = 11;
+	optional uint32 serverSequenceNumber = 11;
 	
 	optional uint32 daemonQueueSize = 12;
 	optional uint32 serverQueueSize = 13;
 	optional uint32 daemonNumServerConnections = 14;
 	optional double serverTimestampMsec = 15;
 	optional uint64 serverNumBytesPerSecNetworkReceive = 16;
+	optional double previousHandlerExecutionTimeMsec = 17;
+	optional uint32 collectorSequenceNumber = 18;
 }

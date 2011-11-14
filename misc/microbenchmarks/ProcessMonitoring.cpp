@@ -12,22 +12,23 @@
 
 ProcessMonitoring::ProcessMonitoring()
 {
-	BOOST_FOREACH(int pid, System::GetAllPids())
-				{
-					LinuxProcessMonitorLight *monitor = new LinuxProcessMonitorLight();
+	BOOST_FOREACH(int pid, System::GetAllPids()) {
+		LinuxProcessMonitorLight *monitor = new LinuxProcessMonitorLight();
 
-					bool open = monitor->Open(pid);
-					bool update = false;
-					if (open)
-						update = monitor->Update();
+		bool open = monitor->Open(pid);
+		bool update = false;
+		if (open)
+			update = monitor->Update();
 
-					if (open && update) {
-						monitor->SetStatistics(&procfsReadSamples, &procfsParseSamples);
-						_monitors.push_back(monitor);
-					} else
-						delete monitor;
+		if (open && update) {
+			monitor->SetStatistics(&procfsReadSamples, &procfsParseSamples);
+			_monitors.push_back(monitor);
+		} else
+			delete monitor;
 
-				}
+		if (_monitors.size() == 280)
+			break;
+	}
 	cout << "monitoring " << _monitors.size() << " processes" << endl;
 }
 
@@ -48,9 +49,9 @@ void ProcessMonitoring::RunProcfsBenchmark(int numSamples)
 	double startSerializationMsec;
 
 	double start = System::GetTimeInMsec();
-	ProcessMessage msg;
+	ProcessCollectorMessage processesMsg;
 	for (int i = 0; i < numSamples; i++) {
-
+		processesMsg.Clear();
 		procfsReadSamples.NewSample();
 		procfsParseSamples.NewSample();
 		protobufPopulateSamples.NewSample();
@@ -58,45 +59,45 @@ void ProcessMonitoring::RunProcfsBenchmark(int numSamples)
 		totalSample.NewSample();
 		double startTotal = System::GetTimeInMsec();
 
-		msg.Clear();
 		for (int j = 0; j < _monitors.size(); j++) {
+			ProcessMessage *msg = processesMsg.add_processmessage();
 			LinuxProcessMonitorLight *m = _monitors[j];
 			m->Update();
 
 			startProtobufPopulateMsec = System::GetTimeInMsec();
 
-			msg.set_processname(m->GetProcessName());
-			msg.set_pid(m->pid());
+			msg->set_processname(m->GetProcessName());
+			msg->set_pid(m->pid());
 
 			util = m->GetUserCpuLoad() / (double) (numCores * 100);
-			msg.set_usercpuutilization(util * 100.);
+			msg->set_usercpuutilization(util * 100.);
 
 			util = m->GetSystemCpuLoad() / (double) (numCores * 100);
-			msg.set_systemcpuutilization(util * 100.);
+			msg->set_systemcpuutilization(util * 100.);
 
 			util = m->GetTotalProgramSize() / (double) totalMemoryMb;
-			msg.set_memoryutilization(util * 100.);
+			msg->set_memoryutilization(util * 100.);
 
-			msg.set_networkinbytes(m->GetNetworkInBytes());
-			msg.set_networkoutbytes(m->GetNetworkOutBytes());
+			msg->set_networkinbytes(m->GetNetworkInBytes());
+			msg->set_networkoutbytes(m->GetNetworkOutBytes());
 
-			msg.set_storageinbytes(m->GetStorageInBytes());
-			msg.set_storageoutbytes(m->GetStorageOutBytes());
-
-			if (m->IsFirstTime())
-				msg.set_user(m->GetUser());
+			msg->set_storageinbytes(m->GetStorageInBytes());
+			msg->set_storageoutbytes(m->GetStorageOutBytes());
 
 			if (m->IsFirstTime())
-				msg.set_starttime(m->GetStartTime());
+				msg->set_user(m->GetUser());
 
-			msg.set_numthreads(m->numthreads());
-			msg.set_numpagefaultspersec(m->GetTotalNumPageFaultsPerSec());
+			if (m->IsFirstTime())
+				msg->set_starttime(m->GetStartTime());
+
+			msg->set_numthreads(m->numthreads());
+			msg->set_numpagefaultspersec(m->GetTotalNumPageFaultsPerSec());
 
 			protobufPopulateSamples.Add(System::GetTimeInMsec() - startProtobufPopulateMsec);
 		}
 
 		startSerializationMsec = System::GetTimeInMsec();
-		if (msg.SerializeToArray(buf, bufSize) != true)
+		if (processesMsg.SerializeToArray(buf, bufSize) != true)
 			cout << "Protocol buffer serialization failed" << endl;
 		double ts = System::GetTimeInMsec();
 		protobufSerializationSamples.Add(ts - startSerializationMsec);
@@ -105,6 +106,20 @@ void ProcessMonitoring::RunProcfsBenchmark(int numSamples)
 
 	double stop = System::GetTimeInMsec();
 	double totalTimeMsec = stop - start;
+
+	// Include de-serialization
+	int byteSize = processesMsg.ByteSize();
+	for (int i = 0; i < numSamples; i++) {
+		protobufDeserializationSamples.NewSample();
+		start = System::GetTimeInMsec();
+		if (processesMsg.ParseFromArray(buf, byteSize) == false)
+			cout << "Protocol buffer de-serializing failed" << endl;
+		protobufDeserializationSamples.Add(System::GetTimeInMsec() - start);
+
+//		if (processesMsg.SerializeToArray(buf, bufSize) != true)
+//			cout << "Protocol buffer serialization failed" << endl;
+	}
+
 
 	cout << endl;
 
@@ -165,6 +180,15 @@ void ProcessMonitoring::RunProcfsBenchmark(int numSamples)
 	cout << "other avg sd msec : " << otherSample.StandardDeviationAvg() << endl;
 	cout << "other sum min     : " << otherSample.SumMin() << endl;
 	cout << "other sum max     : " << otherSample.SumMax() << endl;
+
+	cout << endl;
+
+	cout << "protobuf de-serialization total msec  : " << protobufDeserializationSamples.SumTotal() << endl;
+	cout << "protobuf de-serialization avg msec    : " << protobufDeserializationSamples.SumAvg() << endl;
+	cout << "protobuf de-serialization avg var msec: " << protobufDeserializationSamples.VarianceAvg() << endl;
+	cout << "protobuf de-serialization avg sd msec : " << protobufDeserializationSamples.StandardDeviationAvg() << endl;
+	cout << "protobuf de-serialization sum min     : " << protobufDeserializationSamples.SumMin() << endl;
+	cout << "protobuf de-serialization sum max     : " << protobufDeserializationSamples.SumMax() << endl;
 
 	delete buf;
 }
