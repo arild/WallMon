@@ -19,11 +19,9 @@ extern "C" ProcessCollector *create_collector()
 		p->context->AddServers(servers);
 	else if (System::IsIceCluster())
 		p->context->AddServer("arild.dyndns.tv");//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
-	else if (System::GetHostname().compare(0, 5, "arild") == 0)
-		p->context->AddServer("localhost");
 	else
 		// Forward to desktop
-		p->context->AddServer("arild.dyndns-work.com");
+		p->context->AddServer("arild.dyndns.tv");
 
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	p->filter->set_processname("");

@@ -8,8 +8,8 @@ STREAMER_ENTRY_PORT = 5577
 MULITCAST_ADDRESS = "224.0.0.127"
 DAEMON_MULTICAST_LISTEN_PORT = 9955
 SERVER_MULTICAST_LISTEN_PORT = 9956
-MONITORS_PATH = os.path.expanduser("~/WallMon/modules/bin/")
-STUBS_DIR = os.path.expanduser("~/WallMon/lib/stubs")
+#MONITORS_PATH = os.path.expanduser("~/WallMon/modules/bin/")
+MONITORS_PATH = "/home/arild/WallMon/modules/bin/"
 
 def multicast_monitor_message(msg):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)

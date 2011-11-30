@@ -10,17 +10,14 @@
 
 string Config::GetTimesFontPath()
 {
-	return System::GetHomePath() + "/lib/times.ttf";
+//	return System::GetHomePath() + "/lib/times.ttf";
+	return "/home/arild/lib/times.ttf";
 }
 
 string Config::GetMonoFontPath()
 {
-	return System::GetHomePath() + "/lib/mono.ttf";
-}
-
-string Config::GetWallMonPath()
-{
-	return "/home/" + System::GetCurrentUser() + "/WallMon";
+//	return System::GetHomePath() + "/lib/mono.ttf";
+	return "/home/arild/lib/mono.ttf";
 }
 
 
