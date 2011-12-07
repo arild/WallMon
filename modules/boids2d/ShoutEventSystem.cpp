@@ -28,7 +28,7 @@ bool ShoutEventSystem::InitEventSystem()
 	if (!_shout)
 		return false;
 
-	uint32_t filter[] = { kEvt_type_calibrated_touch_location, kEvt_type_touch_remove };
+	uint32_t filter[] = { kEvt_type_calibrated_touch_location, kEvt_type_touch_remove, kEvt_type_sound_location };
 	shout_set_event_filter(_shout, sizeof(filter) / 4, filter);
 	return true;
 }

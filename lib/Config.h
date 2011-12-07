@@ -16,6 +16,7 @@ class Config {
 public:
 	static string GetTimesFontPath();
 	static string GetMonoFontPath();
+	static string GetInstructionManualPath();
 };
 
 #endif /* CONFIG_H_ */

@@ -121,6 +121,11 @@ EntityEvent::EntityEvent()
 void EntityEvent::HandleHit(TT_touch_state_t & event)
 {
 	//LOG(INFO) << "Received event id " << event.oid << " | " << "x=" << event.loc.x << " | y=" << event.loc.y << " | deltaX=" << event.delta.x << " | deltaY=" << event.delta.y << " | movedDistance=" << event.movedDistance << " remove=" << event.remove << " | radius=" << event.radius;
+	if (event.isSound) {
+		Clap();
+		return;
+	}
+
 	if (_isFirstTime) {
 		_isFirstTime = false;
 		// Policies and thresholds not calculated
@@ -141,48 +146,10 @@ void EntityEvent::HandleHit(TT_touch_state_t & event)
 	if (event.remove)
 		return;
 
-//	if (event.radius > 20) {
-//		_currentTapEventTimestamp = event.lastUpdated;
-//		if (_currentTapEventTimestamp - _previousTapEventTimestamp > _tapEventInterval) {
-//			_previousTapEventTimestamp = _currentTapEventTimestamp;
-//			Tap(event.loc.x, event.loc.y);
-//		}
-//	}
-
-
-//	_eventBuffer.push_back(event);
-//	if (_eventBuffer.size() < 2)
-//		return;
-//
-//	float deltaY = 0, deltaX = 0, radius = 0, numEventsProcessed = 0;
-//	for (int i = 0; i < _eventBuffer.size(); i++) {
-//		if (event.lastUpdated - _eventBuffer[i].lastUpdated < 0.2) {
-//			// Only take into account events that are close in time
-//			deltaX += _eventBuffer[i].delta.x;
-//			deltaY += _eventBuffer[i].delta.y;
-//			LOG(INFO) << "DELTA Y: " << _eventBuffer[i].delta.y;
-//			radius += _eventBuffer[i].radius;
-//			numEventsProcessed += 1;
-//		}
-//		else
-//			LOG(INFO) << "DISCARD EVENT";
-//	}
-//	if (numEventsProcessed > 0)
-//		radius = radius / (float)numEventsProcessed;
-//	_eventBuffer.clear();
-//
-//	event.delta.x = deltaX;
-//	event.delta.y = deltaY;
-//	event.radius = radius;
-//	LOG(INFO) << "NEW DELTA Y: " << deltaY;
-
-
-
 	float fy = fabs(event.delta.y);
 	float fx = fabs(event.delta.x);
 	if (fy < _scrollThreshold && fx < _swipeThreshold)
 		return;
-
 
 	// TODO: Take varied x and y axis into account
 	bool isScroll = false;
@@ -278,5 +245,35 @@ void EntityEvent::_RunSwipeCallbacks()
 			_swipeSpeed = 0;
 	} else
 		_swipeSpeed = 0;
+}
+
+void EntityEvent::Tap(float x, float y)
+{
+
+}
+
+void EntityEvent::ScrollDown(float speed)
+{
+
+}
+
+void EntityEvent::ScrollUp(float speed)
+{
+
+}
+
+void EntityEvent::SwipeLeft(float speed)
+{
+
+}
+
+void EntityEvent::SwipeRight(float speed)
+{
+
+}
+
+void EntityEvent::Clap()
+{
+
 }
 

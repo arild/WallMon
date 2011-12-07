@@ -10,11 +10,13 @@
 #include "TableItem.h"
 #include "BoidSharedContext.h"
 #include "TableStateSynchronizer.h"
+#include "ControlPanel.h"
 
 using namespace std;
 
 class Table: public EntityEvent {
 public:
+	static ControlPanel *controlPanel;
 	Table(bool isMaster, bool isTopLevelTable=true);
 	virtual ~Table();
 
@@ -28,11 +30,12 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	virtual void Tap(float x, float y);
-	virtual void ScrollDown(float speed);
-	virtual void ScrollUp(float speed);
-	virtual void SwipeLeft(float speed);
-	virtual void SwipeRight(float speed);
+	void Tap(float x, float y);
+	void ScrollDown(float speed);
+	void ScrollUp(float speed);
+	void SwipeLeft(float speed);
+	void SwipeRight(float speed);
+	void Clap();
 
 private:
 	vector< vector<TableItem *> > _items;

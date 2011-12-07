@@ -15,17 +15,15 @@
 
 using namespace std;
 
-class ControlPanel: public Entity {
+
+class ControlPanel: public EntityEvent {
 public:
 	virtual void OnInit();
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	virtual void Tap(float x, float y);
-	virtual void ScrollDown(float speed);
-	virtual void ScrollUp(float speed);
-	virtual void SwipeLeft(float speed);
-	virtual void SwipeRight(float speed);
+	void Tap(float x, float y);
+	void Clap();
 
 	static void CpuBoidButtonCallback();
 	static void MemoryBoidButtonCallback();
@@ -33,6 +31,8 @@ public:
 	static void StorageBoidButtonCallback();
 private:
 	Font *_font;
+	GLuint _textureId;
+	bool _showLegend, _imageIsLoaded;
 };
 
 #endif /* BOIDDESCRIPTION_H_ */

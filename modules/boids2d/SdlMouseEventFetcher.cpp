@@ -9,6 +9,7 @@
 #include "SDL/SDL.h"
 #include "shout/shout.h"
 #include "shout/event-types/touch-events.h"
+#include "shout/event-types/shout-std-events.h"
 #include "SdlMouseEventFetcher.h"
 #include "System.h"
 #include "stdio.h"
@@ -46,14 +47,17 @@ void SdlMouseEventFetcher::PollEvents()
 		switch (sdlEvent.type)
 		{
 		case SDL_MOUSEBUTTONDOWN: // Occurs only once when a key is pressed and kept down
-		case SDL_KEYDOWN:
 			_isEventStreamActive = true;
 			break;
 		case SDL_MOUSEBUTTONUP:
-		case SDL_KEYUP:
 			_isEventStreamActive = false;
 			_queue.Push(create_touch_remove_event(_eventId, 0));
 			_eventId += 1;
+			return;
+		case SDL_KEYDOWN:
+			uint8_t loc_flags;
+			uint32_t sound_type;
+			_queue.Push(shout_create_sound_location_event(sound_type, loc_flags, 0, 0, 0, 0));
 			return;
 		default:
 			break;

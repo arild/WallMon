@@ -54,12 +54,13 @@ public:
 	void SetScrollEventInterval(double seconds);
 	void SetSwipeEventInterval(double seconds);
 
-	virtual void Tap(float x, float y) = 0;
+	virtual void Tap(float x, float y);
 //	virtual void TapHold(float x, float y) = 0;
-	virtual void ScrollDown(float speed) = 0;
-	virtual void ScrollUp(float speed) = 0;
-	virtual void SwipeLeft(float speed) = 0;
-	virtual void SwipeRight(float speed) = 0;
+	virtual void ScrollDown(float speed);
+	virtual void ScrollUp(float speed);
+	virtual void SwipeLeft(float speed);
+	virtual void SwipeRight(float speed);
+	virtual void Clap();
 	static void RunAllCallbacks();
 	void RunCallbacks();
 private:

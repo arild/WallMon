@@ -5,5 +5,4 @@
 
 # The delay makes sure both server and client is up and running when the 
 # initilization broadcoast message from the dispatcher arrives
-sleep 1 
 ${WALLMON_DISPATCH_MODULES}

@@ -9,6 +9,7 @@
 #define SHOUTEVENTSYSTEM_H_
 
 #include <shout/event-types/touch-events.h>
+#include <shout/event-types/shout-std-events.h>
 #include "touchmanager/STouchManager.h"
 #include "EventSystemBase.h"
 

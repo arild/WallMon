@@ -163,22 +163,26 @@ void BoidsApp::_SetupAndPopulateScenes()
 	float offsetW = w * 0.05;
 
 	_tableScene = new Scene(0, 0, w*0.5, h, 100, 100);
-	_boidScene = new Scene(w*0.45 + offsetW, offsetH, w*0.5 - offsetW*2, h - offsetH*1.5, 100, 100);
-//	_controlPanelScene = new Scene(w*0.9, h*0.1, w*0.1, h*0.8, 100, 100);
 	_boidScene = new Scene(w*0.5 + offsetW, offsetH, w*0.5 - offsetW*2, h - offsetH*1.5, 100, 100);
+	_controlPanelScene = new Scene(0, 0, w, h, 100, 100);
 
 	Scene::AddScene(_boidScene);
 	BoidAxis *axis = new BoidAxis();
 	axis->Set(0, 100, 25);
 	_boidScene->AddEntity(axis);
+	axis->ScrollDown(0); // Set logarithmic horizontal axis
 
 	Scene::AddScene(_tableScene);
 	Scene::current = _tableScene;
 	_table = new Table(_wallView->IsLowerLeft());
 	_tableScene->AddEntity(_table);
 
-//	Scene::AddScene(_controlPanelScene);
-//	_controlPanelScene->AddEntity(new ControlPanel());
+	Scene::AddScene(_controlPanelScene);
+	ControlPanel *controlPanel = new ControlPanel();
+	_controlPanelScene->AddEntity(controlPanel);
+
+	_table->controlPanel = controlPanel;
+	axis->controlPanel = controlPanel;
 }
 
 void BoidsApp::_HandleTouchEvents()

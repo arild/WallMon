@@ -26,6 +26,7 @@ float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
 float FONT_SIZE = 3.;
 Table *topTable = NULL;
+ControlPanel *Table::controlPanel = NULL;
 
 struct TableGroupCompareAlphabetically {
 	bool operator()(const vector<TableItem *> a, const vector<TableItem *> b)
@@ -330,6 +331,12 @@ void Table::SwipeRight(float speed)
 	if (!_isMaster)
 		return;
 	_SynchronizeState(_currentPixelIndex, -1, -1, speed);
+}
+
+void Table::Clap()
+{
+	LOG(INFO) << "CLAP DETECTED";
+	controlPanel->Clap();
 }
 
 void Table::_DrawTopLevelTable()

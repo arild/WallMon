@@ -20,5 +20,10 @@ string Config::GetMonoFontPath()
 	return "/home/arild/lib/mono.ttf";
 }
 
+string Config::GetInstructionManualPath()
+{
+	return "/home/arild/WallMon/modules/boids2d/instruction_manual.png";
+}
+
 
 

@@ -11,9 +11,11 @@
 #include "FTGL/ftgl.h"
 #include "Entity.h"
 #include "Font.h"
+#include "ControlPanel.h"
 
 class BoidAxis : public EntityEvent {
 public:
+	static ControlPanel *controlPanel;
 	BoidAxis();
 	virtual ~BoidAxis();
 
@@ -24,11 +26,11 @@ public:
 	virtual void OnLoop();
 	virtual void OnRender();
 	virtual void OnCleanup();
-	virtual void Tap(float x, float y);
-	virtual void ScrollDown(float speed);
-	virtual void ScrollUp(float speed);
-	virtual void SwipeLeft(float speed);
-	virtual void SwipeRight(float speed);
+	void Tap(float x, float y);
+	void ScrollDown(float speed);
+	void ScrollUp(float speed);
+	void SwipeLeft(float speed);
+	void SwipeRight(float speed);
 
 private:
 	int _start, _stop, _tickSize;

@@ -24,7 +24,7 @@ const float X = -1 - S;
 const float Y = -1 - S;
 const float W = 102 + S;
 const float H = 102 + S;
-
+ControlPanel *BoidAxis::controlPanel = NULL;
 
 BoidAxis::BoidAxis()
 {
@@ -54,6 +54,7 @@ void BoidAxis::OnInit()
 	height = 100;
 
 	SetScrollEventInterval(1);
+	SetTapEventInterval(1);
 }
 
 void BoidAxis::OnCleanup()
@@ -185,6 +186,7 @@ void BoidAxis::OnRender()
 
 void BoidAxis::Tap(float x, float y)
 {
+	controlPanel->Tap(0, 0);
 }
 
 void BoidAxis::ScrollDown(float speed)

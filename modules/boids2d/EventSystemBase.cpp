@@ -9,8 +9,10 @@
 #include <boost/foreach.hpp>
 #include <shout/shout.h>
 #include "shout/event-types/touch-events.h"
+#include "shout/event-types/shout-std-events.h"
 #include "Config.h"
 #include "EventSystemBase.h"
+
 
 typedef void (EventSystemBase::*HandleTouchesPtr)(touchVector_t &down, touchVector_t &up);
 
@@ -68,7 +70,7 @@ void EventSystemBase::_HandleEventsForever()
 void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 {
 	uint32_t locFlags, senderID, eventId;
-	float x, y, radius;
+	float x, y, z, radius;
 	bool isLast;
 	if (event->type == kEvt_type_calibrated_touch_location) {
 		isLast = false;
@@ -78,13 +80,24 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 			return;
 		}
 		eventId = event->refcon;
-	}
-	else if (event->type == kEvt_type_touch_remove) {
+	} else if (event->type == kEvt_type_touch_remove) {
 		isLast = true;
 		if (parse_touch_remove_event(event, &eventId, &senderID) != 0) {
 			LOG(WARNING) << "failed parsing touch remove event";
 			return;
 		}
+	}
+	else if (event->type == kEvt_type_sound_location) {
+        uint32_t        sound_type;
+        uint8_t         loc_flags;
+        double          power, rel_x, rel_y, rel_z;
+		// x, y and z are relative to user
+		if (shout_parse_sound_location_event(event, &sound_type, &loc_flags, &power, &rel_x, &rel_y, &rel_z) != 0) {
+			LOG(WARNING) << "failed parsing sound event";
+			return;
+		}
+		x = 100;
+		y = 100;
 	}
 	else {
 		LOG(WARNING) << "Unknown touch event type";
@@ -107,13 +120,13 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	vector<EntityHit> entityHits = Scene::GetAllEntityHits(x, y);
 	int numEntityHits = entityHits.size();
 
-//	if (!isLast) {
-//		TT_touch_state_t e;
-//		e.loc.x = x;
-//		e.loc.y = y;
-//		e.visualizeOnly = true;
-//		eventQueue->Push(make_tuple((Entity *) NULL, e));
-//	}
+	//	if (!isLast) {
+	//		TT_touch_state_t e;
+	//		e.loc.x = x;
+	//		e.loc.y = y;
+	//		e.visualizeOnly = true;
+	//		eventQueue->Push(make_tuple((Entity *) NULL, e));
+	//	}
 
 	// Associate the id of the event with an entity
 	EventIdMap::iterator it = _eventIdMap.find(eventId);
@@ -121,18 +134,16 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	if (it != _eventIdMap.end()) {
 		// Event id already associated with entity. Forward to
 		// touch manager regardless whether the entity is hit or not
-		_currentEntity = it->second.get<0>();
-		scene = it->second.get<1>();
+		_currentEntity = it->second.get<0> ();
+		scene = it->second.get<1> ();
 		if (event->type == kEvt_type_touch_remove) {
 			// Special case: the event is a remove event (the last one)
 			_eventIdMap.erase(eventId);
 		}
-	}
-	else if (numEntityHits == 0) {
+	} else if (numEntityHits == 0) {
 		// Id not previously associated and no entities' hit, discard event
 		return;
-	}
-	else if (numEntityHits > 0) {
+	} else if (numEntityHits > 0) {
 		// Id not previously associated, but entity hits available.
 		_currentEntity = entityHits[0].entity;
 		scene = entityHits[0].scene;
@@ -146,10 +157,18 @@ void EventSystemBase::FilterAndRouteEvent(shout_event_t *event)
 	// Obviously, this is not optimal performance-wise, however, it works
 	// and the functionality of provided by the touch-manager is re-used.
 	if (event->type == kEvt_type_calibrated_touch_location)
-		event = create_calibrated_touch_location_event_v2(eventId,
-				kTouch_evt_first_detect_flag | kTouch_evt_last_detect_flag, x, y, radius, 0, senderID);
+		event = create_calibrated_touch_location_event_v2(eventId, kTouch_evt_first_detect_flag
+				| kTouch_evt_last_detect_flag, x, y, radius, 0, senderID);
 	else if (event->type == kEvt_type_touch_remove)
 		event = create_touch_remove_event(eventId, 0);
+	else if (event->type == kEvt_type_sound_location) {
+		TT_touch_state_t e;
+		e.isSound = true;
+		e.lastUpdated = shout_double_time();
+//		_currentEntity = entityHits[1].entity;
+		_HandleTouch(e);
+	}
+
 	else
 		return;
 	_touchManager->handleEvent(event);
@@ -162,6 +181,7 @@ void EventSystemBase::_HandleTouchesCallback(touchVector_t & down, touchVector_t
 {
 	for (int i = 0; i < down.size(); i++) {
 		TT_touch_state_t *obj = down[i];
+		obj->isSound = false;
 		if (obj->wasUpdated) {
 			obj->remove = false;
 			_HandleTouch(*obj);
@@ -169,6 +189,7 @@ void EventSystemBase::_HandleTouchesCallback(touchVector_t & down, touchVector_t
 	}
 	for (int i = 0; i < up.size(); i++) {
 		TT_touch_state_t *obj = up[i];
+		obj->isSound = false;
 		if (obj->wasUpdated) {
 			obj->remove = true;
 			_HandleTouch(*obj);
