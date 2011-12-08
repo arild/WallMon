@@ -98,7 +98,6 @@ void ControlPanel::Tap(float x, float y)
 
 void ControlPanel::Clap()
 {
-	LOG(INFO) << "CTR CLAP";
 	_showLegend = !_showLegend;
 }
 

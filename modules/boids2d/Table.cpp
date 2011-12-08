@@ -335,7 +335,6 @@ void Table::SwipeRight(float speed)
 
 void Table::Clap()
 {
-	LOG(INFO) << "CLAP DETECTED";
 	controlPanel->Clap();
 }
 

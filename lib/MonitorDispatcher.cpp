@@ -80,9 +80,6 @@ void MonitorDispatcher::_ListenForever()
 						monitor = loader.LoadAndInstantiateHandler();
 					else {
 						monitor = loader.LoadAndInstantiateCollector();
-						// Attempt to synchronize collectors by waiting 1 second in order to make sure
-						// all collectors have been loaded from NFS
-						//usleep(1000 * 100);
 					}
 					LOG(INFO) << "user-defined collector successfully loaded (" << path << ")";
 				} catch (exception &e) {

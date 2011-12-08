@@ -69,8 +69,7 @@ void ProcessCollector::OnStop()
 
 void ProcessCollector::Sample(WallmonMessage *msg)
 {
-	// TODO: Investigate why this causes segfault at arbirary intervals
-	if (_processNames.size() == 0)// _numSamples++ % 5 == 0)
+	if (_processNames.size() == 0)
 		_FindAllNewProcesses();
 	// Drop the BOOST_FOREACH macro due to ~5% overhead. This loop is critical for performance
 	for (int i = 0; i < _monitors.size(); i++) {
@@ -84,16 +83,6 @@ void ProcessCollector::Sample(WallmonMessage *msg)
 			// Continue reading old values stored in the monitor
 			// and after that delete it
 		}
-
-//		if (monitor->GetProcessName().compare(0, 7, "wallmon") == 0) {
-//			LOG(INFO) << monitor->GetProcessName();
-//			LOG(INFO) << "---------------";
-//			LOG(INFO) << "Network receive: " << monitor->GetNetworkInBytes() / (double)1024 << " KB";
-//			LOG(INFO) << "Network send   : " << monitor->GetNetworkOutBytes() / (double)1024 << " KB";
-//			LOG(INFO) << "Storage read   : " << monitor->GetStorageInBytes() / (double)1024 << " KB";
-//			LOG(INFO) << "Storage write  : " << monitor->GetStorageOutBytes() / (double)1024 << " KB";
-//			LOG(INFO) << "---------------";
-//		}
 		double util;
 		if (filter->has_processname()) {
 			processMsg->set_processname(monitor->GetProcessName());

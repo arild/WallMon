@@ -84,8 +84,8 @@ void Boid::OnLoop()
 		// a simple solution.
 		_isHighlighted = ctx->IsHighlighted();
 		if (_isHighlighted) {
-			width += 1;
-			height += 1;
+			width += 2;
+			height += 2;
 		}
 		glColor3ub(ctx->red, ctx->green, ctx->blue);
 		_DrawBoid();
@@ -109,8 +109,8 @@ void Boid::OnRender()
 
 	if (_isHighlighted) {
 		_DrawHighlight();
-		width -= 1;
-		height -= 1;
+		width -= 2;
+		height -= 2;
 	}
 }
 
@@ -178,26 +178,7 @@ void Boid::_DrawHighlight()
 	ss << ctx->GetHighlightNumber();
 	glColor3f(1, 0, 0);
 	// tx and ty refers to origo of boids
-	_font.RenderText(ss.str(), tx, ty - height/(float)2 + 0.2, true, false);
-//	switch (ctx->boidShape)
-//	{
-//	case QUAD:
-//		if (BoidSharedContext::showCpuBoid == false)
-//			return;
-//		break;
-//	case TRIANGLE:
-//		if (BoidSharedContext::showMemoryBoid == false)
-//			return;
-//		break;
-//	case DIAMOND:
-//		if (BoidSharedContext::showNetworkBoid == false)
-//			return;
-//		break;
-//	case POLYGON:
-//		if (BoidSharedContext::showStorageBoid == false)
-//			return;
-//		break;
-//	}
+	_font.RenderText(ss.str(), tx, ty + 0.25, true, true);
 }
 
 

@@ -118,7 +118,7 @@ void BoidsApp::_RenderForever()
 
 		SDL_GL_SwapBuffers();
 
-//		Xserver::BringToFront();
+		Xserver::BringToFront();
 		char Buffer[255];
 		sprintf(Buffer, "WallMon - FPS: %d  |  Total Num Objects: %d", Fps::fpsControl.GetFps(), Scene::GetTotalNumEntities());
 		SDL_WM_SetCaption(Buffer, Buffer);

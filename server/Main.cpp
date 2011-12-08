@@ -13,21 +13,22 @@
 #include "IMonitorManager.h"
 #include "MonitorDispatcher.h"
 #include "DataSink.h"
+#include <boost/thread/condition.hpp>
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 
-
-bool running;
+boost::condition mainThreadCondition;
+boost::mutex mainThreadMutex;
 
 void sigproc(int signal)
 {
 	LOG(INFO) << "signal catched: " << signal;
-	running = false;
+	mainThreadCondition.notify_one();
 }
 
 int main(int argc, char *argv[])
 {
-	running = true;
 	google::InitGoogleLogging(argv[0]);
 	signal(SIGINT, &sigproc); // CTRL+C
 	signal(SIGTERM, &sigproc); // pkill -SIGTERM wallmond
@@ -53,8 +54,8 @@ int main(int argc, char *argv[])
 	router->Start();
 	sink->Start();
 
-	while (running)
-		sleep(2);
+	// Block main thread and wait for termination signal
+	mainThreadCondition.wait(mainThreadMutex);
 
 	LOG(INFO) << "stopping server...";
 	dispatcher->Stop();
