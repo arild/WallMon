@@ -47,8 +47,9 @@ private:
 	TableItem *_selectedItem;
 	Queue<TableItem *> *_addQueue, *_removeQueue;
 	TableStateSynchronizer *_state;
-	bool _isHighlighted, _isTopLevelTable, _isMaster;
+	bool _isHighlighted, _isTopLevelTable, _isMaster, _startupSortDone;
 	int _processTerminationIndex;
+	double _startTimestamp;
 	void _DrawTopLevelTable();
 	void _DrawSubLevelTable();
 	void _DrawBlackBorders();

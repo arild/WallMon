@@ -21,6 +21,7 @@
 #include "Table.h"
 #include "Scene.h"
 #include "Button.h"
+#include "System.h"
 
 float TABLE_TOP = 85.;
 float TABLE_BOTTOM = 15.;
@@ -117,6 +118,8 @@ Table::Table(bool isMaster, bool isTopLevelTable)
 	_fontSubLarge.SetFontType(FONT_MONO);
 	SetSwipeEventInterval(0.75);
 	SetTapEventInterval(1.1);
+	_startTimestamp = System::GetTimeInSec();
+	_startupSortDone = false;
 }
 
 Table::~Table()
@@ -258,6 +261,11 @@ void Table::OnLoop()
 			_items.push_back(v);
 		} else
 			itemGroup->push_back(item);
+	}
+
+	if (_startupSortDone == false && System::GetTimeInSec() - _startTimestamp > 2.) {
+		_startupSortDone = true;
+		_SortTableScore();
 	}
 
 }
