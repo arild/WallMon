@@ -27,7 +27,8 @@ public:
 	static int GetNumRealCores();
 	static int GetTotalMemory();
 	static bool IsValidIpAddress(string ipAddress);
-	static vector<string> HostnameToIpAddress(string hostname);
+	static string HostnameToIpAddress(string hostname);
+	static string HostnameToIpAddressFallback(string hostname);
 	static void AttachToLocalDisplay();
 
 	static string GetCurrentUser();

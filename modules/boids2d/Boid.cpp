@@ -84,8 +84,12 @@ void Boid::OnLoop()
 		// a simple solution.
 		_isHighlighted = ctx->IsHighlighted();
 		if (_isHighlighted) {
-			width += 2;
-			height += 2;
+			width = 4;
+			height = 4;
+		}
+		else {
+			width = 2;
+			height = 2;
 		}
 		glColor3ub(ctx->red, ctx->green, ctx->blue);
 		_DrawBoid();

@@ -15,8 +15,12 @@ extern "C" ProcessCollector *create_collector()
 	p->context->includeStatistics = true;
 	vector<string> servers = WallView(2,1,3,2).GetGrid();
 //	vector<string> servers = WallView(2,1,1,1).GetGrid();
-	if (System::IsRocksvvCluster())
-		p->context->AddServers(servers);
+	if (System::IsRocksvvCluster()) {
+		if (System::IsRocksvvClusterRootNode())
+			p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
+		else
+			p->context->AddServers(servers);
+	}
 	else if (System::IsIceCluster())
 		p->context->AddServer("arild.dyndns.tv");//p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	else

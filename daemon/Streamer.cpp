@@ -70,15 +70,18 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 		return (*_serverMap)[serverAddress];
 
 	LOG(INFO) << "new server: " << serverAddress << ":" << serverPort;
-	string serverIpAddress = serverAddress;
-	if (System::IsValidIpAddress(serverIpAddress) == false) {
+	string serverIpAddress = "";
+	if (System::IsValidIpAddress(serverAddress) == false) {
 		// Translate hostname to an ip address
-		vector<string> tmp = System::HostnameToIpAddress(serverIpAddress);
-		if (tmp.size() == 0) {
-			LOG(ERROR) << "unable to resolve hostname: " << serverIpAddress;
-			return -1;
+		serverIpAddress = System::HostnameToIpAddress(serverAddress);
+		if (serverIpAddress.empty()) {
+			LOG(ERROR) << "unable to resolve hostname: " << serverIpAddress << ", trying fallback approach...";
+			serverIpAddress = System::HostnameToIpAddressFallback(serverAddress);
+			if (serverIpAddress.empty()) {
+				LOG(ERROR) << "fallback approach failed too";
+				return -1;
+			}
 		}
-		serverIpAddress = tmp[0];
 		if (System::IsValidIpAddress(serverIpAddress) == false) {
 			LOG(ERROR) << "resolved hostname to invalid ip address: " << serverIpAddress;
 			return -1;

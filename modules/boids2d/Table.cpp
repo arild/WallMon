@@ -202,21 +202,19 @@ void Table::OnLoop()
 		}
 		if (msg.has_swipeleft() && _isTopLevelTable)
 			_SortTableAlphabetically();
-		if (msg.has_swiperight()) {
-			if (_isTopLevelTable)
-				_SortTableScore();
+		if (msg.has_swiperight() && _isTopLevelTable)
+			_SortTableScore();
+		if (!_isTopLevelTable && (msg.has_swipeleft() || msg.has_swiperight())) {
+			if (_items.size() == 0)
+				// No items present in sub-table (tap not performed)
+				return;
+			if (_isHighlighted) {
+				_UnHighlightBoids(_items[0]);
+				_isHighlighted = false;
+			}
 			else {
-				if (_items.size() == 0)
-					// No items present in sub-table (tap not performed)
-					return;
-				if (_isHighlighted) {
-					_UnHighlightBoids(_items[0]);
-					_isHighlighted = false;
-				}
-				else {
-					_HighlightBoids(_items[0]);
-					_isHighlighted = true;
-				}
+				_HighlightBoids(_items[0]);
+				_isHighlighted = true;
 			}
 		}
 

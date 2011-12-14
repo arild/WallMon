@@ -2,38 +2,35 @@
 
 # Common variables for WallMon related scripts
 
-USER=/home/arild
-WMON_DIR=${USER}/WallMon
+HOME_DIR=/home/arild
+SRC_DIR=${HOME_DIR}/src
+APP_DIR=${HOME_DIR}/apps
+WMON_DIR=${HOME_DIR}/WallMon
+
 DAEMON_DIR=${WMON_DIR}/daemon
 SERVER_DIR=${WMON_DIR}/server
 DISPATCHER_DIR=${WMON_DIR}/dispatcher
 SCRIPTS_DIR=${WMON_DIR}/scripts
 MODULES_DIR=${WMON_DIR}/modules
-SRC_DIR=${USER}/src
-APP_DIR=${USER}/apps
 
 DAEMON_PROC_NAME=wallmond
 SERVER_PROC_NAME=wallmons
 
-LIB_PATH="LD_LIBRARY_PATH=${USER}/lib:${USER}/WallMon/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="${HOME_DIR}/lib:${WMON_DIR}/lib:${LD_LIBRARY_PATH}"
+export DISPLAY=:0.0
 
-DAEMON_EXECUTE="./${DAEMON_PROC_NAME} -d"
-SERVER_EXECUTE="./${SERVER_PROC_NAME} -d"
+DAEMON_EXECUTE="${DAEMON_DIR}/${DAEMON_PROC_NAME} -d"
+SERVER_EXECUTE="${SERVER_DIR}/${SERVER_PROC_NAME} -d"
 WALLMON_DISPATCH_MODULES="python ${DISPATCHER_DIR}/main.py init"
 
 ROCKSVV=rocksvv.cs.uit.no
-ROCKSVV_SSH=arild@${ROCKSVV}
- 
 ICE=ice.cs.uit.no
-ICE_SSH=ani027@${ICE}
-
 
 if [ $HOSTNAME = $ICE ]; then
 	CLUSTER_FORK="rocks run host"	
+	export LD_LIBRARY_PATH="${HOME_DIR}/lib32:${HOME_DIR}/lib64:${LD_LIBRARY_PATH}"
 elif [ $HOSTNAME = $ROCKSVV ]; then
 	CLUSTER_FORK="cf"
-	DAEMON_EXECUTE="DISPLAY=:0.0 ${LIB_PATH} ${DAEMON_EXECUTE}"
-	SERVER_EXECUTE="DISPLAY=:0.0 ${LIB_PATH} ${SERVER_EXECUTE}"
 fi
 
 if [ $# -eq 0 ]; then
@@ -47,5 +44,4 @@ fi
 
 RSYNC_EXCLUDE_FILE=${WMON_DIR}/scripts/rsync_exclude
 RSYNC="rsync -rvu --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
-
 

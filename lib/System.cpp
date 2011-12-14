@@ -175,20 +175,21 @@ bool System::IsValidIpAddress(string ipAddress)
 	return result != 0;
 }
 
-vector<string> System::HostnameToIpAddress(string hostname)
+string System::HostnameToIpAddress(string hostname)
 {
-	struct hostent *he;
-	struct in_addr a;
-	vector<string> result;
+	hostent * record = gethostbyname(hostname.c_str());
+	if(record == NULL)
+		return "";
+	in_addr * address = (in_addr * )record->h_addr;
+	return inet_ntoa(* address);
+}
 
-	he = gethostbyname(hostname.c_str());
-	if (he) {
-		while (*he->h_addr_list) {
-			bcopy(*he->h_addr_list++, (char *) &a, sizeof(a));
-			result.push_back((string)inet_ntoa(a));
-		}
-	}
-	return result;
+string System::HostnameToIpAddressFallback(string hostname)
+{
+	string awk = "awk '{if ($1==\"Address:\") print $2}' | awk 'END { print $NF }'";
+	string ret =  RunCommand("nslookup " + hostname + " | " + awk);
+	LOG(INFO) << "FALLBACK: " << ret;
+	return ret;
 }
 
 void System::AttachToLocalDisplay()
