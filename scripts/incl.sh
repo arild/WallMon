@@ -17,6 +17,7 @@ DAEMON_PROC_NAME=wallmond
 SERVER_PROC_NAME=wallmons
 
 export LD_LIBRARY_PATH="${HOME_DIR}/lib:${WMON_DIR}/lib:${LD_LIBRARY_PATH}"
+# export LD_LIBRARY_PATH="${HOME_DIR}/lib32:${HOME_DIR}/lib64:${LD_LIBRARY_PATH}" # For ice
 export DISPLAY=:0.0
 
 DAEMON_EXECUTE="${DAEMON_DIR}/${DAEMON_PROC_NAME} -d"
@@ -28,7 +29,6 @@ ICE=ice.cs.uit.no
 
 if [ $HOSTNAME = $ICE ]; then
 	CLUSTER_FORK="rocks run host"	
-	export LD_LIBRARY_PATH="${HOME_DIR}/lib32:${HOME_DIR}/lib64:${LD_LIBRARY_PATH}"
 elif [ $HOSTNAME = $ROCKSVV ]; then
 	CLUSTER_FORK="cf"
 fi

@@ -15,9 +15,13 @@
 
 #include "System.h"
 #include "WallView.h"
+#include <map>
+#include <boost/tuple/tuple.hpp>
+#include <boost/assign.hpp>
 
-#include <iostream>
 using namespace std;
+using namespace boost::tuples;
+using namespace boost::assign;
 
 // 1D array representing a bottom-up row-wise representation of the display wall
 string HOSTNAMES[WALL_WIDHT * WALL_HEIGHT] = { "tile-0-0", "tile-1-0", "tile-2-0", "tile-3-0",
@@ -26,6 +30,16 @@ string HOSTNAMES[WALL_WIDHT * WALL_HEIGHT] = { "tile-0-0", "tile-1-0", "tile-2-0
 		"tile-4-2", "tile-5-2", "tile-6-2", "tile-0-3", "tile-1-3", "tile-2-3", "tile-3-3",
 		"tile-4-3", "tile-5-3", "tile-6-3" };
 
+map<string, string> ipAddresses = map_list_of("tile-0-0", "10.1.255.238")("tile-0-1",
+		"10.1.255.237")("tile-0-2", "10.1.255.236")("tile-0-3", "10.1.255.234")("tile-1-0",
+		"10.1.255.233")("tile-1-1", "10.1.255.232")("tile-1-2", "10.1.255.231")("tile-1-3",
+		"10.1.255.230")("tile-2-0", "10.1.255.229")("tile-2-1", "10.1.255.228")("tile-2-2",
+		"10.1.255.227")("tile-2-3", "10.1.255.226")("tile-3-0", "10.1.255.225")("tile-3-1",
+		"10.1.255.224")("tile-3-2", "10.1.255.223")("tile-3-3", "10.1.255.222")("tile-4-0",
+		"10.1.255.221")("tile-4-1", "10.1.255.220")("tile-4-2", "10.1.255.219")("tile-4-3",
+		"10.1.255.218")("tile-5-0", "10.1.255.217")("tile-5-1", "10.1.255.216")("tile-5-2",
+		"10.1.255.215")("tile-5-3", "10.1.255.214")("tile-6-0", "10.1.255.213")("tile-6-1",
+		"10.1.255.212")("tile-6-2", "10.1.255.211")("tile-6-3", "10.1.255.210");
 /**
  * Defines a grid on the display wall
  *
@@ -59,6 +73,15 @@ WallView::WallView(int x, int y, int width, int height, string hostname)
 vector<string> WallView::GetGrid()
 {
 	return _grid;
+}
+
+vector<string> WallView::GetGridIpAddress()
+{
+	vector<string> ret;
+	vector<string> grid = GetGrid();
+	for (int i = 0; i < grid.size(); i++)
+		ret.push_back(ipAddresses[grid[i]]);
+	return ret;
 }
 
 /**
@@ -121,7 +144,7 @@ void WallView::GetDisplayArea(double *x, double *y, double *width, double *heigh
 	int posx, posy, index;
 	index = _GetIndex(hostname);
 	_IndexToCoordinates(index, &posx, &posy);
-	*x = (posx / (double) _w) * (double)(TILE_SCREEN_WIDTH * _w);
+	*x = (posx / (double) _w) * (double) (TILE_SCREEN_WIDTH * _w);
 	*y = (posy / (double) _h) * (double) (TILE_SCREEN_HEIGHT * _h);
 	*width = TILE_SCREEN_WIDTH;
 	*height = TILE_SCREEN_HEIGHT;

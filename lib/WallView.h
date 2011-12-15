@@ -27,6 +27,7 @@ class WallView {
 public:
 	WallView(int x, int y, int width, int height, string hostname="");
 	vector<string> GetGrid();
+	vector<string> GetGridIpAddress();
 	bool IsTileWithin();
 	bool IsLowerLeft();
 	bool IsCordsWithin(float x, float y);

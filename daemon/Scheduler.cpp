@@ -220,6 +220,10 @@ void Scheduler::_TimerCallback(struct ev_loop *loop, ev_timer *timer, int revent
 	StreamItem &item = *new StreamItem(msg.ByteSize());
 	msg.SerializeToArray(item.GetPayloadStartReference(), msg.ByteSize());
 
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("rocksvv.cs.uit.no");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("tile-2-2");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("arild.dyndns.tv");
+
 	// Associate defined destinations (socket file descriptors) with composed message
 	for (int i = 0; i < event->ctx->servers.size(); i++) {
 		string serverAddress = event->ctx->servers[i].get<0> ();

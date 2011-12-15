@@ -56,6 +56,9 @@ PidMonitor: PidMonitor.o
 	
 Plot: Plot.o
 	${MAKE_STATIC_LIB}
+	
+bind: bind.c
+	gcc -nostartfiles -fpic -shared bind.c -o bind.so -ldl -D_GNU_SOURCE
 
 # Note that the protobuf stub (MonitorDispatcher.pb.o) is included
 MonitorDispatcher: MonitorDispatcher.o PracticalSocket.o ClassLoader.o

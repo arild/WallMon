@@ -75,7 +75,7 @@ int Streamer::SetupStream(string serverAddress, int serverPort)
 		// Translate hostname to an ip address
 		serverIpAddress = System::HostnameToIpAddress(serverAddress);
 		if (serverIpAddress.empty()) {
-			LOG(ERROR) << "unable to resolve hostname: " << serverIpAddress << ", trying fallback approach...";
+			LOG(ERROR) << "unable to resolve hostname: " << serverAddress << ", trying fallback approach...";
 			serverIpAddress = System::HostnameToIpAddressFallback(serverAddress);
 			if (serverIpAddress.empty()) {
 				LOG(ERROR) << "fallback approach failed too";

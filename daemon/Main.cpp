@@ -54,16 +54,28 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("rocksvv.cs.uit.no");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("tile-2-2");
+
 	// Create and start threads based on dependencies between each other
 	Streamer *streamer = new Streamer();
 	streamer->Start();
 
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("rocksvv.cs.uit.no");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("tile-2-2");
+
 	Scheduler *scheduler = new Scheduler(streamer);
 	scheduler->Start();
+
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("rocksvv.cs.uit.no");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("tile-2-2");
 
 	IMonitorManager *manager = (IMonitorManager *) scheduler;
 	MonitorDispatcher *dispatcher = new MonitorDispatcher(*manager, DAEMON_MULTICAST_LISTEN_PORT);
 	dispatcher->Start();
+
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("rocksvv.cs.uit.no");
+	LOG(INFO) << "HOSTNAME: " << System::HostnameToIpAddress("tile-2-2");
 
 	// Block main thread and wait for termination signal
 	mainThreadCondition.wait(mainThreadMutex);

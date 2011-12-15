@@ -27,7 +27,7 @@ map<string, int> _tileToPortMap = map_list_of("tile-0-0", 51150)("tile-0-1", 511
 		"tile-5-1", 51171)("tile-5-2", 51172)("tile-5-3", 51173)("tile-6-0", 51174)("tile-6-1",
 		51175)("tile-6-2", 51176)("tile-6-3", 51177);
 
-#define ROCKSVV_CLUSTER_HOST_NAME	"129.242.19.46" // "rocksvv.cs.uit.no"
+#define ROCKSVV_CLUSTER_HOST_NAME	"rocksvv.cs.uit.no" // "129.242.19.46"
 
 class PortForwarder {
 public:

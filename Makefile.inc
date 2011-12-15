@@ -15,7 +15,7 @@ HOME_PATH=/$(HOME_DIR)/$(USER)
 WALLMON=$(HOME_PATH)/WallMon
 SYSTEM=$(HOME_PATH)
 INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
-LIB_PATH=-L$(SYSTEM)/lib -L$(SYSTEM)/lib64 -L$(WALLMON)/lib
+LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib
 
 # Default target for compiling single source files to object files (no linking)
 # If this target is not suitable, simply overwrite it

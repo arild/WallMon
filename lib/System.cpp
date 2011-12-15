@@ -188,7 +188,6 @@ string System::HostnameToIpAddressFallback(string hostname)
 {
 	string awk = "awk '{if ($1==\"Address:\") print $2}' | awk 'END { print $NF }'";
 	string ret =  RunCommand("nslookup " + hostname + " | " + awk);
-	LOG(INFO) << "FALLBACK: " << ret;
 	return ret;
 }
 

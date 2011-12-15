@@ -2,10 +2,10 @@ syntax: glob
 *.o
 *.a
 *.so
-*.c
 *.d
 *.mk
 .*
+*.c
 *.orig
 Debug/**
 *.cc
