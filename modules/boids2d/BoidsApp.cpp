@@ -100,7 +100,7 @@ void BoidsApp::_RenderForever()
 	_InitSdlAndOpenGl();
 	mainLoopThreadCondition.notify_one();
 	LOG(INFO) << "BoidsApp entering infinite loop";
-
+	SDL_ShowCursor(SDL_DISABLE);
 	while (_running) {
 		if (_updateOrtho) {
 			glMatrixMode(GL_PROJECTION);

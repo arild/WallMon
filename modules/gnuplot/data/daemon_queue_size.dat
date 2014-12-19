@@ -1,0 +1,14 @@
+# Statistical data for: no prefix
+# Data format for populations:
+# auto generated | custom defined | average | variance | std dev | min | max 
+0 1  0 0 0 0 0  # Based on 1740 samples
+1 2  0 0 0 0 0  # Based on 1740 samples
+2 4  0 0 0 0 0  # Based on 1740 samples
+3 8  0 0 0 0 0  # Based on 1740 samples
+4 16  0 0 0 0 0  # Based on 1740 samples
+5 32  0 0 0 0 0  # Based on 3480 samples
+6 64  0 0 0 0 0  # Based on 3480 samples
+7 128  0 0 0 0 0  # Based on 3480 samples
+8 256  0.0122989 0.0769752 0.277444 0 11  # Based on 8700 samples
+9 512  0 0 0 0 0  # Based on 8700 samples
+# avg variance = 0.007698  |  avg std dev = 0.027744

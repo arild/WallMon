@@ -1,0 +1,3 @@
+#!/bin/bash
+/home/arild/WallMon/scripts/wallmon_cluster_stop.sh -9
+

@@ -1,0 +1,14 @@
+# Statistical data for: wallmond
+# Data format for populations:
+# auto generated | custom defined | average | variance | std dev | min | max 
+0 1  0.0600255 0.114398 0.338228 0 8.1222  # Based on 1740 samples
+1 2  0.0658056 0.0121225 0.110102 0 0.265355  # Based on 1740 samples
+2 4  0.129438 0.0480408 0.219182 0 0.565156  # Based on 1740 samples
+3 8  0.257948 0.191322 0.437404 0 1.02128  # Based on 1740 samples
+4 16  0.523798 0.773109 0.879266 0 2.31817  # Based on 1740 samples
+5 32  1.03829 3.0928 1.75864 0 6.1215  # Based on 3480 samples
+6 64  1.74469 11.5332 3.39605 0 16.5736  # Based on 3480 samples
+7 128  1.95823 18.7818 4.3338 0 17.6184  # Based on 3480 samples
+8 256  1.94282 18.8107 4.33713 0 17.4385  # Based on 8700 samples
+9 512  1.94235 18.8529 4.342 0 17.5788  # Based on 8699 samples
+# avg variance = 7.221041  |  avg std dev = 2.015180

@@ -25,7 +25,7 @@ extern "C" ProcessCollector *create_collector()
 		p->context->AddServers(PortForwarder::HostnamesToRocksvvRootNodeMapping(servers));
 	else
 		// Forward to desktop
-		p->context->AddServer("arild.dyndns.tv");
+		p->context->AddServer("localhost");
 
 	p->context->sampleFrequencyMsec = SAMPLE_FREQUENCY_MSEC;
 	p->filter->set_processname("");

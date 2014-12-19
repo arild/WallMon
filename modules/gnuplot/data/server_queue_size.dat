@@ -1,0 +1,14 @@
+# Statistical data for: no prefix
+# Data format for populations:
+# auto generated | custom defined | average | variance | std dev | min | max 
+0 1  0.041954 0.0723778 0.269031 0 5  # Based on 1740 samples
+1 2  0.0373563 0.041708 0.204225 0 3  # Based on 1740 samples
+2 4  0.0385057 0.0416208 0.204012 0 2  # Based on 1740 samples
+3 8  0.0350575 0.0361273 0.190072 0 2  # Based on 1740 samples
+4 16  0.05 0.0497989 0.223157 0 2  # Based on 1740 samples
+5 32  0.0775862 0.0853597 0.292164 0 3  # Based on 3480 samples
+6 64  0.237356 0.413202 0.642808 0 8  # Based on 3480 samples
+7 128  0.352586 0.788039 0.887716 0 13  # Based on 3480 samples
+8 256  0.546322 6.52625 2.55465 0 50  # Based on 8700 samples
+9 512  0.57023 7.72783 2.7799 0 51  # Based on 8700 samples
+# avg variance = 1.578231  |  avg std dev = 0.824773

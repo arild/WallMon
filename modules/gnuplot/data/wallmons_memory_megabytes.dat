@@ -1,0 +1,14 @@
+# Statistical data for: wallmons
+# Data format for populations:
+# auto generated | custom defined | average | variance | std dev | min | max 
+0 1  139.525 166.569 12.9062 69.4531 195.812  # Based on 1740 samples
+1 2  200.642 355.53 18.8555 137.133 256.375  # Based on 1740 samples
+2 4  258.862 545.999 23.3666 202.051 316.969  # Based on 1740 samples
+3 8  319.162 695.205 26.3667 258.438 377.023  # Based on 1740 samples
+4 16  377.552 759.635 27.5615 323.355 460.805  # Based on 1740 samples
+5 32  467.813 1790.91 42.3192 388.273 599.965  # Based on 3480 samples
+6 64  587.18 1906.41 43.6625 499.105 727.824  # Based on 3480 samples
+7 128  710.132 2062.81 45.4182 615.207 901.078  # Based on 3480 samples
+8 256  924.949 10193.4 100.962 721.949 1387.85  # Based on 8700 samples
+9 512  1225.04 8623.96 92.8653 1014.07 1396.66  # Based on 8700 samples
+# avg variance = 2710.041151  |  avg std dev = 43.428385

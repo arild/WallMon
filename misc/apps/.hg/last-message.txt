@@ -1,0 +1,1 @@
+CPU consuming madworm in both python and C++. Both number of forks and CPU consumption can be specified.

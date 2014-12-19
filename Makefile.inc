@@ -1,4 +1,4 @@
-CC=g++ -O2 -Wno-multichar
+CC=g++ -O2 -g -Wno-multichar
 
 # Determine the path to the home directory
 USER = $(shell whoami)
@@ -14,8 +14,8 @@ HOME_PATH=/$(HOME_DIR)/$(USER)
 # Global paths for libraries required by Wallmon
 WALLMON=$(HOME_PATH)/WallMon
 SYSTEM=$(HOME_PATH)
-INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib
-LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib
+INC_PATH=-I$(SYSTEM)/include -I$(SYSTEM)/include/freetype2 -I$(WALLMON)/lib -I/share/apps/include/ -I/share/apps/cuda/sdk/shared/inc/ 
+LIB_PATH=-L$(SYSTEM)/lib -L$(WALLMON)/lib -L/share/apps/lib/ -ljpeg -lcurl -lpthread -lGLEW -lGL -lGLU -lX11 -lGLEW
 
 # Default target for compiling single source files to object files (no linking)
 # If this target is not suitable, simply overwrite it

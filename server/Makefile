@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 CFLAGS= -rdynamic
-LIBS=-lpthread -lboost_thread -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher `sdl-config --libs`
+LIBS=-ldl -lpthread -lboost_thread -lboost_system -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lByteBuffer -lConfig -lSystem -lWallmonMessage -lIoLogger -lMonitorDispatcher `sdl-config --libs`
 
 all: wallmons
 

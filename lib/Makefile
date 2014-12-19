@@ -62,7 +62,7 @@ bind: bind.c
 
 # Note that the protobuf stub (MonitorDispatcher.pb.o) is included
 MonitorDispatcher: MonitorDispatcher.o PracticalSocket.o ClassLoader.o
-	${MAKE_STATIC_LIB} PracticalSocket.o ClassLoader.o stubs/MonitorDispatcher.pb.o
+	${MAKE_SHARED_LIB} PracticalSocket.o ClassLoader.o stubs/MonitorDispatcher.pb.o
 
 # Note that the protobuf stub (ProcessCollector.pb.o) is included
 # This library is build as a shared library due to some problems

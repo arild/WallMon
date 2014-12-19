@@ -1,0 +1,2 @@
+#!/bin/bash
+/home/arild/WallMon/scripts/wallmon_cluster_start.sh
