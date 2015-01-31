@@ -51,14 +51,14 @@ void ControlPanel::OnRender()
 	if (_imageIsLoaded == false) {
 		_imageIsLoaded = true;
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		glActiveTexture(1);
+		//glActiveTexture(1);
 		_textureId = load_texture(Config::GetInstructionManualPath().c_str());
-		glActiveTexture(0);
+		//glActiveTexture(0);
 		glPopAttrib();
 	}
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glActiveTexture(1);
+	//glActiveTexture(1);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, _textureId);
@@ -83,7 +83,7 @@ void ControlPanel::OnRender()
 	glEnd();
 	glPopMatrix();
 
-	glActiveTexture(0);
+	//glActiveTexture(0);
 	glPopAttrib();
 }
 
