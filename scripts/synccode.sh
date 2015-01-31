@@ -1,3 +1,4 @@
+#!/bin/sh
 . $(dirname $0)/incl.sh
 
 # Synchronizes WallMon source code and related artifacts with provided destinations
@@ -17,9 +18,10 @@ do
 		continue
 	fi
 
+	echo ${RSYNC}
+	echo ${WMON_DIR}
+	echo ${DEST}
 	${RSYNC} ${WMON_DIR} ${DEST}:.
-	${RSYNC} ${SRC_DIR} ${DEST}:.
-	${RSYNC} ${APP_DIR} ${DEST}:.
 	if [ $REMOTE_BUILD == true ]; then
 		ssh ${DEST} "cd WallMon && make && exit"
 	fi
