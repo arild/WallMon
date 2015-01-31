@@ -24,8 +24,7 @@ DAEMON_EXECUTE="${DAEMON_DIR}/${DAEMON_PROC_NAME} -d"
 SERVER_EXECUTE="${SERVER_DIR}/${SERVER_PROC_NAME} -d"
 WALLMON_DISPATCH_MODULES="python ${DISPATCHER_DIR}/main.py init"
 
-#ROCKSVV=rocksvv.cs.uit.no
-ROCKSVV=rocksvv
+ROCKSVV=rocksvv.cs.uit.no
 ICE=ice.cs.uit.no
 
 if [ $HOSTNAME = $ICE ]; then
@@ -44,5 +43,5 @@ else
 fi
 
 RSYNC_EXCLUDE_FILE=${WMON_DIR}/scripts/rsync_exclude
-RSYNC="rsync -rvu --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
+RSYNC="rsync -azv --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
 
