@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 CFLAGS=-rdynamic
-LIBS= -lMonitorDispatcherMessage -lMonitorDispatcher -lConfig -lpthread -lboost_thread -lboost_system -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
+LIBS= -lMonitorDispatcherMessage -lMonitorDispatcher -lConfig -lpthread -lboost_thread -lboost_system -Wl,--no-as-needed -ldl -lev -lglog -lprotobuf -lPracticalSocket -lClassLoader -lSystem -lWallmonMessage -lIoLogger
 
 all: wallmond
 
