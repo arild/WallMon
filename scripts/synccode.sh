@@ -18,9 +18,7 @@ do
 		continue
 	fi
 
-	echo ${RSYNC}
-	echo ${WMON_DIR}
-	echo ${DEST}
+	echo "Syncing" ${WMON_DIR} "to" ${DEST}
 	${RSYNC} ${WMON_DIR} ${DEST}:.
 	if [ $REMOTE_BUILD == true ]; then
 		ssh ${DEST} "cd WallMon && make && exit"
