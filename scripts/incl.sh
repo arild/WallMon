@@ -25,13 +25,7 @@ SERVER_EXECUTE="${SERVER_DIR}/${SERVER_PROC_NAME} -d"
 WALLMON_DISPATCH_MODULES="python ${DISPATCHER_DIR}/main.py init"
 
 ROCKSVV=rocksvv.cs.uit.no
-ICE=ice.cs.uit.no
-
-if [ $HOSTNAME = $ICE ]; then
-	CLUSTER_FORK="rocks run host"	
-elif [ $HOSTNAME = $ROCKSVV ]; then
-	CLUSTER_FORK="/share/apps/bin/cf"
-fi
+CLUSTER_FORK="/share/apps/bin/cf"
 
 if [ $# -eq 0 ]; then
 	DAEMON_KILL="pkill -SIGTERM $DAEMON_PROC_NAME"
@@ -43,5 +37,5 @@ else
 fi
 
 RSYNC_EXCLUDE_FILE=${WMON_DIR}/scripts/rsync_exclude
-RSYNC="rsync -azv --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
+RSYNC="rsync -av --copy-links --exclude-from=${RSYNC_EXCLUDE_FILE}"
 
