@@ -270,12 +270,16 @@ string System::RunCommand(string cmd)
 	char buf[8000];
 
 	FILE *fp = popen(cmd.c_str(), "r");
-	if (fp == NULL)
+	if (fp == NULL) {
+		LOG(ERROR) << "Failed opening pipe for running system command: " << cmd;
 		return "";
+	}
 	void *res = fgets(buf, 8000, fp);
 	pclose(fp);
-	if (res == NULL)
+	if (res == NULL) {
+		LOG(ERROR) << "Failed retrieving output for system command: " << cmd;
 		return "";
+	}
 
 	// Remove '\n' before returning result
 	string retval = (string)buf;
