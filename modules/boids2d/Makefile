@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 # Take display wall into account on Rocksvv cluster
 HOSTNAME = $(shell hostname)
-ifeq ("$(HOSTNAME)", "rocksvv.cs.uit.no")
+ifeq ("$(HOSTNAME)", "rocksvv")
 ROCKSVV = -D ROCKSVV
 endif
 
